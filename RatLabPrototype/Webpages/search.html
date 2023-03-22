@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
+<title>Rat Search</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -39,15 +39,15 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   <div class="w3-bar-block">
     <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black" onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>  Close Menu</a>
     <a href="Webpages/dashboard.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Dashboard</a>
-    <a href="Webpages/search.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i>  Search</a>
-    <a href="Webpages/addrat.html" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-cog fa-fw"></i>  Add Rat</a>
+    <a href="Webpages/search.html" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-eye fa-fw"></i>  Search</a>
+    <a href="Webpages/addrat.html" class="w3-bar-item w3-button w3-padding w3"><i class="fa fa-cog fa-fw"></i>  Add Rat</a>
     <a href="Webpages/editrecords.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-history fa-fw"></i>  Edit Records</a>
     <a href="Webpages/breedingpairs.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Generate Breeding Pairs</a>
-    <a href="RatLabPrototype/Webpages/tableview.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bullseye fa-fw"></i>  Table View</a>
-    <a href="RatLabPrototype/Webpages/reportlitter.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>  Report Litter</a>
-    <a href="RatLabPrototype/Webpages/reportdeath.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>  Report Death</a>
-    <a href="RatLabPrototype/Webpages/adduser.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add User</a>
-    <a href="RatLabPrototype/Webpages/recordtransfer.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i>  Record Transfer</a>
+    <a href="Webpages/tableview.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bullseye fa-fw"></i>  Table View</a>
+    <a href="Webpages/reportlitter.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>  Report Litter</a>
+    <a href="Webpages/reportdeath.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>  Report Death</a>
+    <a href="Webpages/adduser.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add User</a>
+    <a href="Webpages/recordtransfer.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i>  Record Transfer</a>
   </div>
 </nav>
 
@@ -59,58 +59,6 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 <div class="w3-main" style="margin-left:300px;margin-top:43px;">
 
   <!-- Header -->
-  <header class="w3-container" style="padding-top:22px">
-    <h5><b><i class="fa fa-dashboard"></i> My Dashboard</b></h5>
-  </header>
-
-  <div class="w3-row-padding w3-margin-bottom">
-    <div class="w3-quarter">
-      <div class="w3-container w3-red w3-padding-16">
-        <div class="w3-left"><i class="fa fa-share-alt w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>52</h3>
-        </div>
-        <div class="w3-clear"></div>
-        <h4>Records Added</h4>
-      </div>
-    </div>
-    <div class="w3-quarter">
-      <div class="w3-container w3-blue w3-padding-16">
-        <div class="w3-left"><i class="fa fa-eye w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>99</h3>
-        </div>
-        <div class="w3-clear"></div>
-        <h4>Searches</h4>
-      </div>
-    </div>
-    <div class="w3-quarter">
-      <div class="w3-container w3-orange w3-text-white w3-padding-16">
-        <div class="w3-left"><i class="fa fa-users w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>50</h3>
-        </div>
-        <div class="w3-clear"></div>
-        <h4>Users</h4>
-      </div>
-    </div>
-  </div>
-
-  <div class="w3-panel">
-    <div class="w3-row-padding" style="margin:0 -16px">
-      <div class="w3-twothird">
-        <h5>Feed</h5>
-        <table class="w3-table w3-striped w3-white">
-          <tr>
-            <td><i class="fa fa-user w3-text-blue w3-large"></i></td>
-            <td>New record</td>
-            <td><i>RatID</i></td>
-          </tr>
-        </table>
-      </div>
-    </div>
-  </div>
-
   <div class="w3-panel">
       <div class="w3-row-padding" style="margin:0 -16px">
         <div class="w3-twothird">
@@ -148,47 +96,6 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     <button class="w3-button w3-dark-grey">All Records  <i class="fa fa-arrow-right"></i></button>
   </div>
   <hr>
-  <div class="w3-container">
-    <h5>Active Users</h5>
-    <ul class="w3-ul w3-card-4 w3-white">
-      <li class="w3-padding-16">
-        <img src="/w3images/avatar2.png" class="w3-left w3-circle w3-margin-right" style="width:35px">
-        <span class="w3-xlarge">User 1</span><br>
-      </li>
-      <li class="w3-padding-16">
-        <img src="/w3images/avatar5.png" class="w3-left w3-circle w3-margin-right" style="width:35px">
-        <span class="w3-xlarge">User 2</span><br>
-      </li>
-      <li class="w3-padding-16">
-        <img src="/w3images/avatar6.png" class="w3-left w3-circle w3-margin-right" style="width:35px">
-        <span class="w3-xlarge">User 3</span><br>
-      </li>
-    </ul>
-  </div>
-  <hr>
-  <br>
-  <div class="w3-container w3-dark-grey w3-padding-32">
-    <div class="w3-row">
-      <div class="w3-container w3-third">
-        <h5 class="w3-bottombar w3-border-green">Table</h5>
-        <p>Add Rat</p>
-        <p>Edit Records</p>
-        <p>Table View</p>
-      </div>
-      <div class="w3-container w3-third">
-        <h5 class="w3-bottombar w3-border-red">User</h5>
-        <p>Add User</p>
-        <p>View Users</p>
-      </div>
-      <div class="w3-container w3-third">
-        <h5 class="w3-bottombar w3-border-orange">Actions</h5>
-        <p>Generate Breeding Pairs</p>
-        <p>Report Litter</p>
-        <p>Report Death</p>
-        <p>Record Transfer</p>
-      </div>
-    </div>
-  </div>
 
   <!-- Footer -->
   <footer class="w3-container w3-padding-16 w3-light-grey">

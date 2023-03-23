@@ -40,10 +40,10 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black" onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>  Close Menu</a>
     <a href="Webpages/dashboard.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Dashboard</a>
     <a href="Webpages/search.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i>  Search</a>
-    <a href="Webpages/addrat.html" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-cog fa-fw"></i>  Add Rat</a>
+    <a href="Webpages/addrat.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-cog fa-fw"></i>  Add Rat</a>
     <a href="Webpages/editrecords.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-history fa-fw"></i>  Edit Records</a>
     <a href="Webpages/breedingpairs.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Generate Breeding Pairs</a>
-    <a href="Webpages/tableview.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bullseye fa-fw"></i>  Table View</a>
+    <a href="Webpages/tableview.html" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-bullseye fa-fw"></i>  Table View</a>
     <a href="Webpages/reportlitter.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>  Report Litter</a>
     <a href="Webpages/reportdeath.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>  Report Death</a>
     <a href="Webpages/adduser.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add User</a>
@@ -60,97 +60,19 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 
   <!-- Header -->
   <header class="w3-container" style="padding-top:22px">
-    <h5><b><i class="fa fa-dashboard"></i> My Dashboard</b></h5>
+    <h5><b><i class="fa fa-bullseye"></i>  Table View</b></h5>
   </header>
 
-  <div class="w3-row-padding w3-margin-bottom">
-    <div class="w3-quarter">
-      <div class="w3-container w3-red w3-padding-16">
-        <div class="w3-left"><i class="fa fa-share-alt w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>52</h3>
-        </div>
-        <div class="w3-clear"></div>
-        <h4>Records Added</h4>
-      </div>
-    </div>
-    <div class="w3-quarter">
-      <div class="w3-container w3-blue w3-padding-16">
-        <div class="w3-left"><i class="fa fa-eye w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>99</h3>
-        </div>
-        <div class="w3-clear"></div>
-        <h4>Searches</h4>
-      </div>
-    </div>
-    <div class="w3-quarter">
-      <div class="w3-container w3-orange w3-text-white w3-padding-16">
-        <div class="w3-left"><i class="fa fa-users w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>50</h3>
-        </div>
-        <div class="w3-clear"></div>
-        <h4>Users</h4>
-      </div>
-    </div>
-  </div>
+  <!-- Table -->
+  <script  src="C:\Users\andre\Desktop\Capstone Repo\Rat-Lab\RatLabPrototype\Scripts\tableview.py"></script>
+  {% for row in rows %}
+  <tr>
+      <td>{{ row.idnum }}</a></td>
+      <td>{{ row.product_code }}</td>
+      <td bgcolor="{{ row.stat_colour }}">{{ row.unit_status }}</td>
+  </tr>
+  {% endfor %}
 
-  <div class="w3-panel">
-    <div class="w3-row-padding" style="margin:0 -16px">
-      <div class="w3-twothird">
-        <h5>Feed</h5>
-        <table class="w3-table w3-striped w3-white">
-          <tr>
-            <td><i class="fa fa-user w3-text-blue w3-large"></i></td>
-            <td>New record</td>
-            <td><i>RatID</i></td>
-          </tr>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="w3-container">
-    <h5>Newest Records</h5>
-    <table class="w3-table w3-striped w3-bordered w3-border w3-hoverable w3-white">
-      <tr>
-        <td>RatID1</td>
-        <td>Age</td>
-      </tr>
-      <tr>
-        <td>RatID2</td>
-        <td>Age</td>
-      </tr>
-      <tr>
-        <td>RatID3</td>
-        <td>Age</td>
-      </tr>
-      <tr>
-        <td>RatID4</td>
-        <td>Age</td>
-      </tr>
-    </table><br>
-    <button class="w3-button w3-dark-grey">All Records  <i class="fa fa-arrow-right"></i></button>
-  </div>
-  <hr>
-  <div class="w3-container">
-    <h5>Active Users</h5>
-    <ul class="w3-ul w3-card-4 w3-white">
-      <li class="w3-padding-16">
-        <img src="/w3images/avatar2.png" class="w3-left w3-circle w3-margin-right" style="width:35px">
-        <span class="w3-xlarge">User 1</span><br>
-      </li>
-      <li class="w3-padding-16">
-        <img src="/w3images/avatar5.png" class="w3-left w3-circle w3-margin-right" style="width:35px">
-        <span class="w3-xlarge">User 2</span><br>
-      </li>
-      <li class="w3-padding-16">
-        <img src="/w3images/avatar6.png" class="w3-left w3-circle w3-margin-right" style="width:35px">
-        <span class="w3-xlarge">User 3</span><br>
-      </li>
-    </ul>
-  </div>
   <hr>
   <br>
   <div class="w3-container w3-dark-grey w3-padding-32">
@@ -207,6 +129,5 @@ function w3_close() {
   overlayBg.style.display = "none";
 }
 </script>
-
 </body>
 </html>

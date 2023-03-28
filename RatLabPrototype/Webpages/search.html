@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="webpage.css">
 <style>
 html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 </style>
@@ -59,38 +60,101 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 <div class="w3-main" style="margin-left:300px;margin-top:43px;">
 
   <!-- Header -->
-  <div class="w3-panel">
+  <div class="center w3-panel">
       <div class="w3-row-padding" style="margin:0 -16px">
         <div class="w3-twothird">
-            <select name="Rat-Gender" id="Rat-Gender">
-              <option value="" disabled selected>Rat Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
-          <input type="text" placeholder="Rat Number..." size = "50">
-          <a href = "#" class="w3-button">Search</a>
+          <select name="Rat-Gender" id="Rat-Gender">
+            <option value="" disabled selected>Rat Gender</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+          </select>
+          <input type="text" id="Input" placeholder="Rat Number..." size = "50" title = "Enter a Rat's Number">
+          <button class="w3-button" onclick="search()">Search</button>
         </div>
       </div>
   </div>
 
   <div class="w3-container">
-    <h5>Newest Records</h5>
-    <table class="w3-table w3-striped w3-bordered w3-border w3-hoverable w3-white">
+    <table class="w3-table w3-striped w3-bordered w3-border w3-hoverable w3-white" id="Table">
       <tr>
-        <td>RatID1</td>
-        <td>Age</td>
+        <th>Rat Number</th>
+        <th>Rat Name</th>
+        <th>Sex</th>
+        <th>Birtdate</th>
+        <th>Date Weaned</th>
+        <th>Date of Last Pairing</th>
+        <th>Date of Last Litter</th>
+        <th>Number of Pairings</th>
+        <th>Number of Litters</th>
+        <th>Date Added to Colony</th>
+        <th>Number of Litters with Defects</th>
+        <th>In Experiment</th>
+        <th>Manner of Death</th>
+        <th>Date of Death</th>
       </tr>
       <tr>
-        <td>RatID2</td>
-        <td>Age</td>
+        <td>1</td>
+        <td>rf</td>
+        <td>M</td>
+        <td>23543</td>
+        <td>246</td>
+        <td>246</td>
+        <td>246</td>
+        <td>246</td>
+        <td>426</td>
+        <td>345</td>
+        <td>435</td>
+        <td>345</td>
+        <td>345</td>
+        <td>435</td>
       </tr>
       <tr>
-        <td>RatID3</td>
-        <td>Age</td>
+        <td>1</td>
+        <td>rf</td>
+        <td>F</td>
+        <td>23543</td>
+        <td>246</td>
+        <td>246</td>
+        <td>246</td>
+        <td>246</td>
+        <td>426</td>
+        <td>345</td>
+        <td>435</td>
+        <td>345</td>
+        <td>345</td>
+        <td>435</td>
       </tr>
       <tr>
-        <td>RatID4</td>
-        <td>Age</td>
+        <td>2</td>
+        <td>rf</td>
+        <td>M</td>
+        <td>23543</td>
+        <td>246</td>
+        <td>246</td>
+        <td>246</td>
+        <td>246</td>
+        <td>426</td>
+        <td>345</td>
+        <td>435</td>
+        <td>345</td>
+        <td>345</td>
+        <td>435</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>rf</td>
+        <td>F</td>
+        <td>23543</td>
+        <td>246</td>
+        <td>246</td>
+        <td>246</td>
+        <td>246</td>
+        <td>426</td>
+        <td>345</td>
+        <td>435</td>
+        <td>345</td>
+        <td>345</td>
+        <td>435</td>
       </tr>
     </table><br>
   </div>
@@ -125,6 +189,40 @@ function w3_open() {
 function w3_close() {
   mySidebar.style.display = "none";
   overlayBg.style.display = "none";
+}
+
+function search(){
+  var input, putIn, filter, sift, table, tr, td, td2, i, num;
+  input = document.getElementById("Input")
+  putIn = document.getElementById("Rat-Gender");
+  filter = input.value.toUpperCase();
+  sift = putIn.value.toUpperCase();
+  table = document.getElementById("Table");
+  tr = table.getElementsByTagName("tr");
+
+  for(i =0; i < tr.length; i++){
+    td=tr[i].getElementsByTagName("td")[0];
+    if(td){
+      num = td.textContent || td.innerText
+      if(num.toUpperCase().indexOf(filter) > -1){
+        tr[i].style.display="";
+      }
+      else{
+        tr[i].style.display = "none";
+      }
+    }
+  }
+  for(i =0; i < tr.length; i++){
+    td2=tr[i].getElementsByTagName("td")[2];
+    if(td2){
+      if(td2.innerHTML.toUpperCase().indexOf(sift) > -1){
+        continue;
+      }
+      else{
+        tr[i].style.display = "none";
+      }
+    }
+  }
 }
 </script>
 

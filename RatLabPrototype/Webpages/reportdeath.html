@@ -66,6 +66,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
         <form>
         <select name="Rat-Gender" id="Rat-Gender">
           <option value="" disabled selected>Rat's Sex</option>
+
           <option value="M">Male</option>
           <option value="F">Female</option>
         </select>
@@ -79,7 +80,9 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 <div class="w3-container w3-padding-32" id = "obscuredDetails">
   <table class="w3-table w3-striped w3-bordered w3-border w3-white" id="Table" style = "width: 90%;">
     <tr>
+
     <form>
+
       <td class = "w3-padding">Death Date <input type="text" id="Input1" placeholder="Death Date..." value="" size = "20" title = "When did the rat die?"></td>
       <td class = "w3-padding">Cause of Death <input type="text" id="Input2" placeholder="Cause of Death..." value="" size = "20" title = "How did the rat die?"></td>
       <td class = "w3-padding">Weaned Date <input type="text" id="Input3" placeholder="Weaned Date..." value="" size = "20" title = "Leave this empty if it wasn't weaned"></td>
@@ -171,6 +174,7 @@ function deathDetails(){
 }
 
 function areYouSure(){
+
   if(dDate.value != "" && coDeath.value != ""){
   modal.style.display = "block";
   document.getElementById("modalText").innerHTML = "Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() + 

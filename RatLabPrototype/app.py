@@ -68,6 +68,40 @@ class Rat(db.Model):
 def dashboard():
     return render_template("dashboard.html")
 
+@app.route("/addrat")
+def addRat():
+    return render_template("addrat.html")
+
+@app.route("/adduser")
+def addUser():
+    return render_template("adduser.html")
+
+@app.route("/breedingpairs")
+def breedingPairs():
+    return render_template("dashboard.html")
+
+@app.route("/editrecords")
+def editRecords():
+    return render_template("editrecords.html")
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+@app.route("/recordtransfer")
+def recordTransfer():
+    return render_template("recordtransfer.html")
+
+@app.route("/reportlitter")
+def reportLitter():
+    return render_template("reportlitter.html")
+
+@app.route("/tableview")
+def tableview():
+    return render_template("tableview.html")
+
+
+
 @app.route("/search")
 def search():
     

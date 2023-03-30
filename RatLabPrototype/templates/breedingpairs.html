@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Rat Search</title>
+<title>Generate Breeding Pairs</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -40,10 +40,10 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   <div class="w3-bar-block">
     <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black" onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>  Close Menu</a>
     <a href="Webpages/dashboard.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Dashboard</a>
-    <a href="Webpages/search.html" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-eye fa-fw"></i>  Search</a>
+    <a href="Webpages/search.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i>  Search</a>
     <a href="Webpages/addrat.html" class="w3-bar-item w3-button w3-padding w3"><i class="fa fa-cog fa-fw"></i>  Add Rat</a>
     <a href="Webpages/editrecords.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-history fa-fw"></i>  Edit Records</a>
-    <a href="Webpages/breedingpairs.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Generate Breeding Pairs</a>
+    <a href="Webpages/breedingpairs.html" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-users fa-fw"></i>  Generate Breeding Pairs</a>
     <a href="Webpages/tableview.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bullseye fa-fw"></i>  Table View</a>
     <a href="Webpages/reportlitter.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>  Report Litter</a>
     <a href="Webpages/reportdeath.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>  Report Death</a>
@@ -61,104 +61,39 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 
   <!-- Header -->
   <div class="center w3-panel">
-      <div class="w3-row-padding" style="margin:0 -16px">
-        <div class="w3-twothird">
-          <select name="Rat-Gender" id="Rat-Gender">
-            <option value="" disabled selected>Rat's Sex</option>
-            <option value="M">Male</option>
-            <option value="F">Female</option>
-          </select>
-          <input type="text" id="Input" placeholder="Rat Number..." size = "50" title = "Enter a Rat's Number">
-          <button type="button" class="w3-button" onclick="search()">Search</button>
-        </div>
+
+    <div class="w3-row-padding" style="margin:0 -16px">
+      <div class="w3-twothird">
+        <select name="Rat-Gender" id="Rat-Gender">
+          <option value="" disabled selected>Rat's Sex</option>
+          <option value="M">Male</option>
+          <option value="F">Female</option>
+        </select>
+        <input type="text" id="Input" placeholder="Rat Number..." size = "50" title = "Enter a Rat's Number">
+        <button type="button" class="w3-button">Generate</button>
+
       </div>
-  </div>
+    </div>
+</div>
 
   <div class="w3-container">
-    <table class="w3-table w3-striped w3-bordered w3-border w3-hoverable w3-white" id="Table">
+    <h5>Potential Mates</h5>
+    <table class="w3-table w3-striped w3-bordered w3-border w3-hoverable w3-white">
+
       <tr>
         <th>Rat Number</th>
         <th>Rat Name</th>
         <th>Sex</th>
-        <th>Birtdate</th>
-        <th>Date Weaned</th>
+        <th>Birthdate</th>
         <th>Date of Last Pairing</th>
         <th>Date of Last Litter</th>
         <th>Number of Pairings</th>
         <th>Number of Litters</th>
-        <th>Date Added to Colony</th>
         <th>Number of Litters with Defects</th>
-        <th>In Experiment</th>
-        <th>Manner of Death</th>
-        <th>Date of Death</th>
       </tr>
-      <tr>
-        <td>1</td>
-        <td>rf</td>
-        <td>M</td>
-        <td>23543</td>
-        <td>246</td>
-        <td>246</td>
-        <td>246</td>
-        <td>246</td>
-        <td>426</td>
-        <td>345</td>
-        <td>435</td>
-        <td>345</td>
-        <td>345</td>
-        <td>435</td>
-      </tr>
-      <tr>
-        <td>1</td>
-        <td>rf</td>
-        <td>F</td>
-        <td>23543</td>
-        <td>246</td>
-        <td>246</td>
-        <td>246</td>
-        <td>246</td>
-        <td>426</td>
-        <td>345</td>
-        <td>435</td>
-        <td>345</td>
-        <td>345</td>
-        <td>435</td>
-      </tr>
-      <tr>
-        <td>2</td>
-        <td>rf</td>
-        <td>M</td>
-        <td>23543</td>
-        <td>246</td>
-        <td>246</td>
-        <td>246</td>
-        <td>246</td>
-        <td>426</td>
-        <td>345</td>
-        <td>435</td>
-        <td>345</td>
-        <td>345</td>
-        <td>435</td>
-      </tr>
-      <tr>
-        <td>2</td>
-        <td>rf</td>
-        <td>F</td>
-        <td>23543</td>
-        <td>246</td>
-        <td>246</td>
-        <td>246</td>
-        <td>246</td>
-        <td>426</td>
-        <td>345</td>
-        <td>435</td>
-        <td>345</td>
-        <td>345</td>
-        <td>435</td>
-      </tr>
+      
     </table><br>
   </div>
-  <hr>
 
   <!-- Footer -->
   <footer class="w3-container w3-padding-16 w3-light-grey">
@@ -191,38 +126,8 @@ function w3_close() {
   overlayBg.style.display = "none";
 }
 
-function search(){
-  var input, putIn, filter, sift, table, tr, td, td2, i, num;
-  input = document.getElementById("Input")
-  putIn = document.getElementById("Rat-Gender");
-  filter = input.value.toUpperCase();
-  sift = putIn.value.toUpperCase();
-  table = document.getElementById("Table");
-  tr = table.getElementsByTagName("tr");
+function generate(){
 
-  for(i =0; i < tr.length; i++){
-    td=tr[i].getElementsByTagName("td")[0];
-    if(td){
-      num = td.textContent || td.innerText
-      if(num.toUpperCase().indexOf(filter) > -1){
-        tr[i].style.display="";
-      }
-      else{
-        tr[i].style.display = "none";
-      }
-    }
-  }
-  for(i =0; i < tr.length; i++){
-    td2=tr[i].getElementsByTagName("td")[2];
-    if(td2){
-      if(td2.innerHTML.toUpperCase().indexOf(sift) > -1){
-        continue;
-      }
-      else{
-        tr[i].style.display = "none";
-      }
-    }
-  }
 }
 </script>
 

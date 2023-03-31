@@ -2,15 +2,15 @@ import jinja2
 
 from flask import Flask, request, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, IntegerField, BooleanField, SelectField, DateField
+from wtforms.validators import DataRequired
 
 # Initialize Flask
-app = Flask(__name__)
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile('config.py')
 
 db = SQLAlchemy()
-
-#TODO: remove the charset at the end once stable
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://lauren:laurenpwd@capstone6.cs.kent.edu/rat_database?charset=utf8mb4"
-
 db.init_app(app)
 
 class Rat(db.Model):
@@ -62,8 +62,34 @@ class Rat(db.Model):
     mg32sire = db.Column(db.String)
     mg32dam = db.Column(db.String)
     mg33sire = db.Column(db.String)
-    mg33dam = db.Column(db.String)
+    mg33dam = db.Column(db.String)  
     
+class EditRatForm(FlaskForm):
+    sex = SelectField(choices=['Male', 'Female'])
+    number = IntegerField()
+    birthdate = DateField()
+    dateLastPairing = DateField()
+    dateLastLitter = DateField()
+    numPairings = IntegerField()
+    numlitters = IntegerField()
+    dateAddedToColony = DateField()
+    numLittersWithDefects = IntegerField()
+    experiment = BooleanField(default="unchecked")
+    sire = StringField('Sire')
+    dam = StringField('Dam')
+    update = SubmitField('Update')
+    
+class ReportDeathForm(FlaskForm):
+    sex = SelectField(choices=['Male', 'Female'])
+    number = IntegerField()
+    deathDate = DateField()
+    mannerOfDeath = SelectField(choices=['Euthanized', 'Unexpected'])
+    submit = SubmitField('Yes')
+    
+@app.route("/")
+def default():
+    return render_template("dashboard.html")
+
 @app.route("/dashboard")
 def dashboard():
     return render_template("dashboard.html")
@@ -78,11 +104,17 @@ def addUser():
 
 @app.route("/breedingpairs")
 def breedingPairs():
-    return render_template("dashboard.html")
+    return render_template("breedingpairs.html")
 
-@app.route("/editrecords")
+@app.route("/editrecords", methods=['GET', 'POST'])
 def editRecords():
-    return render_template("editrecords.html")
+    
+    form = EditRatForm()
+    if(request.method == "POST"):
+        print(form.data)
+        return redirect(url_for("editRecords"))
+    else:
+        return render_template("editrecords.html", form=form)
 
 @app.route("/login")
 def login():
@@ -100,43 +132,32 @@ def reportLitter():
 def tableview():
     return render_template("tableview.html")
 
-
-
 @app.route("/search")
 def search():
-    
     query = db.session.execute(db.select(Rat).order_by(Rat.rat_number)).scalars()
 
     #print(query.all())
     # Whatever you do, do NOT run print(query.all()) before the return statement
     # that'll clear out the query variable or something, because then read.html 
     # will be blank
-   
     return render_template("search.html", query = query)
 
-@app.route("/reportdeath")
+@app.route("/reportdeath", methods=['POST', 'GET'])
 def reportDeath():
-    return render_template("reportdeath.html")
-
-# Routing to actually update the rat - user doesn't interact with this endpoint
-@app.route("/enforcedeath", methods = ["POST", "GET"])
-def enforceDeath():
+    form = ReportDeathForm()
+    
+    if(request.method == "POST"):       
+        rat_number = str(form.number.data) + form.sex.data[0]
+ 
+        rat = Rat.query.get(rat_number)
+        rat.manner_of_death = form.mannerOfDeath.data
+        rat.death_date = form.deathDate.data
+        db.session.commit()
         
-    if request.method == "POST":
-        # Get the data from the form and placed into a variable. 
-        # input_data = request.form
-
-        # # Search for the rat to change based on the rat id
-        # #query = db.session.query(Rat).filter(Rat.rat_number == rat_number).one()  
-        
-        # # Write the changes to the database
-        # query.rat_number = input_data["rat_number"]
-        # query.rat_name = input_data["rat_name"]
-        # db.session.commit()
-        return redirect(url_for("reportdeath")) 
+        #TODO: route to confirmation screen instead(?) definitely not search
+        return redirect(url_for("search"))
     else:
-        return redirect(url_for("reportdeath"))
-
+        return render_template("reportdeath.html", form=form)
 
 if __name__ == '__main__':
     app.run()

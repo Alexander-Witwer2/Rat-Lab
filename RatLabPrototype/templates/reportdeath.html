@@ -84,47 +84,43 @@
   <div class="w3-main" style="margin-left:300px;margin-top:43px;">
 
     <!-- Header -->
-    <div class="center w3-panel">
-      <div class="w3-row-padding" style="margin:0 -16px">
-        <div class="w3-twothird">
-          <select name="Rat-Gender" id="Rat-Gender">
-            <option value="" disabled selected>Rat Gender</option>
-            <option value="M">Male</option>
-            <option value="F">Female</option>
-          </select>
-          <input type="text" id="Input" placeholder="Rat Number..." value="" size="50" title="Enter a Rat's Number">
-          <button class="w3-button" onclick="deathDetails()">Report</button>
+    <form action="/reportdeath" , method="POST">
+      <div class="center w3-panel">
+        <div class="w3-row-padding" style="margin:0 -16px">
+          <div class="w3-twothird">
+            {{ form.sex }}
+            {{ form.number }}
+            <!-- below button was part of the input rat sex/num, move to next screen setup, removed for now-->
+            <!-- <button class="w3-button" onclick="deathDetails()">Continue</button> -->
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="w3-container w3-padding-32" id="obscuredDetails">
-      <table class="w3-table w3-striped w3-bordered w3-border w3-white" id="Table" style="width: 90%;">
-        <tr>
-          <td class="w3-padding">Death Date <input type="text" id="Input1" placeholder="Death Date..." value=""
-              size="20" title="When did the rat die?"></td>
-          <td class="w3-padding">
-            <select name="manner-of-death" id="Input2">
+      <div class="w3-container w3-padding-32">
+        <table class="w3-table w3-striped w3-bordered w3-border w3-white" id="Table" style="width: 90%;">
+          <tr>
+            <td class="w3-padding"> {{ form.deathDate }}
+            </td>
+            <td class="w3-padding">
+              {{ form.mannerOfDeath }}
               <!-- TODO: FIX: table looks weird after removed weaned date and added dropdown for manner of death -->
-              <option value="" disabled selected>Manner of death</option>
-              <option value="euthanized">Euthanized</option>
-              <option value="Unexpected">Unexpected</option>
-            </select>
-          </td>
-          <td style="display: block;"><button class="w3-button" onclick="areYouSure()">Submit</button></td>
-        </tr>
+            </td>
+            <td style="display: block;"><button type="button" class="w3-button" onclick="areYouSure()">Report</button></td>
+          </tr>
 
-      </table>
-    </div>
-    <div id="myModal" class="modal">
-
-      <div class="modal-content">
-        <p id="modalText"></p>
-        <button class="w3-button" onclick="closeModal()" action="/enforcedeath" method="POST">Yes</button>
-        <button class="w3-button" onclick="closeModal()">No</button>
+        </table>
       </div>
+      <div id="myModal" class="modal">
 
-    </div>
+        <div class="modal-content">
+          <p id="modalText"></p>
+          {{ form.submit }}
+          <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
+          <button class="w3-button" onclick="closeModal()">No</button>
+        </div>
+
+      </div>
+    </form>
 
     <hr>
     <br>
@@ -192,17 +188,19 @@
     }
 
     function deathDetails () {
-      if ( dropDown.value != "" && number.value != "" ) {
-        show.style.display = "inline";
+      if ( form.  dropDown.value != "" && number.value != "" ) {
+      show.style.display = "inline";
       }
     }
 
     function areYouSure () {
-      if ( dDate.value != "" && coDeath.value != "" && weDate != "" ) {
+      //if ( dDate.value != "" && coDeath.value != "" ) {
         modal.style.display = "block";
-        document.getElementById( "modalText" ).innerHTML = "Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() +
-          " died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() + "?";
-      }
+        document.getElementById( "modalText" ).innerHTML = "Are you sure?"
+        //TODO: update "are you sure" with the actual values like it used to show previously
+        //"Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() +
+          //" died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() + "?";
+      //}
     }
 
     function closeModal () {

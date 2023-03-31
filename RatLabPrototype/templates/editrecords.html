@@ -1,223 +1,248 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Record Editing</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='webpage.css')}}">
-<style>
-html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
-</style>
+  <title>Record Editing</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='webpage.css')}}">
+  <style>
+    html,
+    body,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+      font-family: "Raleway", sans-serif
+    }
+  </style>
 </head>
+
 <body class="w3-light-grey">
 
-<!-- Top container -->
-<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
-  <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
-  <span class="w3-bar-item w3-right">Login</span>
-</div>
-
-<!-- Sidebar/menu -->
-<nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
-  <div class="w3-container w3-row">
-    <div class="w3-col s4">
-      <img src="C:\Users\andre\Desktop\Capstone Repo\Rat-Lab\RatLabPrototype\Assets\kentstatelogo.png" class="w3-circle w3-margin-right" style="width:90px">
-    </div>
-    <div class="w3-col s8 w3-bar">
-      <span>Welcome, <strong>User!</strong></span><br>
-      <a href="#" class="w3-bar-item w3-button"><i class="fa fa-envelope"></i></a>
-      <a href="#" class="w3-bar-item w3-button"><i class="fa fa-user"></i></a>
-      <a href="#" class="w3-bar-item w3-button"><i class="fa fa-cog"></i></a>
-    </div>
+  <!-- Top container -->
+  <div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+    <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i
+        class="fa fa-bars"></i>  Menu</button>
+    <span class="w3-bar-item w3-right">Login</span>
   </div>
-  <hr>
-  <div class="w3-container">
-    <h5>Damron-Mueller Rat Lab</h5>
-  </div>
-  <div class="w3-bar-block">
-    <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black" onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>  Close Menu</a>
-    <a href="Webpages/dashboard.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Dashboard</a>
-    <a href="Webpages/search.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i>  Search</a>
-    <a href="Webpages/addrat.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-cog fa-fw"></i>  Add Rat</a>
-    <a href="Webpages/editrecords.html" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-history fa-fw"></i>  Edit Records</a>
-    <a href="Webpages/breedingpairs.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Generate Breeding Pairs</a>
-    <a href="Webpages/tableview.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bullseye fa-fw"></i>  Table View</a>
-    <a href="Webpages/reportlitter.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>  Report Litter</a>
-    <a href="Webpages/reportdeath.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>  Report Death</a>
-    <a href="Webpages/adduser.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add User</a>
-    <a href="Webpages/recordtransfer.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i>  Record Transfer</a>
-  </div>
-</nav>
 
-
-<!-- Overlay effect when opening sidebar on small screens -->
-<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
-
-<!-- !PAGE CONTENT! -->
-<div class="w3-main" style="margin-left:300px;margin-top:43px;">
-
-  <!-- Header -->
-<div class="center w3-panel">
-  <div class="w3-row-padding" style="margin:0 -16px">
-      <div class="w3-twothird">
-        <form>
-      <select name="Rat-Gender" id="Rat-Gender">
-        <option value="" disabled selected>Rat's Sex</option>
-        <option value="M">Male</option>
-        <option value="F">Female</option>
-      </select>
-      <input type="text" id="Input" placeholder="Rat Number..." value="" size = "50" title = "Enter a Rat's Number">
-      <button type="button" class="w3-button" onclick="bringChecks()">Report</button>
-    </div>
-  </div>
-</div>
-
-<div id="boxes" style ="display: none;">
-    <label class="checkbox" for="name"> Edit Rat's Name
-      <input type="checkbox" id="name" name="name" value="name">
-      <span style="display: block;">
-        <input type="text" id="Input" placeholder="Rat's Name..." value="" size = "50" title = "Enter the Rat's Name">
-      </span>
-    </label><br>
-    <label class="checkbox" for="birth"> Change Birthdate
-      <input type="checkbox" id="birth" name="birth" value="bdate">
-      <span style="display: block;">
-        <input type="text" id="Input" placeholder="The Rat's Birthday..." value="" size = "50" title = "Enter the Rat's Birthdate">
-      </span>
-    </label><br>
-    <label class="checkbox" for="lastPair"> Edit date of Last Pairing
-      <input type="checkbox" id="lastPair" name="lastPair" value="lp">
-      <span style="display: block;">
-        <input type="text" id="Input" placeholder="The Date of the Rat's Last Pairing..." value="" size = "50" title = "Enter the Date of the Rat's Last Pairing">
-      </span>
-    </label><br> 
-    <label class="checkbox" for="lastLitter"> Change date of Last Litter
-      <input  type="checkbox" id="lastLitter" name="lastLitter" value="ll">
-      <span style="display: block;">
-        <input type="text" id="Input" placeholder="Rat's Last Litter..." value="" size = "50" title = "Enter the Rat's Sire">
-      </span>
-    </label><br>
-    <label class="checkbox" for="numPair"> Edit Number of Pairings
-      <input  type="checkbox" id="numPair" name="numPair" value="numP">
-      <span style="display: block;">
-        <input type="text" id="Input" placeholder="Rat's Number of Pairings..." value="" size = "50" title = "Enter the amount of the the rat has been paired">
-      </span>
-    </label><br>
-    <label class="checkbox" for="numLitter"> Edit Number of Litters
-      <input  type="checkbox" id="numLitter" name="numLitter" value="numL">
-      <span style="display: block;"><input type="text" id="Input" placeholder="Rat's litters..." value="" size = "50" title = "Enter the Rat's number of litters"></span>
-    </label><br>
-    <label class="checkbox" for="colonyDate"> Change the Date the Rat was Added to the Colony
-      <input type="checkbox" id="colonyDate" name="colonyDate" value="colDate">
-      <span style="display: block;">
-        <input type="text" id="Input" placeholder="Rat's Colony Addition Date..." value="" size = "50" title = "Enter the Rat's Date added to the Colony">
-      </span>
-    </label><br>
-    <label class="checkbox" for="defectLit"> Edit the Number of Litters with Defects
-      <input  type="checkbox" id="defectLit" name="defectLit" value="defL">
-      <span style="display: block;">
-        <input type="text" id="Input" placeholder="Rat's defective Litters..." value="" size = "50" title = "Enter the Rat's number of defective litters">
-      </span>
-    </label><br> 
-    <label class="checkbox" for="exp"> Has the Rat been put in an Experiment
-      <input type="checkbox" id="exp" name="exp" value="exp">
-      <span style="display: block;"></span>
-    </label><br>
-    <label class="checkbox" for="ratSire"> Edit the Rat's Sire
-      <input type="checkbox" id="ratSire" name="ratSire" value="sire">
-      <span style="display: block;">
-        <input type="text" id="Input" placeholder="Rat's Sire..." value="" size = "50" title = "Enter the Rat's Sire">
-      </span>
-    </label><br>
-    <label class="checkbox" for="ratDam"> Edit the Rat's Dam
-      <input type="checkbox" id="ratDam" name="ratDam" value="dam">
-      <span style="display: block;">
-        <input type="text" id="Input" placeholder="Rat's Dam..." value="" size = "50" title = "Enter the Rat's Dam">
-      </span>
-    </label><br>
-    <button style="height: 40px; width: 300px;">Report</button>
-  </form>
-</div>
-
-  <hr>
-  <br>
-  <div class="w3-container w3-dark-grey w3-padding-32">
-    <div class="w3-row">
-      <div class="w3-container w3-third">
-        <h5 class="w3-bottombar w3-border-green">Table</h5>
-        <p>Add Rat</p>
-        <p>Edit Records</p>
-        <p>Table View</p>
+  <!-- Sidebar/menu -->
+  <nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
+    <div class="w3-container w3-row">
+      <div class="w3-col s4">
+        <img src="C:\Users\andre\Desktop\Capstone Repo\Rat-Lab\RatLabPrototype\Assets\kentstatelogo.png"
+          class="w3-circle w3-margin-right" style="width:90px">
       </div>
-      <div class="w3-container w3-third">
-        <h5 class="w3-bottombar w3-border-red">User</h5>
-        <p>Add User</p>
-        <p>View Users</p>
-      </div>
-      <div class="w3-container w3-third">
-        <h5 class="w3-bottombar w3-border-orange">Actions</h5>
-        <p>Generate Breeding Pairs</p>
-        <p>Report Litter</p>
-        <p>Report Death</p>
-        <p>Record Transfer</p>
+      <div class="w3-col s8 w3-bar">
+        <span>Welcome, <strong>User!</strong></span><br>
+        <a href="#" class="w3-bar-item w3-button"><i class="fa fa-envelope"></i></a>
+        <a href="#" class="w3-bar-item w3-button"><i class="fa fa-user"></i></a>
+        <a href="#" class="w3-bar-item w3-button"><i class="fa fa-cog"></i></a>
       </div>
     </div>
+    <hr>
+    <div class="w3-container">
+      <h5>Damron-Mueller Rat Lab</h5>
+    </div>
+    <div class="w3-bar-block">
+      <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black"
+        onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>  Close Menu</a>
+      <a href="Webpages/dashboard.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i> 
+        Dashboard</a>
+      <a href="Webpages/search.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i> 
+        Search</a>
+      <a href="Webpages/addrat.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-cog fa-fw"></i>  Add
+        Rat</a>
+      <a href="Webpages/editrecords.html" class="w3-bar-item w3-button w3-padding w3-blue"><i
+          class="fa fa-history fa-fw"></i>  Edit Records</a>
+      <a href="Webpages/breedingpairs.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i> 
+        Generate Breeding Pairs</a>
+      <a href="Webpages/tableview.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bullseye fa-fw"></i> 
+        Table View</a>
+      <a href="Webpages/reportlitter.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i> 
+        Report Litter</a>
+      <a href="Webpages/reportdeath.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i> 
+        Report Death</a>
+      <a href="Webpages/adduser.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add
+        User</a>
+      <a href="Webpages/recordtransfer.html" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
+        Record Transfer</a>
+    </div>
+  </nav>
+
+
+  <!-- Overlay effect when opening sidebar on small screens -->
+  <div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer"
+    title="close side menu" id="myOverlay"></div>
+
+  <!-- !PAGE CONTENT! -->
+  <div class="w3-main" style="margin-left:300px;margin-top:43px;">
+
+    <!-- Header -->
+    <div class="center w3-panel">
+      <div class="w3-row-padding" style="margin:0 -16px">
+        <div class="w3-twothird">
+          <form action="/editrecords" , method="POST">
+            {{ form.sex }}
+            <!-- <select name="Rat-Gender" id="Rat-Gender">
+              <option value="" disabled selected>Rat's Sex</option>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+            </select> -->
+            <!-- <input type="text" id="Input" name="number" placeholder="Rat Number..." value="" size="50"
+              title="Enter a Rat's Number"> -->
+            {{ form.number }}
+            <!-- {{ form.update }} -->
+            <button type="button" class="w3-button" onclick="bringChecks()">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="boxes" style="display: none;">
+      <label class="checkbox" for="birth"> Change Birthdate
+        <span style="display: block;">
+          <!-- <input type="text" id="Input" name="birthdate" placeholder="The Rat's Birthday..." value="" size="50"
+            title="Enter the Rat's Birthdate"> -->
+          {{ form.birthdate }}
+        </span>
+      </label><br>
+      <label class="checkbox" for="lastPair"> Edit date of Last Pairing
+        <span style="display: block;">
+          <input type="text" id="Input" name="lastPairingDate" placeholder="The Date of the Rat's Last Pairing..."
+            value="" size="50" title="Enter the Date of the Rat's Last Pairing">
+        </span>
+      </label><br>
+      <label class="checkbox" for="lastLitter"> Change date of Last Litter
+        <span style="display: block;">
+          <input type="text" id="Input" name="lastLitterDate" placeholder="Rat's Last Litter..." value="" size="50"
+            title="Enter the Rat's Sire">
+        </span>
+      </label><br>
+      <label class="checkbox" for="numPair"> Edit Number of Pairings
+        <span style="display: block;">
+          <input type="text" id="Input" name="numPairings" placeholder="Rat's Number of Pairings..." value="" size="50"
+            title="Enter the amount of the the rat has been paired">
+        </span>
+      </label><br>
+      <label class="checkbox" for="numLitter"> Edit Number of Litters
+        <span style="display: block;"><input type="text" id="Input" name="numLitters" placeholder="Rat's litters..."
+            value="" size="50" title="Enter the Rat's number of litters"></span>
+      </label><br>
+      <label class="checkbox" for="colonyDate"> Change the Date the Rat was Added to the Colony
+        <span style="display: block;">
+          <input type="text" id="Input" name="colonyAddedDate" placeholder="Rat's Colony Addition Date..." value=""
+            size="50" title="Enter the Rat's Date added to the Colony">
+        </span>
+      </label><br>
+      <label class="checkbox" for="defectLit"> Edit the Number of Litters with Defects
+        <span style="display: block;">
+          <input type="text" id="Input" name="numDefectiveLitters" placeholder="Rat's defective Litters..." value=""
+            size="50" title="Enter the Rat's number of defective litters">
+        </span>
+      </label><br>
+      <label class="checkbox" for="exp"> Has the Rat been put in an Experiment
+        <input type="checkbox" id="exp" name="exp" value="exp">
+        <span style="display: block;"></span>
+      </label><br>
+      <label class="checkbox" for="ratSire"> Edit the Rat's Sire
+        <span style="display: block;">
+          <input type="text" id="Input" name="sire" placeholder="Rat's Sire..." value="" size="50"
+            title="Enter the Rat's Sire">
+        </span>
+      </label><br>
+      <label class="checkbox" for="ratDam"> Edit the Rat's Dam
+        <span style="display: block;">
+          <input type="text" id="Input" name="dam" placeholder="Rat's Dam..." value="" size="50"
+            title="Enter the Rat's Dam">
+        </span>
+      </label><br>
+      {{form.update}}
+      <!-- <input type="submit" value="Update" class="w3-button"></input> -->
+      </form>
+    </div>
+
+    <hr>
+    <br>
+    <div class="w3-container w3-dark-grey w3-padding-32">
+      <div class="w3-row">
+        <div class="w3-container w3-third">
+          <h5 class="w3-bottombar w3-border-green">Table</h5>
+          <p>Add Rat</p>
+          <p>Edit Records</p>
+          <p>Table View</p>
+        </div>
+        <div class="w3-container w3-third">
+          <h5 class="w3-bottombar w3-border-red">User</h5>
+          <p>Add User</p>
+          <p>View Users</p>
+        </div>
+        <div class="w3-container w3-third">
+          <h5 class="w3-bottombar w3-border-orange">Actions</h5>
+          <p>Generate Breeding Pairs</p>
+          <p>Report Litter</p>
+          <p>Report Death</p>
+          <p>Record Transfer</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w3-container w3-padding-16 w3-light-grey">
+    </footer>
+
+    <!-- End page content -->
   </div>
 
-  <!-- Footer -->
-  <footer class="w3-container w3-padding-16 w3-light-grey">
-  </footer>
+  <script>
+    var dropDown = document.getElementById( "Rat-Gender" );
+    var number = document.getElementById( "Input" );
+    var modal = document.getElementById( "myModal" );
+    var boxes = document.getElementById( "boxes" );
 
-  <!-- End page content -->
-</div>
+    // Get the Sidebar
+    var mySidebar = document.getElementById( "mySidebar" );
 
-<script>
-var dropDown = document.getElementById("Rat-Gender");
-var number = document.getElementById("Input");
-var modal = document.getElementById("myModal");
-var boxes = document.getElementById("boxes");
+    // Get the DIV with overlay effect
+    var overlayBg = document.getElementById( "myOverlay" );
 
-// Get the Sidebar
-var mySidebar = document.getElementById("mySidebar");
+    // Toggle between showing and hiding the sidebar, and add overlay effect
+    function w3_open () {
+      if ( mySidebar.style.display === 'block' ) {
+        mySidebar.style.display = 'none';
+        overlayBg.style.display = "none";
+      } else {
+        mySidebar.style.display = 'block';
+        overlayBg.style.display = "block";
+      }
+    }
 
-// Get the DIV with overlay effect
-var overlayBg = document.getElementById("myOverlay");
+    // Close the sidebar with the close button
+    function w3_close () {
+      mySidebar.style.display = "none";
+      overlayBg.style.display = "none";
+    }
 
-// Toggle between showing and hiding the sidebar, and add overlay effect
-function w3_open() {
-  if (mySidebar.style.display === 'block') {
-    mySidebar.style.display = 'none';
-    overlayBg.style.display = "none";
-  } else {
-    mySidebar.style.display = 'block';
-    overlayBg.style.display = "block";
-  }
-}
+    function bringChecks () {
+      // if ( dropDown.value != "" && number.value != "" )
+      boxes.style.display = "block";
+    }
 
-// Close the sidebar with the close button
-function w3_close() {
-  mySidebar.style.display = "none";
-  overlayBg.style.display = "none";
-}
+    function bringModal () {
+      modal.style.display = "block";
+      document.getElementById( "modalText" ).innerHTML = "Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() +
+        " was Transfer?";
+    }
 
-function bringChecks(){
-  if(dropDown.value != "" && number.value != "")
-    boxes.style.display = "block";
-}
-
-function bringModal(){
-     modal.style.display = "block";
-    document.getElementById("modalText").innerHTML = "Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() + 
-            " was Transfer?";
-}
-
-function closeModal(){
-  modal.style.display = "none";
-}
-</script>
+    function closeModal () {
+      modal.style.display = "none";
+    }
+  </script>
 
 </body>
+
 </html>

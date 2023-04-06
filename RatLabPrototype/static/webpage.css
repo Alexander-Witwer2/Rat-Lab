@@ -1,0 +1,43 @@
+.center {
+    padding: 30px 25px 0px 29%;
+}
+
+#obscuredDetails{
+    display: none;
+}
+
+#Input{
+    border: 1px solid #ddd;
+}
+
+#Table th, #Table td, #table tr,#myTable tr.header, #myTable tr:hover {
+    border: 1px solid #ddd;
+}
+
+#Rat-Gender{
+    border: 1px solid #ddd;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; 
+    background-color: rgb(0,0,0); 
+    background-color: rgba(0,0,0,0.4); 
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    text-align: center;
+    margin: auto;
+    padding: 50px;
+    border: 1px solid #888;
+    width: 50%;
+  }
+  

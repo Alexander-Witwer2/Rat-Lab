@@ -21,17 +21,52 @@ class Rat(db.Model):
     rat_name = db.Column(db.String)
     sex = db.Column(db.String)
     birthdate = db.Column(db.Date)
+    weaned_date = db.Column(db.Date)
     last_paired_date = db.Column(db.Date)
+    last_litter_date = db.Column(db.Date)
+    num_times_paired = db.Column(db.Integer)
+    num_litters = db.Column(db.Integer)
+    date_added_to_colony = db.Column(db.Date)
+    num_litters_with_defects = db.Column(db.Integer)
+    experiment = db.Column(db.Integer)
     current_partner = db.Column(db.String)
     manner_of_death = db.Column(db.String)
     death_date = db.Column(db.Date)
+    age_months = db.Column(db.Integer)
     sire = db.Column(db.String)
     dam = db.Column(db.String)
     pgsire = db.Column(db.String)
     pgdam = db.Column(db.String)
     mgsire = db.Column(db.String)
     mgdam = db.Column(db.String)
-    age_months = db.Column(db.Integer)
+    pg1sire = db.Column(db.String)
+    pg1dam = db.Column(db.String)
+    mg1sire = db.Column(db.String)
+    mg1dam = db.Column(db.String)
+    pg2sire = db.Column(db.String)
+    pg2dam = db.Column(db.String)
+    pg21sire = db.Column(db.String)
+    pg21dam = db.Column(db.String)
+    mg2sire = db.Column(db.String)
+    mg2dam = db.Column(db.String)
+    mg21sire = db.Column(db.String)
+    mg21dam = db.Column(db.String)
+    pg3sire = db.Column(db.String)
+    pg3dam = db.Column(db.String)
+    pg31sire = db.Column(db.String)
+    pg31dam = db.Column(db.String)
+    pg32sire = db.Column(db.String)
+    pg32dam = db.Column(db.String)
+    pg33sire = db.Column(db.String)
+    pg33dam = db.Column(db.String)
+    mg3sire = db.Column(db.String)
+    mg3dam = db.Column(db.String)
+    mg31sire = db.Column(db.String)
+    mg31dam = db.Column(db.String)
+    mg32sire = db.Column(db.String)
+    mg32dam = db.Column(db.String)
+    mg33sire = db.Column(db.String)
+    mg33dam = db.Column(db.String) 
     
 class EditRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
@@ -76,13 +111,7 @@ def breedingPairs():
     return render_template("breedingpairs.html")
 
 @app.route("/editrecords", methods=['GET', 'POST'])
-def editRecords():
-    pairing()
-    #abc = Rat.query.get("19F")
-    #print(abc)
-    # stmt = db.session.select(Rat.rat_name).where(Rat.rat_number == "19F")
-    #stmt = Rat.select()
-    
+def editRecords():   
     form = EditRatForm()
     if(request.method == "POST"):
         print(form.data)
@@ -317,12 +346,12 @@ def updateAges():
             years_to_months =  (date.today().year - birthdate.year) * 12
             months = date.today().month - birthdate.month
             age = years_to_months + months
-            print(str(rat.rat_number) + " " + str(age))
+            #print(str(rat.rat_number) + " " + str(age))
         else:
             years_to_months =  (deathDate.year - birthdate.year) * 12
             months = deathDate.month - birthdate.month
             age = years_to_months + months
-            print(str(rat.rat_number) + " " + str(age))
+            #print(str(rat.rat_number) + " " + str(age))
         db.session.execute(db.update(Rat).where(Rat.rat_number == rat.rat_number).values(age_months = age))
         
     db.session.commit()

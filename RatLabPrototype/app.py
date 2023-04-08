@@ -55,32 +55,6 @@ class ReportDeathForm(FlaskForm):
     mannerOfDeath = SelectField(choices=['Euthanized', 'Unexpected'])
     submit = SubmitField('Yes')
 
-correctOutputColonyRatsSwappingPairsTrue = {
-    "41F" : ['60M', '61M', '65M', '66M', '73M', '74M', '75M', '77M', '78M', '79M', '80M', '81M', '82M', '86M', '87M', '93M', '94M'],
-    "59M" : ['63F', '64F', '65F', '71F', '72F', '73F', '74F', '75F', '80F', '81F', '82F', '94F', '95F', '96F', '97F'],
-    "66F" : ['61M', '65M', '66M', '71M', '75M', '78M', '79M', '81M', '82M', '86M', '87M', '93M', '94M'],
-    "83M" : ['61F', '63F', '71F', '72F', '80F', '82F', '94F', '95F', '96F', '97F'],
-    "65F" : ['61M', '65M', '66M', '71M', '75M', '78M', '79M', '81M', '82M', '86M', '87M', '93M', '94M'],
-    "71M" : ['61F', '63F', '64F', '65F', '71F', '72F', '73F', '74F', '82F', '94F', '95F', '96F', '97F'],
-    "81F" : ['61M', '65M', '66M', '75M', '78M', '79M', '81M', '82M', '86M', '87M', '94M'],
-    "80M" : ['61F', '63F', '71F', '72F', '82F', '94F', '95F', '97F'],
-    "94F" : [('60M',), ('61M',), ('65M',), ('66M',), ('71M',), ('73M',), ('74M',), ('75M',), ('77M',), ('78M',), ('79M',), ('80M',), ('81M',), ('82M',), ('86M',), ('87M',), ('93M',), ('94M',)],
-    "78M" : [('61F',), ('63F',), ('64F',), ('65F',), ('71F',), ('72F',), ('73F',), ('74F',), ('75F',), ('80F',), ('81F',), ('82F',), ('94F',), ('95F',), ('96F',), ('97F',)]
-}
-
-correctOutputColonyRatsSwappingPairsFalse = {
-    "41F" : ['84M', '85M', '88M', '89M', '90M'],
-    "59M" : ['100F', '102F', '103F', '104F', '87F', '88F', '89F', '90F', '98F', '99F'],
-    "66F" : ['84M', '85M'],
-    "83M" : ['100F', '101F', '104F', '106F', '62F', '78F', '79F', '91F', '92F', '99F'],
-    "65F" : ['84M', '85M'],
-    "71M" : ['100F', '102F', '103F', '62F', '76F', '77F', '78F', '79F', '87F', '88F', '89F', '90F', '99F'],
-    "81F" : ['84M', '85M'],
-    "80M" : ['100F', '62F', '78F', '79F', '99F'],
-    "94F" : [('84M',), ('85M',), ('88M',), ('89M',), ('90M',), ('91M',), ('92M',), ('96M',)],
-    "78M" : [('100F',), ('101F',), ('102F',), ('103F',), ('104F',), ('106F',), ('62F',), ('76F',), ('77F',), ('78F',), ('79F',), ('87F',), ('88F',), ('89F',), ('90F',), ('91F',), ('92F',), ('98F',), ('99F',)]
-}
-
 @app.route("/")
 def default():
     return render_template("dashboard.html")
@@ -124,31 +98,8 @@ def login():
 def recordTransfer():
     return render_template("recordtransfer.html")
 
-def testColonyRats(swappingExistingPairs):
-    currently_paired_rats_to_test = ['41F', '59M', '66F', '83M', '65F', '71M', '81F', '80M', '94F', '78M']
-    for rat in currently_paired_rats_to_test:
-        result = pairing(rat, swappingExistingPairs)
-        # print(rat + ": " + str(result))
-        if(swappingExistingPairs == True):
-            if(result == correctOutputColonyRatsSwappingPairsTrue[rat]):
-                print(rat + " passed")
-            else:
-                print(rat + " FAILED")
-        else:
-            if(result == correctOutputColonyRatsSwappingPairsFalse[rat]):
-                print(rat + " passed")
-            else:
-                print(rat + " FAILED")
-
 @app.route("/reportlitter")
 def reportLitter():
-    #updateAges()
-
-    print("TESTING: swapping existing pairs = true, input = colony rat")
-    testColonyRats(True)
-    print("TESTING: swapping existing pairs = false, input = colony rat")
-    testColonyRats(False)
-  
     return render_template("reportlitter.html")
 
 @app.route("/search")
@@ -177,13 +128,10 @@ def reportDeath():
     else:
         return render_template("reportdeath.html", form=form)
 
-
-# CASE 1: num_paired_rats is even, so the user is swapping existing pairs
-#           ACTION: return an unrelated, currently paired rat
-# CASE 2: num_paired_rats is odd, so the user needs to add a new rat to the colony
-#           from the "spare" unpaired rats who have not been previously paired
-#           ACTION: return an unrelated, unpaired rat
-# in calling function, query DB for input_rat and pass that rat to this function
+# input_data: string, the input rat's rat_number
+# input_swapping_existing_pairs: bool
+#   true if swapping existing pairs
+#   false if adding new rat to colony
 def pairing(input_data, input_swapping_existing_pairs):
     
     swapping_existing_pairs = input_swapping_existing_pairs
@@ -193,13 +141,49 @@ def pairing(input_data, input_swapping_existing_pairs):
     # STEP 1: query for input_rat's information and separate out the parents and grandparents names
     input_rat = Rat.query.get(input_data)
     input_rat_ancestor_names = [input_rat.sire, input_rat.dam, input_rat.pgsire, input_rat.pgdam, input_rat.mgsire, input_rat.mgdam]  
-     
-    # STEP 2: handle ENEN rats because they're a special case.  They can breed with anyone, 
+    
+    # case 1: input_rat is spare rat, swapping = True
+    if(swapping_existing_pairs == True and input_rat.current_partner == "00X"):
+        return "ERROR: cannot swap existing pairs if the inputted rat is a spare rat"
+    
+    # case 2: input_rat is spare rat, swapping = False
+    if(swapping_existing_pairs == False and input_rat.current_partner == "00X"):
+        # not excluding XXXX and 5X5X rats in this query like I will do in the future because
+        # at time of writing there may be 5X5X and XXXX rats who need a new partner from the spare rats
+        # ok to cast len into bool because it'll be True if there are multiple vacancies in the colony
+        # so if the user reports multiple colony rat deaths then wants to find partners from the 
+        # spare rats, this will still behave properly
+        colony_rats_without_partner = db.session.execute(
+                db.select(Rat.rat_number, Rat.sire, Rat.dam, Rat.pgsire, Rat.pgdam, Rat.mgsire, Rat.mgdam).where(
+                    (Rat.sex != input_rat.sex) &
+                    (Rat.manner_of_death == "Alive") & 
+                    (Rat.current_partner == "DEC") & # narrow search to only paired rats
+                    (Rat.age_months >= 3) #&
+                    #(Rat.num_litters_with_defects <= 2 ) #TODO: uncomment this line when using full database
+                )
+            ).all()
+        does_colony_have_vacancy = bool(len(colony_rats_without_partner))
+        if(does_colony_have_vacancy == False): # case 2a: no vacancy error
+            return "ERROR: there are no unpaired rats to pair the given rat with"
+        else: # case 2b and 2c
+            # the user could've reported multiple deaths before looking for new partners
+            # so there could be multiple rats in colony_rats_without_partner, need to check all of them
+            finalDatingPool = compareBirthdates(input_rat_ancestor_names=input_rat_ancestor_names, datingPool=colony_rats_without_partner, input_rat=input_rat)
+            if (len(finalDatingPool) == 0): # case 2b: no unrelated rats error
+                return "ERROR: there are no unrelated rats that " + input_rat.rat_number + " can be paired with"
+            else: # case 2c: succeeded in finding unrelated rat with DEC partner
+                return finalDatingPool
+            
+    # case input_rat is a colony rat
+    
+    if(swapping_existing_pairs == True and input_rat.current_partner == "DEC"):
+        return "ERROR: cannot swap existing pairs if input rat's partner is deceased, must add new rat to colony first"
+    
+    # handle ENEN rats because they're a special case.  They can breed with anyone, 
     # including other ENEN rats, so birthdate checking to rule out common ancestors is unnecessary
     # for them
     if(input_rat.sire == "EN" and input_rat.dam == "EN"):
-        #case 1: query for rats who are paired, excluding the rat’s current partner if known (! UNK and !00X)
-        if(swapping_existing_pairs):
+        if(swapping_existing_pairs): # look for colony rat
             finalDatingPool = db.session.execute(
                 db.select(Rat.rat_number).where(
                     (Rat.sex != input_rat.sex) &
@@ -214,8 +198,7 @@ def pairing(input_data, input_swapping_existing_pairs):
                     (Rat.dam != "5X")
                 )
             ).all()
-        else:
-            # case 2: query for rats who aren't paired
+        else: # look for spare rat
             finalDatingPool = db.session.execute(
                 db.select(Rat.rat_number).where(
                     (Rat.sex != input_rat.sex) &
@@ -230,16 +213,8 @@ def pairing(input_data, input_swapping_existing_pairs):
                 )
             ).all()
     
-    # STEP 3: handle colony rats.  Need to compare birthdates of input_rat and their ancestors
-    # to the birthdates of potential mates and their ancestors to exclude related rats
-    else:
-        #Generate dating pool based on which case we're in
-        
-        # case 1, query for rats who are paired.  exclude current partner.  
-        # include input_rat's birthdate because these are colony rats and checking != birthdate
-        # is a quick way to exclude siblings born on the same day 
-        # this isn't necessarily all siblings, but it helps narrow down the dating pool
-        if(swapping_existing_pairs):
+    else: # handle non ENEN, so need to do birthdate checking
+        if(swapping_existing_pairs): # query for colony rats
             datingPool = db.session.execute(
                 db.select(Rat.rat_number, Rat.sire, Rat.dam, Rat.pgsire, Rat.pgdam, Rat.mgsire, Rat.mgdam).where(
                     (Rat.sex != input_rat.sex) &
@@ -256,7 +231,7 @@ def pairing(input_data, input_swapping_existing_pairs):
                 )
             ).all()
             
-        else: # case 2: adding new rat to colony
+        else: # case: adding new rat to colony
             datingPool = db.session.execute(
                 db.select(Rat.rat_number, Rat.sire, Rat.dam, Rat.pgsire, Rat.pgdam, Rat.mgsire, Rat.mgdam).where(
                     (Rat.sex != input_rat.sex) &
@@ -271,21 +246,13 @@ def pairing(input_data, input_swapping_existing_pairs):
                     (Rat.birthdate != input_rat.birthdate)
                 )
             ).all()
-        
-        #printDatingPool(datingPool=datingPool, rat_number=input_rat.rat_number)
-        
+                
         # compare birthdates to get the final dating pool
         finalDatingPool = compareBirthdates(datingPool=datingPool, input_rat_ancestor_names=input_rat_ancestor_names, input_rat=input_rat)
-
     return finalDatingPool
 
-def printDatingPool(datingPool, rat_number):
-    datingPoolString = rat_number + ": "
-    for i in datingPool:
-        datingPoolString += i[0]
-        datingPoolString += "   " 
-    print(datingPoolString)
-
+# helper function to compare birthdates for a given rat vs their potential dating pool
+# this rules out common ancestors
 def compareBirthdates(datingPool, input_rat_ancestor_names, input_rat):
    
     finalDatingPool = []
@@ -293,7 +260,7 @@ def compareBirthdates(datingPool, input_rat_ancestor_names, input_rat):
     input_rat_ancestor_birthdays = []
     inputRat50sAncestorsFlag = False
     
-    # STEP 1: get the ancestor's birthdates. Include EN b/c grandparents could be EN
+    # STEP 1: get the ancestor's birthdates. Include EN in 2nd if stmt b/c grandparents could be EN
     for ancestor in input_rat_ancestor_names:
         pattern = re.compile(r'5\d[MF]|5X|4[78][MF]')
         isAncestorIn50sOr5X = pattern.match(ancestor)
@@ -328,7 +295,12 @@ def compareBirthdates(datingPool, input_rat_ancestor_names, input_rat):
                     break
     return finalDatingPool
 
-
+def printDatingPool(datingPool, rat_number):
+    datingPoolString = rat_number + " dating pool: "
+    for i in datingPool:
+        datingPoolString += i[0]
+        datingPoolString += "   " 
+    print(datingPoolString)
 
 # updates ages, rat's age in months
 # TODO make this skip rats that are dead 

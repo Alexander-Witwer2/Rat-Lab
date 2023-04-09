@@ -136,7 +136,6 @@ def recordTransfer():
 
 @app.route("/reportlitter")
 def reportLitter():
-    updateAges()
     return render_template("reportlitter.html")
 
 @app.route("/search")

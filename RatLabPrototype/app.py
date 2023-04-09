@@ -32,7 +32,7 @@ class Rat(db.Model):
     experiment = db.Column(db.Integer)
     manner_of_death = db.Column(db.String)
     death_date = db.Column(db.Date)
-    #age_months = db.Column(db.Integer)
+    age_months = db.Column(db.Integer)
     sire = db.Column(db.String)
     dam = db.Column(db.String)
     

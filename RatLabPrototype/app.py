@@ -6,6 +6,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, BooleanField, SelectField, DateField
 from wtforms.validators import DataRequired
 from datetime import date
+from dateutil import relativedelta
 import re
 
 # Initialize Flask
@@ -393,17 +394,14 @@ def updateAges():
         age = 0
         deathDate = rat.death_date
         birthdate = rat.birthdate
-
         if deathDate.year == 1900:
-            years_to_months =  (date.today().year - birthdate.year) * 12
-            months = date.today().month - birthdate.month
-            age = years_to_months + months
-            #print(str(rat.rat_number) + " " + str(age))
+            delta = relativedelta.relativedelta(date.today(), birthdate)
+            age = delta.months + (delta.years * 12) 
+            print(str(rat.rat_number) + " " + str(age))
         else:
-            years_to_months =  (deathDate.year - birthdate.year) * 12
-            months = deathDate.month - birthdate.month
-            age = years_to_months + months
-            #print(str(rat.rat_number) + " " + str(age))
+            delta = relativedelta.relativedelta(deathDate, birthdate)
+            age = delta.months + (delta.years * 12) 
+            print(str(rat.rat_number) + " " + str(age))
         db.session.execute(db.update(Rat).where(Rat.rat_number == rat.rat_number).values(age_months = age))
         
     db.session.commit()

@@ -27,46 +27,52 @@ class Rat(db.Model):
     num_times_paired = db.Column(db.Integer)
     num_litters = db.Column(db.Integer)
     date_added_to_colony = db.Column(db.Date)
+    current_partner = db.Column(db.String)
     num_litters_with_defects = db.Column(db.Integer)
     experiment = db.Column(db.Integer)
-    current_partner = db.Column(db.String)
     manner_of_death = db.Column(db.String)
     death_date = db.Column(db.Date)
     age_months = db.Column(db.Integer)
     sire = db.Column(db.String)
     dam = db.Column(db.String)
+    
+    # paternal and maternal grandparents
     pgsire = db.Column(db.String)
     pgdam = db.Column(db.String)
     mgsire = db.Column(db.String)
     mgdam = db.Column(db.String)
-    pg1sire = db.Column(db.String)
-    pg1dam = db.Column(db.String)
-    mg1sire = db.Column(db.String)
-    mg1dam = db.Column(db.String)
-    pg2sire = db.Column(db.String)
-    pg2dam = db.Column(db.String)
+    
+    # paternal and maternal 1st great-grandparents, 1st and 2nd sets (see diagram)
+    pg11sire = db.Column(db.String)
+    pg11dam = db.Column(db.String)
+    pg12sire = db.Column(db.String)
+    pg12dam = db.Column(db.String)
+    
+    mg11sire = db.Column(db.String)
+    mg11dam = db.Column(db.String)
+    mg12sire = db.Column(db.String)
+    mg12dam = db.Column(db.String)
+    
+    # paternal and paternal 2nd great-grandparents, 1st, 2nd, 3rd, 4th sets (see diagram)
     pg21sire = db.Column(db.String)
     pg21dam = db.Column(db.String)
-    mg2sire = db.Column(db.String)
-    mg2dam = db.Column(db.String)
+    pg22sire = db.Column(db.String)
+    pg22dam = db.Column(db.String)
+    pg23sire = db.Column(db.String)
+    pg23dam = db.Column(db.String)
+    pg24sire = db.Column(db.String)
+    pg24dam = db.Column(db.String)
+    
     mg21sire = db.Column(db.String)
     mg21dam = db.Column(db.String)
-    pg3sire = db.Column(db.String)
-    pg3dam = db.Column(db.String)
-    pg31sire = db.Column(db.String)
-    pg31dam = db.Column(db.String)
-    pg32sire = db.Column(db.String)
-    pg32dam = db.Column(db.String)
-    pg33sire = db.Column(db.String)
-    pg33dam = db.Column(db.String)
-    mg3sire = db.Column(db.String)
-    mg3dam = db.Column(db.String)
-    mg31sire = db.Column(db.String)
-    mg31dam = db.Column(db.String)
-    mg32sire = db.Column(db.String)
-    mg32dam = db.Column(db.String)
-    mg33sire = db.Column(db.String)
-    mg33dam = db.Column(db.String) 
+    mg22sire = db.Column(db.String)
+    mg22dam = db.Column(db.String)
+    mg23sire = db.Column(db.String)
+    mg23dam = db.Column(db.String)
+    mg24sire = db.Column(db.String)
+    mg24dam = db.Column(db.String)
+
+    
     
 class EditRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
@@ -156,6 +162,52 @@ def reportDeath():
         return redirect(url_for("search"))
     else:
         return render_template("reportdeath.html", form=form)
+
+# this function MUST be called *after* a new rat has been added to the database
+# it fills in the new rat's genealogical fields
+# assumetion: the new rat has an entry in the database.  sire number and dam number are valid
+# input: the new rat's number, sire number, and dam number
+# output: updates the genealogical fields of the new rat's entry in the database
+#         this function does not return anything 
+def fillGenealogyData(new_rat_number, sire_number, dam_number):
+    new_rat = Rat.query.get(new_rat_number)
+    sire = Rat.query.get(sire_number)
+    dam = Rat.query.get(dam_number)
+
+    # fill in new rat's paternal side
+    new_rat.pgsire = sire.sire
+    new_rat.pgdam = sire.dam
+    new_rat.pg11sire = sire.pgsire
+    new_rat.pg11dam = sire.pgdam
+    new_rat.pg12sire = sire.mgsire
+    new_rat.pg12dam = sire.mgdam
+    new_rat.pg21sire = sire.pg11sire
+    new_rat.pg21dam = sire.pg11dam
+    new_rat.pg22sire = sire.pg12sire
+    new_rat.pg22dam = sire.pg12dam
+    new_rat.pg23sire = sire.mg11sire
+    new_rat.pg23dam = sire.mg11dam
+    new_rat.pg24sire = sire.mg12sire
+    new_rat.pg24dam = sire.mg12dam
+    
+    # fill in new rat's maternal side
+    new_rat.mgsire = dam.sire
+    new_rat.mgdam = dam.dam
+    new_rat.mg11sire = dam.pgsire
+    new_rat.mg11dam = dam.pgdam
+    new_rat.mg12sire = dam.mgsire
+    new_rat.mg12dam = dam.mgdam
+    new_rat.mg21sire = dam.pg11sire
+    new_rat.mg21dam = dam.pg11dam
+    new_rat.mg22sire = dam.pg12sire
+    new_rat.mg22dam = dam.pg12dam
+    new_rat.mg23sire = dam.mg11sire
+    new_rat.mg23dam = dam.mg11dam
+    new_rat.mg24sire = dam.mg12sire
+    new_rat.mg24dam = dam.mg12dam
+    
+    db.session.commit()
+    return 
 
 # input_data: string, the input rat's rat_number
 # input_swapping_existing_pairs: bool

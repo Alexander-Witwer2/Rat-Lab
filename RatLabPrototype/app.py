@@ -240,8 +240,8 @@ def pairing(input_data, input_swapping_existing_pairs):
                     (Rat.sex != input_rat.sex) &
                     (Rat.manner_of_death == "Alive") & 
                     (Rat.current_partner == "DEC") & # narrow search to only paired rats
-                    (Rat.age_months >= 3) #&
-                    #(Rat.num_litters_with_defects <= 2 ) #TODO: uncomment this line when using full database
+                    (Rat.age_months >= 3) &
+                    (Rat.num_litters_with_defects <= 2 ) 
                 )
             ).all()
         does_colony_have_vacancy = bool(len(colony_rats_without_partner))
@@ -273,7 +273,7 @@ def pairing(input_data, input_swapping_existing_pairs):
                     (Rat.current_partner != "00X") & # narrow search to only paired rats
                     (Rat.rat_number != input_rat.current_partner) & # narrow search to exclude input_rat's current partner                    
                     (Rat.age_months >= 3) &
-                    #(Rat.num_litters_with_defects <= 2 ) #TODO: uncomment this line when using full database
+                    (Rat.num_litters_with_defects <= 2 ) & 
                     (Rat.sire != "XX") &
                     (Rat.dam != "XX") &
                     (Rat.sire != "5X") &
@@ -287,7 +287,7 @@ def pairing(input_data, input_swapping_existing_pairs):
                     (Rat.manner_of_death == "Alive") & 
                     (Rat.current_partner == "00X") & # search for unpaired rats
                     (Rat.age_months >= 3) &
-                    #(Rat.num_litters_with_defects <= 2 ) #TODO: uncomment this line when using full database
+                    (Rat.num_litters_with_defects <= 2 ) &
                     (Rat.sire != "XX") &
                     (Rat.dam != "XX") &
                     (Rat.sire != "5X") &
@@ -304,7 +304,7 @@ def pairing(input_data, input_swapping_existing_pairs):
                     (Rat.current_partner != "00X") & # narrow search to only paired rats
                     (Rat.rat_number != input_rat.current_partner) & # narrow search to exclude input_rat's current partner                    
                     (Rat.age_months >= 3) &
-                    #(Rat.num_litters_with_defects <= 2 ) #TODO: uncomment this line when using full database
+                    (Rat.num_litters_with_defects <= 2 ) &
                     (Rat.sire != "XX") &
                     (Rat.dam != "XX") &
                     (Rat.sire != "5X") &
@@ -320,7 +320,7 @@ def pairing(input_data, input_swapping_existing_pairs):
                     (Rat.manner_of_death == "Alive") & 
                     (Rat.current_partner == "00X") & # search for unpaired rats
                     (Rat.age_months >= 3) &
-                    #(Rat.num_litters_with_defects <= 2 ) #TODO: uncomment this line when using full database
+                    (Rat.num_litters_with_defects <= 2 ) & 
                     (Rat.sire != "XX") &
                     (Rat.dam != "XX") &
                     (Rat.sire != "5X") &
@@ -401,7 +401,7 @@ def updateAges():
         else:
             delta = relativedelta.relativedelta(deathDate, birthdate)
             age = delta.months + (delta.years * 12) 
-            print(str(rat.rat_number) + " " + str(age))
+            #print(str(rat.rat_number) + " " + str(age))
         db.session.execute(db.update(Rat).where(Rat.rat_number == rat.rat_number).values(age_months = age))
         
     db.session.commit()

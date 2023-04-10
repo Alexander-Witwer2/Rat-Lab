@@ -94,20 +94,25 @@
             {{ form.swapping(class="checkbox", default="checked")}}
             {{ form.generateButton (type="submit") }}
           </form>
-          
+
           {% if showMateDropdown %}
           <form action="/recordpairing/{{num}}" method="POST">
             <div id="mateDropdown">
               <label>Select the rat's partner</label>
               {{ form.mateDropdown }}
-              <!-- <button type="button" class="w3-button" onclick="areYouSure()">Record Pairing</button> -->
-              {{ form.recordButton (type="submit" )}}
+              <button type="button" onclick="areYouSure()">Record Pairing</button>
+            </div>
+
+            <div id="myModal" class="modal">
+              <div class="modal-content">
+                <p id="modalText"></p>
+                {{ form.recordButton (type="submit" )}}
+                <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
+                <button class="w3-button" onclick="closeModal()">No</button>
+              </div>
             </div>
           </form>
           {% endif %}
-
-
-
 
         </div>
       </div>
@@ -156,6 +161,8 @@
   </div>
 
   <script>
+    var modal = document.getElementById( "myModal" );
+
     // Get the Sidebar
     var mySidebar = document.getElementById( "mySidebar" );
 
@@ -181,6 +188,20 @@
 
     function generate () {
 
+    }
+
+    function areYouSure () {
+      //if ( dDate.value != "" && coDeath.value != "" ) {
+      modal.style.display = "block";
+      document.getElementById( "modalText" ).innerHTML = "Are you sure?"
+      //TODO: update "are you sure" with the actual values like it used to show previously
+      //"Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() +
+      //" died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() + "?";
+      //}
+    }
+
+    function closeModal () {
+      modal.style.display = "none";
     }
   </script>
 

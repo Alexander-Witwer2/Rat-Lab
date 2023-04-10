@@ -173,43 +173,32 @@ def breedingPairs():
     form = GenerateBreedingPairsForm()
     if(request.method == "POST"):
         ratNumber = str(form.number.data) + form.sex.data[0]
-        #print(ratNumber)
         possibleMates = pairing(ratNumber, form.swapping.data)
-        
+        #TODO: handle the error cases in pairing() so the website doesn't crash
         form.mateDropdown.choices = possibleMates
-        #print(possibleMates)
-        
-        
-        query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates))).scalars()
-        #print(query)
-        #return render_template("breedingpairs.html", form=form, query=query)
-    
-        return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True,num=ratNumber)
-    
+        query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates))).scalars()   
+        return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True, num=ratNumber)
     return render_template("breedingpairs.html", form=form)
 
 @app.route("/recordpairing/<num>", methods=["GET", "POST"])
 def recordPairing(num):
     if( request.method == "POST"):
-        #input_data = request.form.
-        print(request.form)
-        print(num)
         rat = db.session.query(Rat).filter(Rat.rat_number == num).one()  
         rat.current_partner = request.form.get("mateDropdown")
+        rat.last_paired_date = date.today()
+        rat.num_times_paired = rat.num_times_paired + 1
+
         #TODO: *shouldn't* need to modify the rat's old partner here.  Test and verify
         newPartner = db.session.query(Rat).filter(Rat.rat_number == request.form.get("mateDropdown")).one()
-        
         newPartner.current_partner = rat.rat_number
-        
+        newPartner.last_paired_date = date.today()
+        newPartner.num_times_paired = newPartner.num_times_paired + 1
         db.session.commit()
-
-        #rat.current_partner = input_data[]
-        #print(rat)
+        # TODO: add a date field that defaults to today for the current date, in case the user is 
+        # recording a previously made pairing?
         return redirect(url_for("search"))
     return redirect(url_for("search"))
 
-    
-    
 @app.route("/editrecords", methods=['GET', 'POST'])
 def editRecords():   
     form = EditRatForm()

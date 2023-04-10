@@ -194,7 +194,15 @@ def recordPairing(num):
         #input_data = request.form.
         print(request.form)
         print(num)
-        #rat = db.session.query(Rat).filter(Rat.rat_number == rat_number).one()  
+        rat = db.session.query(Rat).filter(Rat.rat_number == num).one()  
+        rat.current_partner = request.form.get("mateDropdown")
+        #TODO: *shouldn't* need to modify the rat's old partner here.  Test and verify
+        newPartner = db.session.query(Rat).filter(Rat.rat_number == request.form.get("mateDropdown")).one()
+        
+        newPartner.current_partner = rat.rat_number
+        
+        db.session.commit()
+
         #rat.current_partner = input_data[]
         #print(rat)
         return redirect(url_for("search"))

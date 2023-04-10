@@ -84,45 +84,26 @@
     <!-- Header -->
     <br>
     <div id="boxes" style="display: block;" class="w3-row-padding">
-      <select name="Rat-Gender" id="Rat-Gender">
-        <option value="" disabled selected>Rat's Sex</option>
-        <option value="M">Male</option>
-        <option value="F">Female</option>
-      </select>
-      <br>
-      <br>
-      <label class="checkbox" for="birth"> Birthdate
-        <span style="display: block;">
-          <input type="text" id="Input" placeholder="MM/DD/YYYY" value="" size="50" title="Enter the Rat's Birthdate">
-        </span>
-      </label><br>
-      <label class="checkbox" for="ratSire"> Rat's Sire
-        <span style="display: block;">
-          <input type="text" id="Input" placeholder="Rat's Sire..." value="" size="50" title="Enter the Rat's Sire">
-        </span>
-      </label><br>
-      <label class="checkbox" for="ratDam"> Rat's Dam
-        <span style="display: block;">
-          <input type="text" id="Input" placeholder="Rat's Dam..." value="" size="50" title="Enter the Rat's Dam">
-        </span>
-      </label><br>
-      <label class="checkbox" for="weanedDate"> Date the Rat Was Weaned
-        <span style="display: block;">
-          <input type="text" id="Input" placeholder="MM/DD/YYYY" value="" size="50"
-            title="Enter the Rat's Date added to the Colony">
-        </span>
-      </label><br>
-      <label class="checkbox" for="colonyDate"> Date the Rat was Added to the Colony
-        <span style="display: block;">
-          <input type="text" id="Input" placeholder="MM/DD/YYYY" value="" size="50"
-            title="Enter the Rat's Date added to the Colony">
-        </span>
-      </label><br>
-      <label class="checkbox" for="exp"> Has the Rat been used in an Experiment?
-        <input type="checkbox" id="exp" name="exp" value="exp">
-        <span style="display: block;"></span>
-      </label><br>
-      <button style="height: 40px; width: 300px;">Add Rat</button>
+      <form action="/addrat" , method="POST">
+        {{form.sex}} <br>
+        <br>
+        <p>Birthdate:</p>
+        {{form.birthdate(class="date")}}
+        <br>
+        {{ form.sire(class="inputtext", placeholder="Sire")}}
+        <br>
+        {{ form.dam(class="inputtext", placeholder="Dam")}}
+        <br>
+        <p>Date the rat was weaned:</p>
+        {{ form.weanedDate(class="date")}}
+        <br>
+        <p>Date the rat was added to the colony:</p>
+        {{ form.dateAddedToColony(class="date")}}
+        <br>
+        <p>Was the rat used in an experiment?</p>
+        {{ form.experiment(class="checkbox", default="unchecked")}}
+        <br>
+        {{form.addButton}}
       </form>
     </div>
 

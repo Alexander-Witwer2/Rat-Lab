@@ -73,8 +73,17 @@ class Rat(db.Model):
     mg24sire = db.Column(db.String)
     mg24dam = db.Column(db.String)
 
+class AddRatForm(FlaskForm):
+    sex = SelectField(choices=['Male', 'Female'])
+    birthdate = DateField()
+    sire = StringField('Sire')
+    dam = StringField('Dam')
+    weanedDate = DateField()
+    dateAddedToColony = DateField()
+    experiment = BooleanField()
+    addButton = SubmitField('Add Rat')    
     
-    
+
 class EditRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
     number = IntegerField()
@@ -105,9 +114,47 @@ def default():
 def dashboard():
     return render_template("dashboard.html")
 
-@app.route("/addrat")
+@app.route("/addrat", methods=['POST', 'GET'])
 def addRat():
-    return render_template("addrat.html")
+    form = AddRatForm()
+    if(request.method == "POST"):
+        rat = Rat()
+        rat.sex = form.sex.data
+        rat.birthdate = form.birthdate.data
+        rat.weaned_date = form.weanedDate.data
+        rat.last_paired_date = date(1900, 1, 1)
+        rat.last_litter_date = date(1900, 1, 1)
+        rat.num_times_paired = 0
+        rat.num_litters = 0
+        rat.date_added_to_colony = form.dateAddedToColony.data
+        rat.current_partner = "00X"
+        rat.num_litters_with_defects = 0
+        rat.experiment = int(form.experiment.data)
+        rat.manner_of_death = "Alive"
+        rat.death_date = date(1900, 1, 1)
+        rat.sire = form.sire.data
+        rat.dam = form.dam.data
+
+        if(rat.sex == "Female"):
+            numFemalesInDatabase = len(db.session.execute(db.select(Rat.rat_number).where(Rat.sex=="Female")).all()) + 25 + 1
+            ratNumber = str(numFemalesInDatabase) + "F"
+            rat.rat_number = ratNumber
+        else:
+            numMalesInDatabase = len(db.session.execute(db.select(Rat.rat_number).where(Rat.sex=="Male")).all()) + 28 + 1
+            ratNumber = str(numMalesInDatabase) + "M"
+            rat.rat_number = ratNumber
+        
+        #TODO: properly concat rat name - shouldn't have sire/dam M and F on there
+        rat.rat_name = rat.rat_number + rat.sire + rat.dam
+       
+        db.session.add(rat)
+        db.session.commit()
+        
+        fillGenealogyData(rat.rat_number, rat.sire, rat.dam)
+        # TODO: fill in the rat's age - adapt updateRats()
+        return redirect(url_for("search"))
+    else:
+        return render_template("addrat.html", form=form)
 
 @app.route("/adduser")
 def addUser():

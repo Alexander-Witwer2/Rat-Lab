@@ -93,14 +93,21 @@
             <label>Check to swap existing pairs</label>
             {{ form.swapping(class="checkbox", default="checked")}}
             {{ form.generateButton (type="submit") }}
-            {% if showMateDropdown %}
+          </form>
+          
+          {% if showMateDropdown %}
+          <form action="/recordpairing/{{num}}" method="POST">
             <div id="mateDropdown">
               <label>Select the rat's partner</label>
               {{ form.mateDropdown }}
-              {{ form.recordButton (type="submit")}}
+              <!-- <button type="button" class="w3-button" onclick="areYouSure()">Record Pairing</button> -->
+              {{ form.recordButton (type="submit" )}}
             </div>
-            {% endif %}
           </form>
+          {% endif %}
+
+
+
 
         </div>
       </div>

@@ -111,7 +111,8 @@ class GenerateBreedingPairsForm(FlaskForm):
     swapping = BooleanField(default="checked")
     mateDropdown = SelectField()
     generateButton = SubmitField('Generate')
-    recordButton = SubmitField('Record pairing')
+    mateDropdown = SelectField()
+    recordButton = SubmitField('Yes')
 
 @app.route("/")
 def default():
@@ -173,7 +174,6 @@ def breedingPairs():
     if(request.method == "POST"):
         ratNumber = str(form.number.data) + form.sex.data[0]
         #print(ratNumber)
-        
         possibleMates = pairing(ratNumber, form.swapping.data)
         
         form.mateDropdown.choices = possibleMates
@@ -184,10 +184,24 @@ def breedingPairs():
         #print(query)
         #return render_template("breedingpairs.html", form=form, query=query)
     
-        return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True)
+        return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True,num=ratNumber)
     
     return render_template("breedingpairs.html", form=form)
 
+@app.route("/recordpairing/<num>", methods=["GET", "POST"])
+def recordPairing(num):
+    if( request.method == "POST"):
+        #input_data = request.form.
+        print(request.form)
+        print(num)
+        #rat = db.session.query(Rat).filter(Rat.rat_number == rat_number).one()  
+        #rat.current_partner = input_data[]
+        #print(rat)
+        return redirect(url_for("search"))
+    return redirect(url_for("search"))
+
+    
+    
 @app.route("/editrecords", methods=['GET', 'POST'])
 def editRecords():   
     form = EditRatForm()

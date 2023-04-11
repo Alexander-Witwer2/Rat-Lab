@@ -118,14 +118,15 @@
 #     for rat in spare_rat_partners.keys():     
 #         testSpareRat(rat, True) # case 1: can't swap existing pairs if input is spare rat
 #         testSpareRat(rat, False) # case 2a: no vacancy error 
-#         for relative in spare_rat_relatives[rat]: 
-#             killRat(relative)
-#         testSpareRat(rat, False) # case 2b: only vacancy is with a related rat
-#         for partner in spare_rat_partners[rat]:
-#             killRat(partner)
+#         if(rat != "99F"): # 99F has no related rats because ENEN rat, so skip her to avoid double printing no vacancy error
+#             for relative in spare_rat_relatives[rat]: 
+#                 killRat(relative)
+#             testSpareRat(rat, False) # case 2b: only vacancy is with a related rat
+#             for partner in spare_rat_partners[rat]:
+#                 killRat(partner)
 #         testSpareRat(rat, False) # case 2c: vacancies are with unrelated rats
         
-#     def testPairingAlgorithm():
+# def testPairingAlgorithm():
 #     resetDatabase()
 #     print("TESTING COLONY RATS, SWAPPING = TRUE")
 #     testColonyRats(True)

@@ -97,6 +97,12 @@ class ReportDeathForm(FlaskForm):
     mannerOfDeath = SelectField(choices=['Euthanized', 'Unexpected'])
     submit = SubmitField('Yes')
 
+class ReportLitterForm(FlaskForm) :
+	sex = SelectField(choices=['Male', 'Female'])
+	number = IntegerField()
+	reportLittersWithDefects = SelectField(choices=['Yes', 'No'])
+	submit = SubmitField('Yes')
+
 @app.route("/")
 def default():
     return render_template("dashboard.html")
@@ -134,9 +140,23 @@ def login():
 def recordTransfer():
     return render_template("recordtransfer.html")
 
-@app.route("/reportlitter")
+@app.route("/reportlitter", methods=['POST', 'GET'])
 def reportLitter():
-    return render_template("reportlitter.html")
+	form = ReportLitterForm()
+	
+	if(request.method == "POST") :
+		rat_number = str(form.number.data) + form.sex.data[0]
+		
+		rat = Rat.query.get(rat_number)
+		if(form.reportLittersWithDefects.data != "No") :
+			rat.num_litters_with_defects = rat.num_litters_with_defects + 1
+			rat.num_litters = rat.num_litters + 1
+			db.session.commit()
+		else:
+			rat.num_litters = rat.num_litters + 1
+			db.session.commit()
+
+	return render_template("reportlitter.html", form=form)
 
 @app.route("/search")
 def search():

@@ -102,6 +102,11 @@ class ReportLitterForm(FlaskForm) :
 	number = IntegerField()
 	reportLittersWithDefects = SelectField(choices=['Yes', 'No'])
 	submit = SubmitField('Yes')
+	
+class RecordTransferForm(FlaskForm) :
+	sex = SelectField(choices=['Male', 'Female'])
+	number = IntegerField()
+	submit = SubmitField('Yes')
 
 @app.route("/")
 def default():
@@ -136,9 +141,20 @@ def editRecords():
 def login():
     return render_template("login.html")
 
-@app.route("/recordtransfer")
+@app.route("/recordtransfer", methods=['POST', 'GET'])
 def recordTransfer():
-    return render_template("recordtransfer.html")
+	form = RecordTransferForm()
+    
+	if(request.method == "POST") :
+		rat_number = str(form.number.data) + form.sex.data[0]
+		
+		rat = Rat.query.get(rat_number)
+		rat.manner_of_death = "Transferred"
+		db.session.commit()
+        
+		return render_template("recordtransfer.html", form=form)
+	else:
+		return render_template("recordtransfer.html", form=form)
 
 @app.route("/reportlitter", methods=['POST', 'GET'])
 def reportLitter():
@@ -148,6 +164,7 @@ def reportLitter():
 		rat_number = str(form.number.data) + form.sex.data[0]
 		
 		rat = Rat.query.get(rat_number)
+		#References drop down menu options for if litter has defects or not
 		if(form.reportLittersWithDefects.data != "No") :
 			rat.num_litters_with_defects = rat.num_litters_with_defects + 1
 			rat.num_litters = rat.num_litters + 1

@@ -87,13 +87,14 @@ class EditRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
     number = IntegerField()
     birthdate = DateField()
-    dateLastPairing = DateField()
-    dateLastLitter = DateField()
-    numPairings = IntegerField()
-    numlitters = IntegerField()
-    dateAddedToColony = DateField()
-    numLittersWithDefects = IntegerField()
-    experiment = BooleanField(default="unchecked")
+    last_paired_date = DateField()
+    last_litter_date = DateField()
+    weaned_date = DateField()
+    num_times_paired = IntegerField()
+    num_litters = IntegerField()
+    date_added_to_colony = DateField()
+    num_litters_with_defects = IntegerField()
+    experiment = BooleanField()
     sire = StringField('Sire')
     dam = StringField('Dam')
     update = SubmitField('Update')
@@ -204,6 +205,34 @@ def editRecords():
     form = EditRatForm()
     if(request.method == "POST"):
         print(form.data)
+        number = str(form.number.data) + form.sex.data[0]
+        rat = db.session.query(Rat).filter(Rat.rat_number == number).one()
+        
+        if(form.birthdate.data != None):
+            rat.birthdate = form.birthdate.data
+        if(form.last_paired_date != None):
+            rat.last_paired_date = form.last_paired_date.data
+        if(form.last_litter_date != None):
+            rat.last_litter_date = form.last_litter_date.data
+        if(form.weaned_date.data != None):
+            rat.weaned_date = form.weaned_date.data
+        if(form.num_times_paired.data != None):
+            rat.num_times_paired = form.num_times_paired.data  
+        if(form.num_litters.data != None):
+            rat.num_litters = form.num_litters.data
+        if(form.date_added_to_colony.data != None):
+            rat.date_added_to_colony = form.date_added_to_colony.data
+        if(form.num_litters_with_defects.data != None):
+            rat.num_litters_with_defects = form.num_litters_with_defects.data
+        if(form.experiment.data != None):
+            rat.experiment = form.experiment.data
+        if(form.sire.data != ''):
+            rat.sire = form.sire.data
+            fillGenealogyData(number, form.sire.data, rat.dam)
+        if(form.dam.data != ''):
+            rat.dam = form.dam.data
+            fillGenealogyData(number, rat.sire, form.dam.data)
+             
         return redirect(url_for("editRecords"))
     else:
         return render_template("editrecords.html", form=form)

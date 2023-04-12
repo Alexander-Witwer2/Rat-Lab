@@ -8,7 +8,7 @@ from wtforms.validators import DataRequired
 from datetime import date
 from dateutil import relativedelta
 import re
-from sqlalchemy import cast, String, func, Unicode, DECIMAL, INTEGER, Integer
+from sqlalchemy import cast, Integer
 
 # Initialize Flask
 app = Flask(__name__, instance_relative_config=True)

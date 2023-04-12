@@ -42,9 +42,9 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i> Close Menu</a>
     <a href="dashboard" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i> 
       Dashboard</a>
-    <a href="search" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-eye fa-fw"></i> 
+    <a href="search" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i> 
       Search Rats</a>
-    <a href="addrat" class="w3-bar-item w3-button w3-padding w3"><i class="fa fa-cog fa-fw"></i>  Add
+    <a href="addrat" class="w3-bar-item w3-button w3-padding"><i class="fa fa-cog fa-fw"></i>  Add
       Rat</a>
     <a href="editrecords" class="w3-bar-item w3-button w3-padding"><i class="fa fa-history fa-fw"></i> 
       Edit Records</a>
@@ -56,8 +56,10 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       Report Death</a>
     <a href="adduser" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add
       User</a>
-    <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
+    <a href="recordtransfer" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-bank fa-fw"></i> 
       Record Transfer</a>
+    <a href="FamilyTree" class="w3-bar-item w3-button w3-padding"><i class="fa fa-diamond fa-fw"></i> 
+      Generate Family Tree</a>
   </div>
 </nav>
 
@@ -78,7 +80,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
           <option value="M">Male</option>
           <option value="F">Female</option>
         </select>
-        <input type="text" id="Input" placeholder="Rat Number..." value="" size = "50" title = "Enter a Rat's Number">
+        <input type="text" id="Input" placeholder="Rat Number" value="" size = "50" title = "Enter a Rat's Number">
         <button type="button" class="w3-button" onclick="transferQuestion()">Report</button>
         </form>
       </div>

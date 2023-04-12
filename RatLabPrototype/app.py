@@ -114,7 +114,11 @@ def default():
 
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
+	livingRats = len(db.session.execute(db.select(Rat.rat_number).where(
+		(Rat.manner_of_death == "Alive")
+		)
+	).all())
+	return render_template("dashboard.html", livingRats = livingRats)
 
 @app.route("/addrat")
 def addRat():

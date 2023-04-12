@@ -77,10 +77,10 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       <div class="w3-container w3-red w3-padding-16">
         <div class="w3-left"><i class="fa fa-share-alt w3-xxxlarge"></i></div>
         <div class="w3-right">
-          <h3>52</h3>
+          <h3>{{livingRats}}</h3>
         </div>
         <div class="w3-clear"></div>
-        <h4>Records Added</h4>
+        <h4>Living Rats</h4>
       </div>
     </div>
     <div class="w3-quarter">
@@ -121,7 +121,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   </div>
 
   <div class="w3-container">
-    <h5>Newest Records</h5>
+    <h5>Oldest Rats</h5>
     <table class="w3-table w3-striped w3-bordered w3-border w3-hoverable w3-white">
       <tr>
         <td>RatID1</td>
@@ -140,7 +140,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
         <td>Age</td>
       </tr>
     </table><br>
-    <button class="w3-button w3-dark-grey">All Records  <i class="fa fa-arrow-right"></i></button>
+    <a href="search"><button class="w3-button w3-dark-grey">All Records  <i class="fa fa-arrow-right"></i></button></a>
   </div>
   <hr>
   <div class="w3-container">
@@ -166,21 +166,26 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     <div class="w3-row">
       <div class="w3-container w3-third">
         <h5 class="w3-bottombar w3-border-green">Table</h5>
-        <p>Add Rat</p>
-        <p>Edit Records</p>
-        <p>Table View</p>
+        <a href="addrat">Add Rat</a>
+		<br><br>
+        <a href="editrecords">Edit Records</a>
+		<br><br>
+        <a href="search">Table View</a>
       </div>
       <div class="w3-container w3-third">
         <h5 class="w3-bottombar w3-border-red">User</h5>
-        <p>Add User</p>
+        <a href="adduser">Add User</a>
         <p>View Users</p>
       </div>
       <div class="w3-container w3-third">
         <h5 class="w3-bottombar w3-border-orange">Actions</h5>
-        <p>Generate Breeding Pairs</p>
-        <p>Report Litter</p>
-        <p>Report Death</p>
-        <p>Record Transfer</p>
+        <a href="breedingpairs">Generate Breeding Pairs</a>
+		<br><br>
+        <a href="reportlitter">Report Litter</a>
+		<br><br>
+        <a href="reportdeath">Report Death</a>
+		<br><br>
+        <a href="recordtransfer">Record Transfer</a>
       </div>
     </div>
   </div>

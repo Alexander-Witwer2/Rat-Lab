@@ -8,6 +8,7 @@ from wtforms.validators import DataRequired
 from datetime import date
 from dateutil import relativedelta
 import re
+from sqlalchemy import cast, String, func, Unicode, DECIMAL, INTEGER, Integer
 
 # Initialize Flask
 app = Flask(__name__, instance_relative_config=True)
@@ -80,7 +81,7 @@ class AddRatForm(FlaskForm):
     dam = StringField('Dam')
     weanedDate = DateField()
     dateAddedToColony = DateField()
-    experiment = BooleanField(default="unchecked")
+    experiment = BooleanField()
     addButton = SubmitField('Add Rat')       
 
 class EditRatForm(FlaskForm):
@@ -145,22 +146,26 @@ def addRat():
         rat.dam = form.dam.data
 
         if(rat.sex == "Female"):
-            numFemalesInDatabase = len(db.session.execute(db.select(Rat.rat_number).where(Rat.sex=="Female")).all()) + 25 + 1
-            ratNumber = str(numFemalesInDatabase) + "F"
-            rat.rat_number = ratNumber
+            highestNumberFemale = db.session.execute(db.select(Rat.rat_number).
+                where(Rat.sex=="Female").order_by(cast(Rat.rat_number, Integer).
+                desc())).all()[0].rat_number[:-1]          
+            number = int(highestNumberFemale) + 1
+            rat.rat_number = str(number) + "F"
         else:
-            numMalesInDatabase = len(db.session.execute(db.select(Rat.rat_number).where(Rat.sex=="Male")).all()) + 28 + 1
-            ratNumber = str(numMalesInDatabase) + "M"
-            rat.rat_number = ratNumber
+            highestNumberMale = db.session.execute(db.select(Rat.rat_number).
+                where(Rat.sex=="Male").order_by(cast(Rat.rat_number, Integer).
+                desc())).all()[0].rat_number[:-1]            
+            number = int(highestNumberMale) + 1
+            rat.rat_number = str(number) + "M"
         
-        #TODO: properly concat rat name - shouldn't have sire/dam M and F on there
-        rat.rat_name = rat.rat_number + rat.sire + rat.dam
-       
+        rat.rat_name = rat.rat_number + rat.sire[:-1] + rat.dam[:-1]
+        delta = relativedelta.relativedelta(date.today(), form.birthdate.data)
+        age = delta.months + (delta.years * 12)
+        rat.age_months = age
+
         db.session.add(rat)
         db.session.commit()
-        
         fillGenealogyData(rat.rat_number, rat.sire, rat.dam)
-        # TODO: fill in the rat's age - adapt updateRats()
         return redirect(url_for("search"))
     else:
         return render_template("addrat.html", form=form)
@@ -302,7 +307,7 @@ def fillGenealogyData(new_rat_number, sire_number, dam_number):
     new_rat.pg24sire = sire.mg12sire
     new_rat.pg24dam = sire.mg12dam
     
-    # fill in new rat's maternal side
+    # # fill in new rat's maternal side
     new_rat.mgsire = dam.sire
     new_rat.mgdam = dam.dam
     new_rat.mg11sire = dam.pgsire
@@ -365,7 +370,7 @@ def pairing(input_data, input_swapping_existing_pairs):
             if (len(finalDatingPool) == 0): # case 2b: no unrelated rats error
                 return "ERROR: there are no unrelated rats that " + input_rat.rat_number + " can be paired with"
             else: # case 2c: succeeded in finding unrelated rat with DEC partner
-                print(finalDatingPool)
+                #print(finalDatingPool)
                 return finalDatingPool
             
     # case input_rat is a colony rat

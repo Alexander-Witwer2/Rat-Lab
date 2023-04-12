@@ -508,7 +508,7 @@ def printDatingPool(datingPool, rat_number):
 # TODO make this skip rats that are dead 
 def updateAges():
     
-    res = db.session.execute(db.select(Rat.rat_number, Rat.age_months)).all()
+    res = db.session.execute(db.select(Rat.rat_number, Rat.age_months).where(Rat.manner_of_death=="Alive")).all()
     for item in res:
         rat = Rat.query.get(item[0])
         age = 0

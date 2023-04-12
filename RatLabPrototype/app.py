@@ -73,19 +73,28 @@ class Rat(db.Model):
     mg24sire = db.Column(db.String)
     mg24dam = db.Column(db.String)
 
-    
-    
+class AddRatForm(FlaskForm):
+    sex = SelectField(choices=['Male', 'Female'])
+    birthdate = DateField()
+    sire = StringField('Sire')
+    dam = StringField('Dam')
+    weanedDate = DateField()
+    dateAddedToColony = DateField()
+    experiment = BooleanField(default="unchecked")
+    addButton = SubmitField('Add Rat')       
+
 class EditRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
     number = IntegerField()
     birthdate = DateField()
-    dateLastPairing = DateField()
-    dateLastLitter = DateField()
-    numPairings = IntegerField()
-    numlitters = IntegerField()
-    dateAddedToColony = DateField()
-    numLittersWithDefects = IntegerField()
-    experiment = BooleanField(default="unchecked")
+    last_paired_date = DateField()
+    last_litter_date = DateField()
+    weaned_date = DateField()
+    num_times_paired = IntegerField()
+    num_litters = IntegerField()
+    date_added_to_colony = DateField()
+    num_litters_with_defects = IntegerField()
+    experiment = BooleanField()
     sire = StringField('Sire')
     dam = StringField('Dam')
     update = SubmitField('Update')
@@ -96,6 +105,15 @@ class ReportDeathForm(FlaskForm):
     deathDate = DateField()
     mannerOfDeath = SelectField(choices=['Euthanized', 'Unexpected'])
     submit = SubmitField('Yes')
+
+class GenerateBreedingPairsForm(FlaskForm):
+    sex = SelectField(choices=['Male', 'Female'])
+    number = IntegerField()
+    swapping = BooleanField(default="checked")
+    mateDropdown = SelectField()
+    generateButton = SubmitField('Generate')
+    mateDropdown = SelectField()
+    recordButton = SubmitField('Yes')
 
 class ReportLitterForm(FlaskForm) :
 	sex = SelectField(choices=['Male', 'Female'])
@@ -120,23 +138,116 @@ def dashboard():
 	).all())
 	return render_template("dashboard.html", livingRats = livingRats)
 
-@app.route("/addrat")
+@app.route("/addrat", methods=['POST', 'GET'])
 def addRat():
-    return render_template("addrat.html")
+    form = AddRatForm()
+    if(request.method == "POST"):
+        rat = Rat()
+        rat.sex = form.sex.data
+        rat.birthdate = form.birthdate.data
+        rat.weaned_date = form.weanedDate.data
+        rat.last_paired_date = date(1900, 1, 1)
+        rat.last_litter_date = date(1900, 1, 1)
+        rat.num_times_paired = 0
+        rat.num_litters = 0
+        rat.date_added_to_colony = form.dateAddedToColony.data
+        rat.current_partner = "00X"
+        rat.num_litters_with_defects = 0
+        rat.experiment = int(form.experiment.data)
+        rat.manner_of_death = "Alive"
+        rat.death_date = date(1900, 1, 1)
+        rat.sire = form.sire.data #TODO: when validating input make sure that sire and dam are in the format expected (NumberSex)
+        rat.dam = form.dam.data
+
+        if(rat.sex == "Female"):
+            numFemalesInDatabase = len(db.session.execute(db.select(Rat.rat_number).where(Rat.sex=="Female")).all()) + 25 + 1
+            ratNumber = str(numFemalesInDatabase) + "F"
+            rat.rat_number = ratNumber
+        else:
+            numMalesInDatabase = len(db.session.execute(db.select(Rat.rat_number).where(Rat.sex=="Male")).all()) + 28 + 1
+            ratNumber = str(numMalesInDatabase) + "M"
+            rat.rat_number = ratNumber
+        
+        #TODO: properly concat rat name - shouldn't have sire/dam M and F on there
+        rat.rat_name = rat.rat_number + rat.sire + rat.dam
+       
+        db.session.add(rat)
+        db.session.commit()
+        
+        fillGenealogyData(rat.rat_number, rat.sire, rat.dam)
+        # TODO: fill in the rat's age - adapt updateRats()
+        return redirect(url_for("search"))
+    else:
+        return render_template("addrat.html", form=form)
 
 @app.route("/adduser")
 def addUser():
     return render_template("adduser.html")
 
-@app.route("/breedingpairs")
+@app.route("/breedingpairs", methods=['GET', 'POST'])
 def breedingPairs():
-    return render_template("breedingpairs.html")
+    form = GenerateBreedingPairsForm()
+    if(request.method == "POST"):
+        ratNumber = str(form.number.data) + form.sex.data[0]
+        possibleMates = pairing(ratNumber, form.swapping.data)
+        #TODO: handle the error cases in pairing() so the website doesn't crash
+        form.mateDropdown.choices = possibleMates
+        query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates))).scalars()   
+        return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True, num=ratNumber)
+    return render_template("breedingpairs.html", form=form)
+
+@app.route("/recordpairing/<num>", methods=["GET", "POST"])
+def recordPairing(num):
+    if( request.method == "POST"):
+        rat = db.session.query(Rat).filter(Rat.rat_number == num).one()  
+        rat.current_partner = request.form.get("mateDropdown")
+        rat.last_paired_date = date.today()
+        rat.num_times_paired = rat.num_times_paired + 1
+
+        #TODO: *shouldn't* need to modify the rat's old partner here.  Test and verify
+        newPartner = db.session.query(Rat).filter(Rat.rat_number == request.form.get("mateDropdown")).one()
+        newPartner.current_partner = rat.rat_number
+        newPartner.last_paired_date = date.today()
+        newPartner.num_times_paired = newPartner.num_times_paired + 1
+        db.session.commit()
+        # TODO: add a date field that defaults to today for the current date, in case the user is 
+        # recording a previously made pairing?
+        return redirect(url_for("search"))
+    return redirect(url_for("search"))
 
 @app.route("/editrecords", methods=['GET', 'POST'])
 def editRecords():   
     form = EditRatForm()
     if(request.method == "POST"):
         print(form.data)
+        number = str(form.number.data) + form.sex.data[0]
+        rat = db.session.query(Rat).filter(Rat.rat_number == number).one()
+        
+        if(form.birthdate.data != None):
+            rat.birthdate = form.birthdate.data
+        if(form.last_paired_date != None):
+            rat.last_paired_date = form.last_paired_date.data
+        if(form.last_litter_date != None):
+            rat.last_litter_date = form.last_litter_date.data
+        if(form.weaned_date.data != None):
+            rat.weaned_date = form.weaned_date.data
+        if(form.num_times_paired.data != None):
+            rat.num_times_paired = form.num_times_paired.data  
+        if(form.num_litters.data != None):
+            rat.num_litters = form.num_litters.data
+        if(form.date_added_to_colony.data != None):
+            rat.date_added_to_colony = form.date_added_to_colony.data
+        if(form.num_litters_with_defects.data != None):
+            rat.num_litters_with_defects = form.num_litters_with_defects.data
+        if(form.experiment.data != None):
+            rat.experiment = form.experiment.data
+        if(form.sire.data != ''):
+            rat.sire = form.sire.data
+            fillGenealogyData(number, form.sire.data, rat.dam)
+        if(form.dam.data != ''):
+            rat.dam = form.dam.data
+            fillGenealogyData(number, rat.sire, form.dam.data)
+             
         return redirect(url_for("editRecords"))
     else:
         return render_template("editrecords.html", form=form)
@@ -281,8 +392,8 @@ def pairing(input_data, input_swapping_existing_pairs):
                     (Rat.sex != input_rat.sex) &
                     (Rat.manner_of_death == "Alive") & 
                     (Rat.current_partner == "DEC") & # narrow search to only paired rats
-                    (Rat.age_months >= 3) #&
-                    #(Rat.num_litters_with_defects <= 2 ) #TODO: uncomment this line when using full database
+                    (Rat.age_months >= 3) &
+                    (Rat.num_litters_with_defects <= 2 ) 
                 )
             ).all()
         does_colony_have_vacancy = bool(len(colony_rats_without_partner))
@@ -295,6 +406,7 @@ def pairing(input_data, input_swapping_existing_pairs):
             if (len(finalDatingPool) == 0): # case 2b: no unrelated rats error
                 return "ERROR: there are no unrelated rats that " + input_rat.rat_number + " can be paired with"
             else: # case 2c: succeeded in finding unrelated rat with DEC partner
+                print(finalDatingPool)
                 return finalDatingPool
             
     # case input_rat is a colony rat
@@ -307,35 +419,38 @@ def pairing(input_data, input_swapping_existing_pairs):
     # for them
     if(input_rat.sire == "EN" and input_rat.dam == "EN"):
         if(swapping_existing_pairs): # look for colony rat
-            finalDatingPool = db.session.execute(
+            datingPool = db.session.execute(
                 db.select(Rat.rat_number).where(
                     (Rat.sex != input_rat.sex) &
                     (Rat.manner_of_death == "Alive") & 
                     (Rat.current_partner != "00X") & # narrow search to only paired rats
                     (Rat.rat_number != input_rat.current_partner) & # narrow search to exclude input_rat's current partner                    
                     (Rat.age_months >= 3) &
-                    #(Rat.num_litters_with_defects <= 2 ) #TODO: uncomment this line when using full database
+                    (Rat.num_litters_with_defects <= 2 ) & 
                     (Rat.sire != "XX") &
                     (Rat.dam != "XX") &
                     (Rat.sire != "5X") &
                     (Rat.dam != "5X")
                 )
             ).all()
+            finalDatingPool = [ rat[0] for rat in datingPool]
+
         else: # look for spare rat
-            finalDatingPool = db.session.execute(
+            datingPool = db.session.execute(
                 db.select(Rat.rat_number).where(
                     (Rat.sex != input_rat.sex) &
                     (Rat.manner_of_death == "Alive") & 
                     (Rat.current_partner == "00X") & # search for unpaired rats
                     (Rat.age_months >= 3) &
-                    #(Rat.num_litters_with_defects <= 2 ) #TODO: uncomment this line when using full database
+                    (Rat.num_litters_with_defects <= 2 ) &
                     (Rat.sire != "XX") &
                     (Rat.dam != "XX") &
                     (Rat.sire != "5X") &
                     (Rat.dam != "5X")
                 )
             ).all()
-    
+            finalDatingPool = [ rat[0] for rat in datingPool]
+
     else: # handle non ENEN, so need to do birthdate checking
         if(swapping_existing_pairs): # query for colony rats
             datingPool = db.session.execute(
@@ -345,7 +460,7 @@ def pairing(input_data, input_swapping_existing_pairs):
                     (Rat.current_partner != "00X") & # narrow search to only paired rats
                     (Rat.rat_number != input_rat.current_partner) & # narrow search to exclude input_rat's current partner                    
                     (Rat.age_months >= 3) &
-                    #(Rat.num_litters_with_defects <= 2 ) #TODO: uncomment this line when using full database
+                    (Rat.num_litters_with_defects <= 2 ) &
                     (Rat.sire != "XX") &
                     (Rat.dam != "XX") &
                     (Rat.sire != "5X") &
@@ -361,7 +476,7 @@ def pairing(input_data, input_swapping_existing_pairs):
                     (Rat.manner_of_death == "Alive") & 
                     (Rat.current_partner == "00X") & # search for unpaired rats
                     (Rat.age_months >= 3) &
-                    #(Rat.num_litters_with_defects <= 2 ) #TODO: uncomment this line when using full database
+                    (Rat.num_litters_with_defects <= 2 ) & 
                     (Rat.sire != "XX") &
                     (Rat.dam != "XX") &
                     (Rat.sire != "5X") &
@@ -438,11 +553,11 @@ def updateAges():
         if deathDate.year == 1900:
             delta = relativedelta.relativedelta(date.today(), birthdate)
             age = delta.months + (delta.years * 12) 
-            print(str(rat.rat_number) + " " + str(age))
+            #print(str(rat.rat_number) + " " + str(age))
         else:
             delta = relativedelta.relativedelta(deathDate, birthdate)
             age = delta.months + (delta.years * 12) 
-            print(str(rat.rat_number) + " " + str(age))
+            #print(str(rat.rat_number) + " " + str(age))
         db.session.execute(db.update(Rat).where(Rat.rat_number == rat.rat_number).values(age_months = age))
         
     db.session.commit()

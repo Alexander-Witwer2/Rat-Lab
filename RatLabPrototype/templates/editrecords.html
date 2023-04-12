@@ -103,91 +103,55 @@
 
     <div id="boxes" style="display: none;">
       <label class="checkbox" for="birth"> Change Birthdate
-        <span style="display: block;">
-          <!-- <input type="text" id="Input" name="birthdate" placeholder="The Rat's Birthday..." value="" size="50"
-            title="Enter the Rat's Birthdate"> -->
-          {{ form.birthdate }}
-        </span>
+        <span style="display: block;"> {{ form.birthdate }} </span>
       </label><br>
       <label class="checkbox" for="lastPair"> Edit date of Last Pairing
-        <span style="display: block;">
-          <input type="text" id="Input" name="lastPairingDate" placeholder="The Date of the Rat's Last Pairing..."
-            value="" size="50" title="Enter the Date of the Rat's Last Pairing">
-        </span>
+        <span style="display: block;"> {{ form.last_paired_date }}</span>
       </label><br>
       <label class="checkbox" for="lastLitter"> Change date of Last Litter
-        <span style="display: block;">
-          <input type="text" id="Input" name="lastLitterDate" placeholder="Rat's Last Litter..." value="" size="50"
-            title="Enter the Rat's Sire">
-        </span>
+        <span style="display: block;"> {{ form.last_litter_date }}</span>
+      </label><br>
+      <label class="checkbox" for="weanedDate"> Change date the date the rat was weaned
+        <span style="display: block;"> {{ form.weaned_date }}</span>
       </label><br>
       <label class="checkbox" for="numPair"> Edit Number of Pairings
-        <span style="display: block;">
-          <input type="text" id="Input" name="numPairings" placeholder="Rat's Number of Pairings..." value="" size="50"
-            title="Enter the amount of the the rat has been paired">
-        </span>
+        <span style="display: block;"> {{ form.num_times_paired }} </span>
       </label><br>
       <label class="checkbox" for="numLitter"> Edit Number of Litters
-        <span style="display: block;"><input type="text" id="Input" name="numLitters" placeholder="Rat's litters..."
-            value="" size="50" title="Enter the Rat's number of litters"></span>
+        <span style="display: block;"> {{ form.num_litters}} </span>
       </label><br>
       <label class="checkbox" for="colonyDate"> Change the Date the Rat was Added to the Colony
-        <span style="display: block;">
-          <input type="text" id="Input" name="colonyAddedDate" placeholder="Rat's Colony Addition Date..." value=""
-            size="50" title="Enter the Rat's Date added to the Colony">
-        </span>
+        <span style="display: block;"> {{ form.date_added_to_colony}} </span>
       </label><br>
       <label class="checkbox" for="defectLit"> Edit the Number of Litters with Defects
-        <span style="display: block;">
-          <input type="text" id="Input" name="numDefectiveLitters" placeholder="Rat's defective Litters..." value=""
-            size="50" title="Enter the Rat's number of defective litters">
-        </span>
+        <span style="display: block;">{{ form.num_litters_with_defects}} </span>
       </label><br>
-      <label class="checkbox" for="exp"> Has the Rat been put in an Experiment
-        <input type="checkbox" id="exp" name="exp" value="exp">
-        <span style="display: block;"></span>
+      <label class="checkbox" for="exp"> Was the rat used in an experiment?
+        <span style="display: block;">{{ form.experiment (class="checkbox", default="unchecked")}}</span>
       </label><br>
       <label class="checkbox" for="ratSire"> Edit the Rat's Sire
-        <span style="display: block;">
-          <input type="text" id="Input" name="sire" placeholder="Rat's Sire..." value="" size="50"
-            title="Enter the Rat's Sire">
-        </span>
+        <span style="display: block;">{{ form.sire }} </span>
       </label><br>
       <label class="checkbox" for="ratDam"> Edit the Rat's Dam
-        <span style="display: block;">
-          <input type="text" id="Input" name="dam" placeholder="Rat's Dam..." value="" size="50"
-            title="Enter the Rat's Dam">
-        </span>
+        <span style="display: block;">{{ form.dam }} </span>
       </label><br>
-      {{form.update}}
       <!-- <input type="submit" value="Update" class="w3-button"></input> -->
+      <button type="button" class="w3-button" onclick="areYouSure()">Update</button>
+      <div id="myModal" class="modal">
+
+        <div class="modal-content">
+          <p id="modalText"></p>
+          {{form.update}}
+          <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
+          <button class="w3-button" onclick="closeModal()">No</button>
+        </div>
+
+      </div>
       </form>
     </div>
 
     <hr>
     <br>
-    <div class="w3-container w3-dark-grey w3-padding-32">
-      <div class="w3-row">
-        <div class="w3-container w3-third">
-          <h5 class="w3-bottombar w3-border-green">Table</h5>
-          <p>Add Rat</p>
-          <p>Edit Records</p>
-          <p>Table View</p>
-        </div>
-        <div class="w3-container w3-third">
-          <h5 class="w3-bottombar w3-border-red">User</h5>
-          <p>Add User</p>
-          <p>View Users</p>
-        </div>
-        <div class="w3-container w3-third">
-          <h5 class="w3-bottombar w3-border-orange">Actions</h5>
-          <p>Generate Breeding Pairs</p>
-          <p>Report Litter</p>
-          <p>Report Death</p>
-          <p>Record Transfer</p>
-        </div>
-      </div>
-    </div>
 
     <!-- Footer -->
     <footer class="w3-container w3-padding-16 w3-light-grey">
@@ -230,10 +194,14 @@
       boxes.style.display = "block";
     }
 
-    function bringModal () {
-      modal.style.display = "block";
-      document.getElementById( "modalText" ).innerHTML = "Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() +
-        " was Transfer?";
+    function areYouSure () {
+      //if ( dDate.value != "" && coDeath.value != "" ) {
+        modal.style.display = "block";
+        document.getElementById( "modalText" ).innerHTML = "Are you sure?"
+        //TODO: update "are you sure" with the actual values like it used to show previously
+        //"Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() +
+          //" died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() + "?";
+      //}
     }
 
     function closeModal () {

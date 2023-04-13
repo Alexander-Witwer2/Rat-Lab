@@ -2,12 +2,13 @@
 <html>
 
 <head>
-  <title>Search Rats</title>
+  <title>Rat Family Tree</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='familytree.css')}}">
   <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='webpage.css')}}">
   <style>
     html,
@@ -54,7 +55,7 @@
         onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i> Close Menu</a>
       <a href="dashboard" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i> 
         Dashboard</a>
-      <a href="search" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-eye fa-fw"></i> 
+      <a href="search" class="w3-bar-item w3-button w3-padding w3"><i class="fa fa-eye fa-fw"></i> 
         Search Rats</a>
       <a href="addrat" class="w3-bar-item w3-button w3-padding w3"><i class="fa fa-cog fa-fw"></i>  Add
         Rat</a>
@@ -70,7 +71,7 @@
         Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
-      <a href="familytree" class="w3-bar-item w3-button w3-padding"><i class="fa fa-diamond fa-fw"></i> 
+      <a href="familytree" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-diamond fa-fw"></i> 
         Generate Family Tree</a>
     </div>
   </nav>
@@ -87,62 +88,37 @@
     <div class="center w3-panel">
       <div class="w3-row-padding" style="margin:0 -16px">
         <div class="w3-twothird">
-          <select name="Rat-Gender" id="Rat-Gender">
-            <option value="" disabled selected>Rat's Sex</option>
-            <option value="M">Male</option>
-            <option value="F">Female</option>
-          </select>
-          <input type="text" id="Input" placeholder="Rat Number" size="50" title="Enter a Rat's Number">
-          <button class="w3-button" onclick="search()">Search</button>
         </div>
       </div>
     </div>
 
-    <div class="w3-container">
-      <table class="w3-table w3-striped w3-bordered w3-border w3-hoverable w3-white" id="Table">
-        <tr>
-          <th>Rat Number</th>
-          <th>Rat Name</th>
-          <th>Sex</th>
-          <th>Current Partner</th>
-          <th>Birthdate</th>
-          <th>Date Weaned</th>
-          <th>Date of Last Pairing</th>
-          <th>Date of Last Litter</th>
-          <th>Number of Pairings</th>
-          <th>Number of Litters</th>
-          <th>Date Added to Colony</th>
-          <th>Number of Litters with Defects</th>
-          <th>Used In Experiment</th>
-          <th>Manner of Death</th>
-          <th>Date of Death</th>
-          <th>View Ancestry</th>
-        </tr>
-        {% for rat in query %}
-        <tr>
-          <td>{{ rat.rat_number }} </td>
-          <td>{{ rat.rat_name }} </td>
-          <td>{{ rat.sex }} </td>
-          <td>{{ rat.current_partner }}</td>
-          <td>{{ rat.birthdate }} </td>
-          <td>{{ rat.weaned_date }} </td>
-          <td>{{ rat.last_paired_date }} </td>
-          <td>{{ rat.last_litter_date }} </td>
-          <td>{{ rat.num_times_paired }} </td>
-          <td>{{ rat.num_litters }} </td>
-          <td>{{ rat.date_added_to_colony }} </td>
-          <td>{{ rat.num_litters_with_defects }} </td>
-          <td>{{ rat.experiment }} </td>
-          <td>{{ rat.manner_of_death }} </td>
-          <td>{{ rat.death_date }} </td>
-          <form action="/familytree/{{rat.rat_number}}" method="POST">
-            <td>{{ form.generateButton (type="submit")}} </td>
-          </form>
-        </tr>
-        {% endfor %}
-      </table><br>
+    <div class="tree center" id="tree">
+      <ul>
+        <li>
+          <a href="#" id="TheRat">{{rat.rat_number}}</a>
+          <ul>
+            <li>
+              <a href="#">{{rat.sire}}</a>
+              <ul>
+                <li>
+                  <a href="#">{{rat.pgsire}}</a>
+                </li>
+                <li>
+                  <a href="#">{{rat.pgdam}}</a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <a href="#">{{rat.dam}}</a>
+              <ul>
+                <li><a href="#">{{rat.mgsire}}</a></li>
+                <li><a href="#">{{rat.mgdam}}</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
-    <hr>
 
     <!-- Footer -->
     <footer class="w3-container w3-padding-16 w3-light-grey">
@@ -175,39 +151,18 @@
       overlayBg.style.display = "none";
     }
 
-    function search () {
-      var input, putIn, filter, sift, table, tr, td, td2, i, num;
-      input = document.getElementById( "Input" )
-      putIn = document.getElementById( "Rat-Gender" );
-      filter = input.value.toUpperCase();
-      sift = putIn.value.toUpperCase();
-      table = document.getElementById( "Table" );
-      tr = table.getElementsByTagName( "tr" );
+    // function tree () {
+    //   var input, putIn;
+    //   input = document.getElementById( "Input" );
+    //   putIn = document.getElementById( "Rat-Gender" );
+    //   famTree = document.getElementById("tree");
 
-      for ( i = 0; i < tr.length; i++ ) {
-        td = tr[ i ].getElementsByTagName( "td" )[ 0 ];
-        if ( td ) {
-          num = td.textContent || td.innerText
-          if ( num.toUpperCase().indexOf( filter ) > -1 ) {
-            tr[ i ].style.display = "";
-          }
-          else {
-            tr[ i ].style.display = "none";
-          }
-        }
-      }
-      for ( i = 0; i < tr.length; i++ ) {
-        td2 = tr[ i ].getElementsByTagName( "td" )[ 2 ];
-        if ( td2 ) {
-          if ( td2.innerHTML.toUpperCase().indexOf( sift ) > -1 ) {
-            continue;
-          }
-          else {
-            tr[ i ].style.display = "none";
-          }
-        }
-      }
-    }
+    //   document.getElementById("TheRat").innerHTML =putIn.value.toUpperCase() + input.value.toUpperCase();
+
+    //   if( input.value != "" && putIn.value != ""){
+    //     famTree.style.display = "block";
+    //   }
+    // }
   </script>
 
 </body>

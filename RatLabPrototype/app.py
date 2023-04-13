@@ -189,7 +189,7 @@ def breedingPairs():
              
         else:
             form.mateDropdown.choices = possibleMates
-            query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates))).scalars()   
+            query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates)).order_by(cast(Rat.rat_number, Integer).desc())).scalars()   
 
             return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True, num=ratNumber, errorText="")
     return render_template("breedingpairs.html", form=form)
@@ -215,8 +215,8 @@ def recordPairing(num):
 
 @app.route("/search")
 def search():
-    form = FamilyTreeForm()
-    query = db.session.execute(db.select(Rat).order_by(Rat.rat_number)).scalars()
+    form = FamilyTreeForm()   
+    query = db.session.execute(db.select(Rat).order_by(cast(Rat.rat_number, Integer).desc())).scalars()
     #print(query.all())
     # Whatever you do, do NOT run print(query.all()) before the return statement
     # that'll clear out the query variable or something, because then read.html 
@@ -243,6 +243,7 @@ def editRecords():
         
         if(form.birthdate.data != None):
             rat.birthdate = form.birthdate.data
+            #TODO: recalculate rat's age when given new birthdate
         if(form.last_paired_date != None):
             rat.last_paired_date = form.last_paired_date.data
         if(form.last_litter_date != None):

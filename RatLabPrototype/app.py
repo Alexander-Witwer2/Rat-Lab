@@ -362,9 +362,17 @@ def pairing(input_data, input_swapping_existing_pairs):
     input_rat = Rat.query.get(input_data)
     input_rat_ancestor_names = [input_rat.sire, input_rat.dam, input_rat.pgsire, input_rat.pgdam, input_rat.mgsire, input_rat.mgdam]  
     
+    # case 0: immediate error checking
+    if( input_rat.manner_of_death != "Alive"):
+        return "ERROR: cannot pair a deceased rat."
+    if(swapping_existing_pairs == True and input_rat.current_partner == "DEC" ):
+        return "ERROR: cannot swap existing pairs.  " + input_rat.rat_number + " is paired with a deceased rat.  Pairs cannot be swapped unless all rats have living partners.  Try again and uncheck the checkbox on the previous page to look for a spare rat to pair " + input_rat.rat_number + " with."
+    if(swapping_existing_pairs == False and input_rat.current_parter != "DEC"):
+        return "ERROR: cannot add a new rat to the colony when the inputted rat is paired.  Check the checkbox on the previous page and try again."
+    
     # case 1: input_rat is spare rat, swapping = True
     if(swapping_existing_pairs == True and input_rat.current_partner == "00X"):
-        return "ERROR: cannot swap existing pairs if the inputted rat is a spare rat"
+        return "ERROR: cannot swap existing pairs if the inputted rat is unpaired."
     
     # case 2: input_rat is spare rat, swapping = False
     if(swapping_existing_pairs == False and input_rat.current_partner == "00X"):
@@ -384,25 +392,20 @@ def pairing(input_data, input_swapping_existing_pairs):
             ).all()
         does_colony_have_vacancy = bool(len(colony_rats_without_partner))
         if(does_colony_have_vacancy == False): # case 2a: no vacancy error
-            return "ERROR: there are no unpaired rats to pair the given rat with"
+            return "ERROR: there are no unpaired rats to pair the given rat with."
         else: # case 2b and 2c
             # the user could've reported multiple deaths before looking for new partners
             # so there could be multiple rats in colony_rats_without_partner, need to check all of them
             finalDatingPool = compareBirthdates(input_rat_ancestor_names=input_rat_ancestor_names, datingPool=colony_rats_without_partner, input_rat=input_rat)
             if (len(finalDatingPool) == 0): # case 2b: no unrelated rats error
-                return "ERROR: there are no unrelated rats that " + input_rat.rat_number + " can be paired with"
+                return "ERROR: there are no unrelated rats that " + input_rat.rat_number + " can be paired with."
             else: # case 2c: succeeded in finding unrelated rat with DEC partner
                 #print(finalDatingPool)
                 return finalDatingPool
-            
-    # case input_rat is a colony rat
-    
-    if(swapping_existing_pairs == True and input_rat.current_partner == "DEC"):
-        return "ERROR: cannot swap existing pairs if input rat's partner is deceased, must add new rat to colony first"
-    
+               
     # handle ENEN rats because they're a special case.  They can breed with anyone, 
     # including other ENEN rats, so birthdate checking to rule out common ancestors is unnecessary
-    # for them
+    # for them.  Don't need to check the l
     if(input_rat.sire == "EN" and input_rat.dam == "EN"):
         if(swapping_existing_pairs): # look for colony rat
             datingPool = db.session.execute(
@@ -473,6 +476,9 @@ def pairing(input_data, input_swapping_existing_pairs):
                 
         # compare birthdates to get the final dating pool
         finalDatingPool = compareBirthdates(datingPool=datingPool, input_rat_ancestor_names=input_rat_ancestor_names, input_rat=input_rat)
+        if (len(finalDatingPool) == 0): # no unrelated rats error
+            return "ERROR: there are no unrelated rats that " + input_rat.rat_number + " can be paired with."
+
     return finalDatingPool
 
 # helper function to compare birthdates for a given rat vs their potential dating pool

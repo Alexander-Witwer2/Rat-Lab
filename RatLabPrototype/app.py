@@ -277,15 +277,6 @@ def recordTransfer():
 def reportLitter():
     return render_template("reportlitter.html")
 
-# @app.route("/search")
-# def search():
-#     query = db.session.execute(db.select(Rat).order_by(Rat.rat_number)).scalars()
-#     #print(query.all())
-#     # Whatever you do, do NOT run print(query.all()) before the return statement
-#     # that'll clear out the query variable or something, because then read.html 
-#     # will be blank
-#     return render_template("search.html", query = query)
-
 @app.route("/reportdeath", methods=['POST', 'GET'])
 def reportDeath():
     form = ReportDeathForm()
@@ -296,6 +287,14 @@ def reportDeath():
         rat = Rat.query.get(rat_number)
         rat.manner_of_death = form.mannerOfDeath.data
         rat.death_date = form.deathDate.data
+        # don't have to update the inputted rat's partner because that rat is now deceased 
+        # so it doesn't matter who they're paired with.  their current partner is still alive
+        # though, so we have to update that rat's partner to DEC because they will be repaired
+        # and it matters who they're paired with  
+        if(rat.current_partner != '' and rat.current_partner != "UNK" 
+           and rat.current_partner != "DEC" and rat.current_partner != "00X"):
+            current_partner = Rat.query.get(rat.current_partner)
+            current_partner.current_partner = "DEC"
         db.session.commit()
         
         #TODO: route to confirmation screen instead(?) definitely not search

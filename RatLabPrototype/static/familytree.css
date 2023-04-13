@@ -50,8 +50,8 @@ right connector from last child*/
 /*Adding back the vertical connector to the last nodes*/
 .tree li:last-child::before{
 	border-right: 1px solid #ccc;
-	border-radius: 0 5px 0 0;
-	-webkit-border-radius: 0 5px 0 0;
+	border-radius: 0 50px 0 0;
+	-webkit-border-radius: 0 50px 0 0;
 	-moz-border-radius: 0 5px 0 0;
 }
 .tree li:first-child::after{
@@ -74,12 +74,12 @@ right connector from last child*/
 	text-decoration: none;
 	color: #666;
 	font-family: arial, verdana, tahoma;
-	font-size: 11px;
+	font-size: 32px;
 	display: inline-block;
 	
-	border-radius: 5px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
+	border-radius: 50px;
+	-webkit-border-radius: 50px;
+	-moz-border-radius: 50px;
 	
 	transition: all 0.5s;
 	-webkit-transition: all 0.5s;
@@ -103,6 +103,7 @@ right connector from last child*/
 	transform: rotate(180deg);
 	margin-top: 250px;
 	margin-right: 400px;
+	margin-left: 200px;
 	display: none;
 }
 

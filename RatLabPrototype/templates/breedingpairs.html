@@ -114,7 +114,6 @@
               </div>
             </div>
           </form>
-          {% endif %}
 
         </div>
       </div>
@@ -128,33 +127,42 @@
           <th>Rat Number</th>
           <th>Rat Name</th>
           <th>Sex</th>
+          <th>Current Partner</th>
           <th>Birthdate</th>
           <th>Date of Last Pairing</th>
           <th>Date of Last Litter</th>
           <th>Number of Pairings</th>
           <th>Number of Litters</th>
+          <th>Date Added to Colony</th>
+          <th>Used in Experiment</th>
           <th>Number of Litters with Defects</th>
+          <th>View Ancestry</th>
         </tr>
         {% for rat in query %}
         <tr>
           <td>{{ rat.rat_number }} </td>
           <td>{{ rat.rat_name }} </td>
           <td>{{ rat.sex }} </td>
+          <td>{{ rat.current_partner }}</td>
           <td>{{ rat.birthdate }} </td>
-          <td>{{ rat.weaned_date }} </td>
           <td>{{ rat.last_paired_date }} </td>
           <td>{{ rat.last_litter_date }} </td>
           <td>{{ rat.num_times_paired }} </td>
           <td>{{ rat.num_litters }} </td>
           <td>{{ rat.date_added_to_colony }} </td>
+          <td>{{ rat.experiment }}</td>
           <td>{{ rat.num_litters_with_defects }} </td>
           <!-- TODO: add current partner? -->
-
+          <form action="/familytree/{{rat.rat_number}}" method="POST">
+            <td>{{ form.generateButton (type="submit")}} </td>
+          </form>
         </tr>
         {% endfor %}
       </table><br>
     </div>
-
+    {% else %}
+    <p>{{errorText}}</p>
+    {% endif %}
     <!-- Footer -->
     <footer class="w3-container w3-padding-16 w3-light-grey">
     </footer>

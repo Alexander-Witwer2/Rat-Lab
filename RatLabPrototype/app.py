@@ -183,10 +183,15 @@ def breedingPairs():
     if(request.method == "POST"):
         ratNumber = str(form.number.data) + form.sex.data[0]
         possibleMates = pairing(ratNumber, form.swapping.data)
-        #TODO: handle the error cases in pairing() so the website doesn't crash
-        form.mateDropdown.choices = possibleMates
-        query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates))).scalars()   
-        return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True, num=ratNumber)
+
+        if (isinstance(possibleMates, str)):
+            return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=possibleMates)
+             
+        else:
+            form.mateDropdown.choices = possibleMates
+            query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates)).order_by(cast(Rat.rat_number, Integer).desc())).scalars()   
+
+            return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True, num=ratNumber, errorText="")
     return render_template("breedingpairs.html", form=form)
 
 @app.route("/recordpairing/<num>", methods=["GET", "POST"])
@@ -210,8 +215,8 @@ def recordPairing(num):
 
 @app.route("/search")
 def search():
-    form = FamilyTreeForm()
-    query = db.session.execute(db.select(Rat).order_by(Rat.rat_number)).scalars()
+    form = FamilyTreeForm()   
+    query = db.session.execute(db.select(Rat).order_by(cast(Rat.rat_number, Integer).desc())).scalars()
     #print(query.all())
     # Whatever you do, do NOT run print(query.all()) before the return statement
     # that'll clear out the query variable or something, because then read.html 
@@ -238,6 +243,7 @@ def editRecords():
         
         if(form.birthdate.data != None):
             rat.birthdate = form.birthdate.data
+            #TODO: recalculate rat's age when given new birthdate
         if(form.last_paired_date != None):
             rat.last_paired_date = form.last_paired_date.data
         if(form.last_litter_date != None):
@@ -277,15 +283,6 @@ def recordTransfer():
 def reportLitter():
     return render_template("reportlitter.html")
 
-# @app.route("/search")
-# def search():
-#     query = db.session.execute(db.select(Rat).order_by(Rat.rat_number)).scalars()
-#     #print(query.all())
-#     # Whatever you do, do NOT run print(query.all()) before the return statement
-#     # that'll clear out the query variable or something, because then read.html 
-#     # will be blank
-#     return render_template("search.html", query = query)
-
 @app.route("/reportdeath", methods=['POST', 'GET'])
 def reportDeath():
     form = ReportDeathForm()
@@ -296,6 +293,14 @@ def reportDeath():
         rat = Rat.query.get(rat_number)
         rat.manner_of_death = form.mannerOfDeath.data
         rat.death_date = form.deathDate.data
+        # don't have to update the inputted rat's partner because that rat is now deceased 
+        # so it doesn't matter who they're paired with.  their current partner is still alive
+        # though, so we have to update that rat's partner to DEC because they will be repaired
+        # and it matters who they're paired with  
+        if(rat.current_partner != '' and rat.current_partner != "UNK" 
+           and rat.current_partner != "DEC" and rat.current_partner != "00X"):
+            current_partner = Rat.query.get(rat.current_partner)
+            current_partner.current_partner = "DEC"
         db.session.commit()
         
         #TODO: route to confirmation screen instead(?) definitely not search
@@ -363,9 +368,13 @@ def pairing(input_data, input_swapping_existing_pairs):
     input_rat = Rat.query.get(input_data)
     input_rat_ancestor_names = [input_rat.sire, input_rat.dam, input_rat.pgsire, input_rat.pgdam, input_rat.mgsire, input_rat.mgdam]  
     
+    # case 0: immediate error checking
+    if( input_rat.manner_of_death != "Alive"):
+        return "ERROR: cannot pair a deceased or transferred rat."
+    
     # case 1: input_rat is spare rat, swapping = True
     if(swapping_existing_pairs == True and input_rat.current_partner == "00X"):
-        return "ERROR: cannot swap existing pairs if the inputted rat is a spare rat"
+        return "ERROR: cannot swap existing pairs if the inputted rat is unpaired."
     
     # case 2: input_rat is spare rat, swapping = False
     if(swapping_existing_pairs == False and input_rat.current_partner == "00X"):
@@ -385,25 +394,27 @@ def pairing(input_data, input_swapping_existing_pairs):
             ).all()
         does_colony_have_vacancy = bool(len(colony_rats_without_partner))
         if(does_colony_have_vacancy == False): # case 2a: no vacancy error
-            return "ERROR: there are no unpaired rats to pair the given rat with"
+            return "ERROR: there are no rats with deceased partners rats to pair " + input_rat.rat_number + " with."
         else: # case 2b and 2c
             # the user could've reported multiple deaths before looking for new partners
             # so there could be multiple rats in colony_rats_without_partner, need to check all of them
             finalDatingPool = compareBirthdates(input_rat_ancestor_names=input_rat_ancestor_names, datingPool=colony_rats_without_partner, input_rat=input_rat)
             if (len(finalDatingPool) == 0): # case 2b: no unrelated rats error
-                return "ERROR: there are no unrelated rats that " + input_rat.rat_number + " can be paired with"
+                return "ERROR: " + input_rat.rat_number + "cannot be added to the colony.  " + input_rat.rat_number + " can only be paired with a rat that has a deceased partner, and " + input_rat.rat_number + " is too closely related to the available rats with deceased partners."
             else: # case 2c: succeeded in finding unrelated rat with DEC partner
                 #print(finalDatingPool)
                 return finalDatingPool
-            
-    # case input_rat is a colony rat
     
-    if(swapping_existing_pairs == True and input_rat.current_partner == "DEC"):
-        return "ERROR: cannot swap existing pairs if input rat's partner is deceased, must add new rat to colony first"
-    
+    # looking at colony rats from here down
+    # two checks to rule out deceased partner errors because those only apply to colony rats
+    if(swapping_existing_pairs == True and input_rat.current_partner == "DEC" ):
+        return "ERROR: cannot swap existing pairs.  " + input_rat.rat_number + " is paired with a deceased rat.  Pairs cannot be swapped unless all rats have living partners.  Try again and uncheck the checkbox on the previous page to look for a spare rat to pair " + input_rat.rat_number + " with."
+    if(swapping_existing_pairs == False and input_rat.current_partner != "DEC"):
+        return "ERROR: cannot add a new rat to the colony when the inputted rat is paired.  Check the checkbox on the previous page and try again."
+       
     # handle ENEN rats because they're a special case.  They can breed with anyone, 
     # including other ENEN rats, so birthdate checking to rule out common ancestors is unnecessary
-    # for them
+    # for them.  Don't need to check the l
     if(input_rat.sire == "EN" and input_rat.dam == "EN"):
         if(swapping_existing_pairs): # look for colony rat
             datingPool = db.session.execute(
@@ -474,6 +485,9 @@ def pairing(input_data, input_swapping_existing_pairs):
                 
         # compare birthdates to get the final dating pool
         finalDatingPool = compareBirthdates(datingPool=datingPool, input_rat_ancestor_names=input_rat_ancestor_names, input_rat=input_rat)
+        if (len(finalDatingPool) == 0): # no unrelated rats error
+            return "ERROR: there are no unrelated paired rats that " + input_rat.rat_number + " can be paired with."
+
     return finalDatingPool
 
 # helper function to compare birthdates for a given rat vs their potential dating pool

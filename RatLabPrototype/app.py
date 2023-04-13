@@ -281,7 +281,9 @@ def editRecords():
         if(form.dam.data != ''):
             rat.dam = form.dam.data
             fillGenealogyData(number, rat.sire, form.dam.data)
-             
+         
+        db.session.commit()
+		
         return redirect(url_for("editRecords"))
     else:
         return render_template("editrecords.html", form=form)

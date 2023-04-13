@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 
@@ -72,7 +71,7 @@
         Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
-      <a href="FamilyTree" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-diamond fa-fw"></i> 
+      <a href="familytree" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-diamond fa-fw"></i> 
         Generate Family Tree</a>
     </div>
   </nav>
@@ -89,48 +88,37 @@
     <div class="center w3-panel">
       <div class="w3-row-padding" style="margin:0 -16px">
         <div class="w3-twothird">
-          <select name="Rat-Gender" id="Rat-Gender">
-            <option value="" disabled selected>Rat's Sex</option>
-            <option value="M">Male</option>
-            <option value="F">Female</option>
-          </select>
-          <input type="text" id="Input" placeholder="Rat Number" size="50" title="Enter a Rat's Number">
-          <button class="w3-button" onclick="tree()">Make Tree</button>
         </div>
       </div>
     </div>
 
-    <!--
-We will create a family tree using just CSS(3)
-The markup will be simple nested lists
--->
-<div class="tree center" id = "tree">
-	<ul>
-		<li>
-			<a href="#" id="TheRat"></a>
-			<ul>
-				<li>
-					<a href="#">Sire</a>
-					<ul>
-						<li>
-							<a href="#">PGSire</a>
-						</li>
+    <div class="tree center" id="tree">
+      <ul>
+        <li>
+          <a href="#" id="TheRat">{{rat.rat_number}}</a>
+          <ul>
             <li>
-							<a href="#">PGDam</a>
-						</li>
-					</ul>
-				</li>
-				<li>
-					<a href="#">Dam</a>
-					<ul>
-						<li><a href="#">MGSire</a></li>
-            <li><a href="#">MGDam</a></li>
-					</ul>
-				</li>
-			</ul>
-		</li>
-	</ul>
-</div>
+              <a href="#">{{rat.sire}}</a>
+              <ul>
+                <li>
+                  <a href="#">{{rat.pgsire}}</a>
+                </li>
+                <li>
+                  <a href="#">{{rat.pgdam}}</a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <a href="#">{{rat.dam}}</a>
+              <ul>
+                <li><a href="#">{{rat.mgsire}}</a></li>
+                <li><a href="#">{{rat.mgdam}}</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
 
     <!-- Footer -->
     <footer class="w3-container w3-padding-16 w3-light-grey">
@@ -163,18 +151,18 @@ The markup will be simple nested lists
       overlayBg.style.display = "none";
     }
 
-    function tree () {
-      var input, putIn;
-      input = document.getElementById( "Input" );
-      putIn = document.getElementById( "Rat-Gender" );
-      famTree = document.getElementById("tree");
+    // function tree () {
+    //   var input, putIn;
+    //   input = document.getElementById( "Input" );
+    //   putIn = document.getElementById( "Rat-Gender" );
+    //   famTree = document.getElementById("tree");
 
-      document.getElementById("TheRat").innerHTML =putIn.value.toUpperCase() + input.value.toUpperCase();
+    //   document.getElementById("TheRat").innerHTML =putIn.value.toUpperCase() + input.value.toUpperCase();
 
-      if( input.value != "" && putIn.value != ""){
-        famTree.style.display = "block";
-      }
-    }
+    //   if( input.value != "" && putIn.value != ""){
+    //     famTree.style.display = "block";
+    //   }
+    // }
   </script>
 
 </body>

@@ -103,7 +103,7 @@ right connector from last child*/
 	transform: rotate(180deg);
 	margin-top: 250px;
 	margin-right: 400px;
-	display: none;
+	display: block;
 }
 
 .tree li a{

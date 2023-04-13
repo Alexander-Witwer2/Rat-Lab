@@ -116,6 +116,9 @@ class GenerateBreedingPairsForm(FlaskForm):
     mateDropdown = SelectField()
     recordButton = SubmitField('Yes')
 
+class FamilyTreeForm(FlaskForm):
+    generateButton = SubmitField("View Ancestry")
+    
 @app.route("/")
 def default():
     return render_template("dashboard.html")
@@ -205,6 +208,26 @@ def recordPairing(num):
         return redirect(url_for("search"))
     return redirect(url_for("search"))
 
+@app.route("/search")
+def search():
+    form = FamilyTreeForm()
+    query = db.session.execute(db.select(Rat).order_by(Rat.rat_number)).scalars()
+    #print(query.all())
+    # Whatever you do, do NOT run print(query.all()) before the return statement
+    # that'll clear out the query variable or something, because then read.html 
+    # will be blank
+    return render_template("search.html", query = query, form=form)
+
+@app.route("/familytree/<num>", methods=["GET", "POST"])
+def showFamilyTree(num):
+    if(request.method == "POST"):
+        rat = db.session.query(Rat).filter(Rat.rat_number == num).one()
+        # note: don't need to validate that the rat exists here because this is accessed
+        # from the search page, which only contains rats that are already in the database
+        return render_template("FamilyTree.html", rat=rat)
+    else:
+        return redirect(url_for("search"))
+    
 @app.route("/editrecords", methods=['GET', 'POST'])
 def editRecords():   
     form = EditRatForm()
@@ -254,14 +277,14 @@ def recordTransfer():
 def reportLitter():
     return render_template("reportlitter.html")
 
-@app.route("/search")
-def search():
-    query = db.session.execute(db.select(Rat).order_by(Rat.rat_number)).scalars()
-    #print(query.all())
-    # Whatever you do, do NOT run print(query.all()) before the return statement
-    # that'll clear out the query variable or something, because then read.html 
-    # will be blank
-    return render_template("search.html", query = query)
+# @app.route("/search")
+# def search():
+#     query = db.session.execute(db.select(Rat).order_by(Rat.rat_number)).scalars()
+#     #print(query.all())
+#     # Whatever you do, do NOT run print(query.all()) before the return statement
+#     # that'll clear out the query variable or something, because then read.html 
+#     # will be blank
+#     return render_template("search.html", query = query)
 
 @app.route("/reportdeath", methods=['POST', 'GET'])
 def reportDeath():

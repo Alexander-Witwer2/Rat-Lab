@@ -70,8 +70,8 @@
         Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
-        <a href="FamilyTree" class="w3-bar-item w3-button w3-padding"><i class="fa fa-diamond fa-fw"></i> 
-          Generate Family Tree</a>
+      <a href="familytree" class="w3-bar-item w3-button w3-padding"><i class="fa fa-diamond fa-fw"></i> 
+        Generate Family Tree</a>
     </div>
   </nav>
 
@@ -115,6 +115,7 @@
           <th>Used In Experiment</th>
           <th>Manner of Death</th>
           <th>Date of Death</th>
+          <th>View Ancestry</th>
         </tr>
         {% for rat in query %}
         <tr>
@@ -132,7 +133,9 @@
           <td>{{ rat.experiment }} </td>
           <td>{{ rat.manner_of_death }} </td>
           <td>{{ rat.death_date }} </td>
-
+          <form action="/familytree/{{rat.rat_number}}" method="POST">
+            <td>{{ form.generateButton (type="submit")}} </td>
+          </form>
         </tr>
         {% endfor %}
       </table><br>

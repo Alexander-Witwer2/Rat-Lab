@@ -140,7 +140,12 @@ def dashboard():
 		(Rat.manner_of_death == "Alive")
 		)
 	).all())
-	return render_template("dashboard.html", livingRats = livingRats)
+	
+	oldRats = db.session.execute(db.select(Rat.rat_number, Rat.age_months).where(
+		(Rat.manner_of_death == "Alive")
+		)
+	).all()
+	return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats)
 
 @app.route("/addrat", methods=['POST', 'GET'])
 def addRat():

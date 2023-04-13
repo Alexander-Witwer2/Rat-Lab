@@ -125,11 +125,12 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   <div class="w3-container">
     <h5>Oldest Rats</h5>
     <table class="w3-table w3-striped w3-bordered w3-border w3-hoverable w3-white">
+	  {% for rat in oldRats|sort(reverse=true) %}
       <tr>
-        <td>RatID1</td>
-        <td>Age</td>
+        <td>{{rat.rat_number}}</td>
+        <td>{{rat.age_months}}</td>
       </tr>
-      <tr>
+      <!--tr>
         <td>RatID2</td>
         <td>Age</td>
       </tr>
@@ -140,7 +141,8 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       <tr>
         <td>RatID4</td>
         <td>Age</td>
-      </tr>
+      </tr-->
+	  {% endfor %}
     </table><br>
     <a href="search"><button class="w3-button w3-dark-grey">All Records  <i class="fa fa-arrow-right"></i></button></a>
   </div>

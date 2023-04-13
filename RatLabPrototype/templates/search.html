@@ -67,7 +67,7 @@
       <a href="reportdeath" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>
         Report Death</a>
       <a href="adduser" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add
-        User</a>
+        Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
     </div>
@@ -102,6 +102,7 @@
           <th>Rat Number</th>
           <th>Rat Name</th>
           <th>Sex</th>
+          <th>Current Partner</th>
           <th>Birthdate</th>
           <th>Date Weaned</th>
           <th>Date of Last Pairing</th>
@@ -113,12 +114,14 @@
           <th>Used In Experiment</th>
           <th>Manner of Death</th>
           <th>Date of Death</th>
+          <th>View Ancestry</th>
         </tr>
         {% for rat in query %}
         <tr>
           <td>{{ rat.rat_number }} </td>
           <td>{{ rat.rat_name }} </td>
           <td>{{ rat.sex }} </td>
+          <td>{{ rat.current_partner }}</td>
           <td>{{ rat.birthdate }} </td>
           <td>{{ rat.weaned_date }} </td>
           <td>{{ rat.last_paired_date }} </td>
@@ -130,7 +133,9 @@
           <td>{{ rat.experiment }} </td>
           <td>{{ rat.manner_of_death }} </td>
           <td>{{ rat.death_date }} </td>
-
+          <form action="/familytree/{{rat.rat_number}}" method="POST">
+            <td>{{ form.generateButton (type="submit")}} </td>
+          </form>
         </tr>
         {% endfor %}
       </table><br>

@@ -437,6 +437,10 @@ def reportDeath():
         return redirect(url_for("search"))
     else:
         return render_template("reportdeath.html", form=form, user=current_user.username)
+    
+@app.route("/userguide")
+def userGuide():
+    return render_template("userguide.html")
 
 # this function MUST be called *after* a new rat has been added to the database
 # it fills in the new rat's genealogical fields

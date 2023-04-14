@@ -193,9 +193,9 @@ def addRat():
     else:
         return render_template("addrat.html", form=form)
 
-@app.route("/adduser")
-def addUser():
-    return render_template("adduser.html")
+@app.route("/addadmin")
+def addAdmin():
+    return render_template("addadmin.html")
 
 @app.route("/breedingpairs", methods=['GET', 'POST'])
 def breedingPairs():

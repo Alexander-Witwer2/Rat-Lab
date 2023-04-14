@@ -9,6 +9,7 @@ from datetime import date
 from dateutil import relativedelta
 import re
 from sqlalchemy import cast, Integer
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 # Initialize Flask
 app = Flask(__name__, instance_relative_config=True)
@@ -16,6 +17,10 @@ app.config.from_pyfile('config.py')
 
 db = SQLAlchemy()
 db.init_app(app)
+
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.init_app(app)
 
 class Rat(db.Model):
     __tablename__ = 'rats'
@@ -74,6 +79,27 @@ class Rat(db.Model):
     mg24sire = db.Column(db.String)
     mg24dam = db.Column(db.String)
 
+class User(UserMixin, db.Model):
+    __tablename__ = "Users"
+    username = db.Column(db.String, primary_key=True)
+    password = db.Column(db.String)
+    
+    def get_id(self):
+        return self.username
+    
+class Admins(db.Model):
+    __tablename__ = "admins"
+    username = db.Column(db.String, db.ForeignKey(User.username), primary_key=True)
+    admin = db.Column(db.Boolean)
+
+@login_manager.user_loader
+def load_user(username):
+    users = [username for username, in db.session.query(User.username)]
+    if( username in users ):
+        return User.query.get(username)
+    else:
+        return None
+
 class AddRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
     birthdate = DateField()
@@ -117,37 +143,46 @@ class GenerateBreedingPairsForm(FlaskForm):
     recordButton = SubmitField('Yes')
 
 class ReportLitterForm(FlaskForm) :
-	sex = SelectField(choices=['Male', 'Female'])
-	number = IntegerField()
-	reportLittersWithDefects = SelectField(choices=['Yes', 'No'])
-	submit = SubmitField('Yes')
-	
+    sex = SelectField(choices=['Male', 'Female'])
+    number = IntegerField()
+    reportLittersWithDefects = SelectField(choices=['Yes', 'No'])
+    submit = SubmitField('Yes')
+    
 class RecordTransferForm(FlaskForm) :
-	sex = SelectField(choices=['Male', 'Female'])
-	number = IntegerField()
-	submit = SubmitField('Yes')
+    sex = SelectField(choices=['Male', 'Female'])
+    number = IntegerField()
+    submit = SubmitField('Yes')
 
 class FamilyTreeForm(FlaskForm):
+    generateButton = SubmitField("View Ancestry")
+
+class LoginForm(FlaskForm):
+    username = StringField()
+    password = StringField()
+    submit = SubmitField("Login")
     generateButton = SubmitField("View Ancestry")
     
 @app.route("/")
 def default():
-    return render_template("dashboard.html")
+    form = LoginForm()
+    return render_template("login.html", form=form)
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
-	livingRats = len(db.session.execute(db.select(Rat.rat_number).where(
-		(Rat.manner_of_death == "Alive")
-		)
-	).all())
-	
-	oldRats = db.session.execute(db.select(Rat.rat_number, Rat.age_months).where(
-		(Rat.manner_of_death == "Alive")
-		)
-	).all()
-	return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats)
+    livingRats = len(db.session.execute(db.select(Rat.rat_number).where(
+        (Rat.manner_of_death == "Alive")
+        )
+    ).all())
+    
+    oldRats = db.session.execute(db.select(Rat.rat_number, Rat.age_months).where(
+        (Rat.manner_of_death == "Alive")
+        )
+    ).all()
+    return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats, user=current_user.username)
 
 @app.route("/addrat", methods=['POST', 'GET'])
+@login_required
 def addRat():
     form = AddRatForm()
     if(request.method == "POST"):
@@ -194,10 +229,12 @@ def addRat():
         return render_template("addrat.html", form=form)
 
 @app.route("/addadmin")
+@login_required
 def addAdmin():
     return render_template("addadmin.html")
 
 @app.route("/breedingpairs", methods=['GET', 'POST'])
+@login_required
 def breedingPairs():
     form = GenerateBreedingPairsForm()
     if(request.method == "POST"):
@@ -215,6 +252,7 @@ def breedingPairs():
     return render_template("breedingpairs.html", form=form)
 
 @app.route("/recordpairing/<num>", methods=["GET", "POST"])
+@login_required
 def recordPairing(num):
     if( request.method == "POST"):
         rat = db.session.query(Rat).filter(Rat.rat_number == num).one()  
@@ -234,6 +272,7 @@ def recordPairing(num):
     return redirect(url_for("search"))
 
 @app.route("/search")
+@login_required
 def search():
     form = FamilyTreeForm()   
     query = db.session.execute(db.select(Rat).order_by(cast(Rat.rat_number, Integer).desc())).scalars()
@@ -244,6 +283,7 @@ def search():
     return render_template("search.html", query = query, form=form)
 
 @app.route("/familytree/<num>", methods=["GET", "POST"])
+@login_required
 def showFamilyTree(num):
     if(request.method == "POST"):
         rat = db.session.query(Rat).filter(Rat.rat_number == num).one()
@@ -254,6 +294,7 @@ def showFamilyTree(num):
         return redirect(url_for("search"))
     
 @app.route("/editrecords", methods=['GET', 'POST'])
+@login_required
 def editRecords():   
     form = EditRatForm()
     if(request.method == "POST"):
@@ -288,50 +329,86 @@ def editRecords():
             fillGenealogyData(number, rat.sire, form.dam.data)
          
         db.session.commit()
-		
+        
         return redirect(url_for("editRecords"))
     else:
         return render_template("editrecords.html", form=form)
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html")
+    #if(request.method=="POST"):
+    
+    form = LoginForm()
+    # if(form.validate_on_submit()):
+    #     login_user(user)
+    if( request.method == "POST"):
+        username = form.username.data
+        print(username)
+        user = db.session.query(User).filter(User.username == form.username.data).one()
+        if not user:
+            return redirect(url_for("accessdenied"))
+        else:
+            login_user(user, remember=True)
+            return redirect(url_for("dashboard"))
+    
+    return render_template("login.html", form=form)
+
+@app.route("/logout", methods=["GET"])
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
+
+@app.route("/accessdenied", methods=["POST", "GET"])
+def accessdenied():
+    return render_template("accessdenied.html")
 
 @app.route("/recordtransfer", methods=['POST', 'GET'])
+@login_required
 def recordTransfer():
-	form = RecordTransferForm()
+    form = RecordTransferForm()
     
-	if(request.method == "POST") :
-		rat_number = str(form.number.data) + form.sex.data[0]
-		
-		rat = Rat.query.get(rat_number)
-		rat.manner_of_death = "Transferred"
-		db.session.commit()
+    if(request.method == "POST") :
         
-		return render_template("recordtransfer.html", form=form)
-	else:
-		return render_template("recordtransfer.html", form=form)
+        rat_number =  str(form.number.data) + form.sex.data[0]
+            #Rat.query.filter(Rat.rat_number == rat_number).all()
+
+        #temp = Rat.query(Rat.rat_number).all()
+        #print(temp)
+        #print(rat_number)
+        if rat_number in rats:
+            print("success")
+        
+        rat = Rat.query.get(rat_number)
+        #rat.manner_of_death = "Transferred"
+        db.session.commit()
+        
+        return render_template("recordtransfer.html", form=form)
+    else:
+        return render_template("recordtransfer.html", form=form)
 
 @app.route("/reportlitter", methods=['POST', 'GET'])
+@login_required
 def reportLitter():
-	form = ReportLitterForm()
-	
-	if(request.method == "POST") :
-		rat_number = str(form.number.data) + form.sex.data[0]
-		
-		rat = Rat.query.get(rat_number)
-		#References drop down menu options for if litter has defects or not
-		if(form.reportLittersWithDefects.data != "No") :
-			rat.num_litters_with_defects = rat.num_litters_with_defects + 1
-			rat.num_litters = rat.num_litters + 1
-			db.session.commit()
-		else:
-			rat.num_litters = rat.num_litters + 1
-			db.session.commit()
+    form = ReportLitterForm()
+    
+    if(request.method == "POST") :
+        rat_number = str(form.number.data) + form.sex.data[0]
+        
+        rat = Rat.query.get(rat_number)
+        #References drop down menu options for if litter has defects or not
+        if(form.reportLittersWithDefects.data != "No") :
+            rat.num_litters_with_defects = rat.num_litters_with_defects + 1
+            rat.num_litters = rat.num_litters + 1
+            db.session.commit()
+        else:
+            rat.num_litters = rat.num_litters + 1
+            db.session.commit()
 
-	return render_template("reportlitter.html", form=form)
+    return render_template("reportlitter.html", form=form)
 
 @app.route("/reportdeath", methods=['POST', 'GET'])
+@login_required
 def reportDeath():
     form = ReportDeathForm()
     

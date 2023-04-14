@@ -349,15 +349,10 @@ def editRecords():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    #if(request.method=="POST"):
-    
     form = LoginForm()
-    # if(form.validate_on_submit()):
-    #     login_user(user)
     if( request.method == "POST"):
-        username = form.username.data
-        user = db.session.query(User).filter(User.username == form.username.data).one()
-        if not user:
+        user = User.query.filter_by(username = form.username.data).first()        
+        if not user or (form.password.data != user.password):
             return redirect(url_for("accessdenied"))
         else:
             login_user(user, remember=True)

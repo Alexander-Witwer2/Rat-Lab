@@ -69,51 +69,36 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 <div class="w3-main" style="margin-left:300px;margin-top:43px;">
 
   <!-- Header -->
-  <div class="center w3-panel">
-    <div class="w3-row-padding" style="margin:0 -16px">
-      <div class="w3-twothird">
-        <form>
-        <select name="Rat-Gender" id="Rat-Gender">
-          <option value="" disabled selected>Rat's Sex</option>
-          <option value="M">Male</option>
-          <option value="F">Female</option>
-        </select>
-        <input type="text" id="Input" placeholder="Rat Number" value="" size = "50" title = "Enter a Rat's Number">
-        <button type="button" class="w3-button" onclick="deathDetails()">Report</button>
-        </form>
-      </div>
-    </div>
-</div>
-
-<div class="w3-container w3-padding-32" id = "obscuredDetails">
-  <table class="w3-table w3-striped w3-bordered w3-border w3-white" id="Table" style = "width: 90%;">
-    <tr>
-
-    <form>
-
-      <td class = "w3-padding">Sire <input type="text" id="Input1" value="" size = "20" title = "Sire"></td>
-      <td class = "w3-padding">Dam <input type="text" id="Input2" value="" size = "20" title = "Dam"></td>
-      <td class = "w3-padding">Defect?
-      <select name="Defect?" id="Defect">
-        <option value="Y">Yes</option>
-        <option value="N">No</option>
-      </select>
-    </td>
-      <td style = "display: block;"><button class="w3-button" onclick="areYouSure()">Submit</button></td>
-    </form>
-    </tr>
-
-  </table>
-</div>
-<div id="myModal" class="modal">
-
-  <div class="modal-content">
-    <p id="modalText"></p>
-    <button class="w3-button" onclick="closeModal()">Yes</button>
-    <button class="w3-button" onclick="closeModal()">No</button>
-  </div>
-
-</div>
+  <form action="/reportlitter" , method="POST">
+	<div class="center w3-panel">
+		<div class="w3-row-padding" style="margin:0 -16px">
+			<div class="w3-twothird">
+				{{ form.sex }}
+				{{ form.number }}
+			<!-- button type="button" class="w3-button" onclick="deathDetails()">Report</button -->
+			</div>
+		</div>
+	</div>
+	
+	<div class="w3-container w3-padding-32">
+		<table class="w3-table w3-striped w3-bordered w3-border w3-white" id="Table" style = "width: 50%;">
+			<tr>
+				<td class = "w3-padding"> Defect? {{form.reportLittersWithDefects}}
+				</td>
+				<td style="display: block;"><button type="button" class="w3-button" onclick="areYouSure()">Report</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div id="myModal" class="modal">
+	<div class="modal-content">
+		<p id="modalText"></p>
+		{{ form.submit }}
+		<!-- TODO: consistent button formatting b/c form button and HTML button look different -->
+		<button class="w3-button" onclick="closeModal()">No</button>
+	</div>
+	</div>
+</form>
 
   <!-- Footer -->
   <footer class="w3-container w3-padding-16 w3-light-grey">
@@ -163,11 +148,12 @@ function deathDetails(){
 
 function areYouSure(){
 
-  if(dDate.value != "" && coDeath.value != ""){
+  //if(dDate.value != "" && coDeath.value != ""){
   modal.style.display = "block";
-  document.getElementById("modalText").innerHTML = "Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() + 
-            " died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() +"?";
-  }
+  document.getElementById("modalText").innerHTML = "Are you sure?" 
+  //+ dropDown.value.toUpperCase() + number.value.toUpperCase() + 
+  //          " died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() +"?";
+  //}
 }
 
 function closeModal(){

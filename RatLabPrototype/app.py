@@ -116,6 +116,17 @@ class GenerateBreedingPairsForm(FlaskForm):
     mateDropdown = SelectField()
     recordButton = SubmitField('Yes')
 
+class ReportLitterForm(FlaskForm) :
+	sex = SelectField(choices=['Male', 'Female'])
+	number = IntegerField()
+	reportLittersWithDefects = SelectField(choices=['Yes', 'No'])
+	submit = SubmitField('Yes')
+	
+class RecordTransferForm(FlaskForm) :
+	sex = SelectField(choices=['Male', 'Female'])
+	number = IntegerField()
+	submit = SubmitField('Yes')
+
 class FamilyTreeForm(FlaskForm):
     generateButton = SubmitField("View Ancestry")
     
@@ -125,7 +136,16 @@ def default():
 
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
+	livingRats = len(db.session.execute(db.select(Rat.rat_number).where(
+		(Rat.manner_of_death == "Alive")
+		)
+	).all())
+	
+	oldRats = db.session.execute(db.select(Rat.rat_number, Rat.age_months).where(
+		(Rat.manner_of_death == "Alive")
+		)
+	).all()
+	return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats)
 
 @app.route("/addrat", methods=['POST', 'GET'])
 def addRat():
@@ -266,7 +286,9 @@ def editRecords():
         if(form.dam.data != ''):
             rat.dam = form.dam.data
             fillGenealogyData(number, rat.sire, form.dam.data)
-             
+         
+        db.session.commit()
+		
         return redirect(url_for("editRecords"))
     else:
         return render_template("editrecords.html", form=form)
@@ -275,13 +297,39 @@ def editRecords():
 def login():
     return render_template("login.html")
 
-@app.route("/recordtransfer")
+@app.route("/recordtransfer", methods=['POST', 'GET'])
 def recordTransfer():
-    return render_template("recordtransfer.html")
+	form = RecordTransferForm()
+    
+	if(request.method == "POST") :
+		rat_number = str(form.number.data) + form.sex.data[0]
+		
+		rat = Rat.query.get(rat_number)
+		rat.manner_of_death = "Transferred"
+		db.session.commit()
+        
+		return render_template("recordtransfer.html", form=form)
+	else:
+		return render_template("recordtransfer.html", form=form)
 
-@app.route("/reportlitter")
+@app.route("/reportlitter", methods=['POST', 'GET'])
 def reportLitter():
-    return render_template("reportlitter.html")
+	form = ReportLitterForm()
+	
+	if(request.method == "POST") :
+		rat_number = str(form.number.data) + form.sex.data[0]
+		
+		rat = Rat.query.get(rat_number)
+		#References drop down menu options for if litter has defects or not
+		if(form.reportLittersWithDefects.data != "No") :
+			rat.num_litters_with_defects = rat.num_litters_with_defects + 1
+			rat.num_litters = rat.num_litters + 1
+			db.session.commit()
+		else:
+			rat.num_litters = rat.num_litters + 1
+			db.session.commit()
+
+	return render_template("reportlitter.html", form=form)
 
 @app.route("/reportdeath", methods=['POST', 'GET'])
 def reportDeath():

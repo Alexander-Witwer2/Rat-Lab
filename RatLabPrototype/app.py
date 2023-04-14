@@ -9,6 +9,7 @@ from datetime import date
 from dateutil import relativedelta
 import re
 from sqlalchemy import cast, Integer
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 # Initialize Flask
 app = Flask(__name__, instance_relative_config=True)
@@ -16,6 +17,10 @@ app.config.from_pyfile('config.py')
 
 db = SQLAlchemy()
 db.init_app(app)
+
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.init_app(app)
 
 class Rat(db.Model):
     __tablename__ = 'rats'
@@ -74,6 +79,27 @@ class Rat(db.Model):
     mg24sire = db.Column(db.String)
     mg24dam = db.Column(db.String)
 
+class User(UserMixin, db.Model):
+    __tablename__ = "Users"
+    username = db.Column(db.String, primary_key=True)
+    password = db.Column(db.String)
+    
+    def get_id(self):
+        return self.username
+    
+class Admins(db.Model):
+    __tablename__ = "admins"
+    username = db.Column(db.String, db.ForeignKey(User.username), primary_key=True)
+    admin = db.Column(db.Boolean)
+
+@login_manager.user_loader
+def load_user(username):
+    users = [username for username, in db.session.query(User.username)]
+    if( username in users ):
+        return User.query.get(username)
+    else:
+        return None
+
 class AddRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
     birthdate = DateField()
@@ -117,38 +143,51 @@ class GenerateBreedingPairsForm(FlaskForm):
     recordButton = SubmitField('Yes')
 
 class ReportLitterForm(FlaskForm) :
-	sex = SelectField(choices=['Male', 'Female'])
-	number = IntegerField()
-	reportLittersWithDefects = SelectField(choices=['Yes', 'No'])
-	submit = SubmitField('Yes')
-	
+    sex = SelectField(choices=['Male', 'Female'])
+    number = IntegerField()
+    reportLittersWithDefects = SelectField(choices=['Yes', 'No'])
+    submit = SubmitField('Yes')
+    
 class RecordTransferForm(FlaskForm) :
-	sex = SelectField(choices=['Male', 'Female'])
-	number = IntegerField()
-	submit = SubmitField('Yes')
+    sex = SelectField(choices=['Male', 'Female'])
+    number = IntegerField()
+    submit = SubmitField('Yes')
 
 class FamilyTreeForm(FlaskForm):
+    generateButton = SubmitField("View Ancestry")
+
+class LoginForm(FlaskForm):
+    username = StringField()
+    password = StringField()
+    submit = SubmitField("Login")
     generateButton = SubmitField("View Ancestry")
     
 @app.route("/")
 def default():
-    return render_template("dashboard.html")
+    form = LoginForm()
+    return render_template("login.html", form=form)
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
-	livingRats = len(db.session.execute(db.select(Rat.rat_number).where(
-		(Rat.manner_of_death == "Alive")
-		)
-	).all())
-	
-	oldRats = db.session.execute(db.select(Rat.rat_number, Rat.age_months).where(
-		(Rat.manner_of_death == "Alive")
-		)
-	).all()
-	return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats)
+    livingRats = len(db.session.execute(db.select(Rat.rat_number).where(
+        (Rat.manner_of_death == "Alive")
+        )
+    ).all())
+    
+    oldRats = db.session.execute(db.select(Rat.rat_number, Rat.age_months).where(
+        (Rat.manner_of_death == "Alive")
+        )
+    ).all()
+    
+    admin = (Admins.query.get(current_user.username) != None)
+    return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats, user=current_user.username, admin=admin)
 
 @app.route("/addrat", methods=['POST', 'GET'])
+@login_required
 def addRat():
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     form = AddRatForm()
     if(request.method == "POST"):
         rat = Rat()
@@ -191,31 +230,40 @@ def addRat():
         fillGenealogyData(rat.rat_number, rat.sire, rat.dam)
         return redirect(url_for("search"))
     else:
-        return render_template("addrat.html", form=form)
+        return render_template("addrat.html", form=form, user=current_user.username)
 
-@app.route("/adduser")
-def addUser():
-    return render_template("adduser.html")
+@app.route("/addadmin")
+@login_required
+def addAdmin():
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
+    return render_template("addadmin.html", user=current_user.username)
 
 @app.route("/breedingpairs", methods=['GET', 'POST'])
+@login_required
 def breedingPairs():
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     form = GenerateBreedingPairsForm()
     if(request.method == "POST"):
         ratNumber = str(form.number.data) + form.sex.data[0]
         possibleMates = pairing(ratNumber, form.swapping.data)
 
         if (isinstance(possibleMates, str)):
-            return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=possibleMates)
+            return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=possibleMates, user=current_user.username)
              
         else:
             form.mateDropdown.choices = possibleMates
             query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates)).order_by(cast(Rat.rat_number, Integer).desc())).scalars()   
 
-            return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True, num=ratNumber, errorText="")
-    return render_template("breedingpairs.html", form=form)
+            return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True, num=ratNumber, errorText="", user=current_user.username)
+    return render_template("breedingpairs.html", form=form, user=current_user.username)
 
 @app.route("/recordpairing/<num>", methods=["GET", "POST"])
+@login_required
 def recordPairing(num):
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     if( request.method == "POST"):
         rat = db.session.query(Rat).filter(Rat.rat_number == num).one()  
         rat.current_partner = request.form.get("mateDropdown")
@@ -234,6 +282,7 @@ def recordPairing(num):
     return redirect(url_for("search"))
 
 @app.route("/search")
+@login_required
 def search():
     form = FamilyTreeForm()   
     query = db.session.execute(db.select(Rat).order_by(cast(Rat.rat_number, Integer).desc())).scalars()
@@ -241,23 +290,28 @@ def search():
     # Whatever you do, do NOT run print(query.all()) before the return statement
     # that'll clear out the query variable or something, because then read.html 
     # will be blank
-    return render_template("search.html", query = query, form=form)
+    admin = (Admins.query.get(current_user.username) != None)
+    return render_template("search.html", query = query, form=form, user=current_user.username, admin=admin)
 
 @app.route("/familytree/<num>", methods=["GET", "POST"])
+@login_required
 def showFamilyTree(num):
     if(request.method == "POST"):
         rat = db.session.query(Rat).filter(Rat.rat_number == num).one()
         # note: don't need to validate that the rat exists here because this is accessed
         # from the search page, which only contains rats that are already in the database
-        return render_template("FamilyTree.html", rat=rat)
+        admin = (Admins.query.get(current_user.username) != None)
+        return render_template("FamilyTree.html", rat=rat, user=current_user.username, admin=admin)
     else:
         return redirect(url_for("search"))
     
 @app.route("/editrecords", methods=['GET', 'POST'])
+@login_required
 def editRecords():   
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     form = EditRatForm()
     if(request.method == "POST"):
-        print(form.data)
         number = str(form.number.data) + form.sex.data[0]
         rat = db.session.query(Rat).filter(Rat.rat_number == number).one()
         
@@ -288,51 +342,79 @@ def editRecords():
             fillGenealogyData(number, rat.sire, form.dam.data)
          
         db.session.commit()
-		
+        
         return redirect(url_for("editRecords"))
     else:
-        return render_template("editrecords.html", form=form)
+        return render_template("editrecords.html", form=form, user=current_user.username)
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html")
+    form = LoginForm()
+    if( request.method == "POST"):
+        user = User.query.filter_by(username = form.username.data).first()        
+        if not user or (form.password.data != user.password):
+            return redirect(url_for("accessdenied"))
+        else:
+            login_user(user, remember=True)
+            return redirect(url_for("dashboard"))
+    
+    return render_template("login.html", form=form)
+
+@app.route("/logout", methods=["GET"])
+@login_required
+def logout():
+    logout_user()
+    form=LoginForm()
+    return render_template("login.html", form=form)
+
+@app.route("/accessdenied", methods=["POST", "GET"])
+def accessdenied():
+    return render_template("accessdenied.html")
 
 @app.route("/recordtransfer", methods=['POST', 'GET'])
+@login_required
 def recordTransfer():
-	form = RecordTransferForm()
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
+    form = RecordTransferForm()
     
-	if(request.method == "POST") :
-		rat_number = str(form.number.data) + form.sex.data[0]
-		
-		rat = Rat.query.get(rat_number)
-		rat.manner_of_death = "Transferred"
-		db.session.commit()
+    if(request.method == "POST") :
+        rat_number =  str(form.number.data) + form.sex.data[0]
+        rat = Rat.query.get(rat_number)
+        rat.manner_of_death = "Transferred"
+        db.session.commit()
         
-		return render_template("recordtransfer.html", form=form)
-	else:
-		return render_template("recordtransfer.html", form=form)
+        return render_template("recordtransfer.html", form=form, user=current_user.username)
+    else:
+        return render_template("recordtransfer.html", form=form, user=current_user.username)
 
 @app.route("/reportlitter", methods=['POST', 'GET'])
+@login_required
 def reportLitter():
-	form = ReportLitterForm()
-	
-	if(request.method == "POST") :
-		rat_number = str(form.number.data) + form.sex.data[0]
-		
-		rat = Rat.query.get(rat_number)
-		#References drop down menu options for if litter has defects or not
-		if(form.reportLittersWithDefects.data != "No") :
-			rat.num_litters_with_defects = rat.num_litters_with_defects + 1
-			rat.num_litters = rat.num_litters + 1
-			db.session.commit()
-		else:
-			rat.num_litters = rat.num_litters + 1
-			db.session.commit()
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
+    form = ReportLitterForm()
+    
+    if(request.method == "POST") :
+        rat_number = str(form.number.data) + form.sex.data[0]
+        
+        rat = Rat.query.get(rat_number)
+        #References drop down menu options for if litter has defects or not
+        if(form.reportLittersWithDefects.data != "No") :
+            rat.num_litters_with_defects = rat.num_litters_with_defects + 1
+            rat.num_litters = rat.num_litters + 1
+            db.session.commit()
+        else:
+            rat.num_litters = rat.num_litters + 1
+            db.session.commit()
 
-	return render_template("reportlitter.html", form=form)
+    return render_template("reportlitter.html", form=form, user=current_user.username)
 
 @app.route("/reportdeath", methods=['POST', 'GET'])
+@login_required
 def reportDeath():
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     form = ReportDeathForm()
     
     if(request.method == "POST"):       
@@ -354,7 +436,7 @@ def reportDeath():
         #TODO: route to confirmation screen instead(?) definitely not search
         return redirect(url_for("search"))
     else:
-        return render_template("reportdeath.html", form=form)
+        return render_template("reportdeath.html", form=form, user=current_user.username)
     
 @app.route("/userguide")
 def userGuide():

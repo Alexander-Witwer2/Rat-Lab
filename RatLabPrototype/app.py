@@ -179,11 +179,15 @@ def dashboard():
         (Rat.manner_of_death == "Alive")
         )
     ).all()
-    return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats, user=current_user.username)
+    
+    admin = (Admins.query.get(current_user.username) != None)
+    return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats, user=current_user.username, admin=admin)
 
 @app.route("/addrat", methods=['POST', 'GET'])
 @login_required
 def addRat():
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     form = AddRatForm()
     if(request.method == "POST"):
         rat = Rat()
@@ -226,34 +230,40 @@ def addRat():
         fillGenealogyData(rat.rat_number, rat.sire, rat.dam)
         return redirect(url_for("search"))
     else:
-        return render_template("addrat.html", form=form)
+        return render_template("addrat.html", form=form, user=current_user.username)
 
 @app.route("/addadmin")
 @login_required
 def addAdmin():
-    return render_template("addadmin.html")
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
+    return render_template("addadmin.html", user=current_user.username)
 
 @app.route("/breedingpairs", methods=['GET', 'POST'])
 @login_required
 def breedingPairs():
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     form = GenerateBreedingPairsForm()
     if(request.method == "POST"):
         ratNumber = str(form.number.data) + form.sex.data[0]
         possibleMates = pairing(ratNumber, form.swapping.data)
 
         if (isinstance(possibleMates, str)):
-            return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=possibleMates)
+            return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=possibleMates, user=current_user.username)
              
         else:
             form.mateDropdown.choices = possibleMates
             query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates)).order_by(cast(Rat.rat_number, Integer).desc())).scalars()   
 
-            return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True, num=ratNumber, errorText="")
-    return render_template("breedingpairs.html", form=form)
+            return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True, num=ratNumber, errorText="", user=current_user.username)
+    return render_template("breedingpairs.html", form=form, user=current_user.username)
 
 @app.route("/recordpairing/<num>", methods=["GET", "POST"])
 @login_required
 def recordPairing(num):
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     if( request.method == "POST"):
         rat = db.session.query(Rat).filter(Rat.rat_number == num).one()  
         rat.current_partner = request.form.get("mateDropdown")
@@ -280,7 +290,8 @@ def search():
     # Whatever you do, do NOT run print(query.all()) before the return statement
     # that'll clear out the query variable or something, because then read.html 
     # will be blank
-    return render_template("search.html", query = query, form=form)
+    admin = (Admins.query.get(current_user.username) != None)
+    return render_template("search.html", query = query, form=form, user=current_user.username, admin=admin)
 
 @app.route("/familytree/<num>", methods=["GET", "POST"])
 @login_required
@@ -289,16 +300,18 @@ def showFamilyTree(num):
         rat = db.session.query(Rat).filter(Rat.rat_number == num).one()
         # note: don't need to validate that the rat exists here because this is accessed
         # from the search page, which only contains rats that are already in the database
-        return render_template("FamilyTree.html", rat=rat)
+        admin = (Admins.query.get(current_user.username) != None)
+        return render_template("FamilyTree.html", rat=rat, user=current_user.username, admin=admin)
     else:
         return redirect(url_for("search"))
     
 @app.route("/editrecords", methods=['GET', 'POST'])
 @login_required
 def editRecords():   
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     form = EditRatForm()
     if(request.method == "POST"):
-        print(form.data)
         number = str(form.number.data) + form.sex.data[0]
         rat = db.session.query(Rat).filter(Rat.rat_number == number).one()
         
@@ -332,7 +345,7 @@ def editRecords():
         
         return redirect(url_for("editRecords"))
     else:
-        return render_template("editrecords.html", form=form)
+        return render_template("editrecords.html", form=form, user=current_user.username)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -343,7 +356,6 @@ def login():
     #     login_user(user)
     if( request.method == "POST"):
         username = form.username.data
-        print(username)
         user = db.session.query(User).filter(User.username == form.username.data).one()
         if not user:
             return redirect(url_for("accessdenied"))
@@ -357,7 +369,8 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("login"))
+    form=LoginForm()
+    return render_template("login.html", form=form)
 
 @app.route("/accessdenied", methods=["POST", "GET"])
 def accessdenied():
@@ -366,30 +379,25 @@ def accessdenied():
 @app.route("/recordtransfer", methods=['POST', 'GET'])
 @login_required
 def recordTransfer():
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     form = RecordTransferForm()
     
     if(request.method == "POST") :
-        
         rat_number =  str(form.number.data) + form.sex.data[0]
-            #Rat.query.filter(Rat.rat_number == rat_number).all()
-
-        #temp = Rat.query(Rat.rat_number).all()
-        #print(temp)
-        #print(rat_number)
-        if rat_number in rats:
-            print("success")
-        
         rat = Rat.query.get(rat_number)
-        #rat.manner_of_death = "Transferred"
+        rat.manner_of_death = "Transferred"
         db.session.commit()
         
-        return render_template("recordtransfer.html", form=form)
+        return render_template("recordtransfer.html", form=form, user=current_user.username)
     else:
-        return render_template("recordtransfer.html", form=form)
+        return render_template("recordtransfer.html", form=form, user=current_user.username)
 
 @app.route("/reportlitter", methods=['POST', 'GET'])
 @login_required
 def reportLitter():
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     form = ReportLitterForm()
     
     if(request.method == "POST") :
@@ -405,11 +413,13 @@ def reportLitter():
             rat.num_litters = rat.num_litters + 1
             db.session.commit()
 
-    return render_template("reportlitter.html", form=form)
+    return render_template("reportlitter.html", form=form, user=current_user.username)
 
 @app.route("/reportdeath", methods=['POST', 'GET'])
 @login_required
 def reportDeath():
+    if(Admins.query.get(current_user.username) == None):
+        return redirect(url_for("accessdenied"))
     form = ReportDeathForm()
     
     if(request.method == "POST"):       
@@ -431,7 +441,7 @@ def reportDeath():
         #TODO: route to confirmation screen instead(?) definitely not search
         return redirect(url_for("search"))
     else:
-        return render_template("reportdeath.html", form=form)
+        return render_template("reportdeath.html", form=form, user=current_user.username)
 
 # this function MUST be called *after* a new rat has been added to the database
 # it fills in the new rat's genealogical fields

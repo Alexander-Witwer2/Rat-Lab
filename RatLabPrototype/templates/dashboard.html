@@ -45,6 +45,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       Dashboard</a>
     <a href="search" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i> 
       Search Rats</a>
+      {% if admin %}
     <a href="addrat" class="w3-bar-item w3-button w3-padding"><i class="fa fa-cog fa-fw"></i>  Add
       Rat</a>
     <a href="editrecords" class="w3-bar-item w3-button w3-padding"><i class="fa fa-history fa-fw"></i>
@@ -59,6 +60,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
       Admin</a>
     <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
       Record Transfer</a>
+      {% endif %}
   </div>
 </nav>
 

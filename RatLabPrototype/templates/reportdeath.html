@@ -28,7 +28,9 @@
   <div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
     <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i
         class="fa fa-bars"></i>  Menu</button>
-    <span class="w3-bar-item w3-right">Login</span>
+    <span class="w3-bar-item w3-right"><a href="{{ url_for('logout') }}" class="navbar-item">
+        Logout
+      </a></span>
   </div>
 
   <!-- Sidebar/menu -->
@@ -39,7 +41,7 @@
           class="w3-circle w3-margin-right" style="width:90px">
       </div>
       <div class="w3-col s8 w3-bar">
-        <span>Welcome, <strong>User!</strong></span><br>
+        <span>Welcome, <strong>{{user}}!</strong></span><br>
         <a href="#" class="w3-bar-item w3-button"><i class="fa fa-envelope"></i></a>
         <a href="#" class="w3-bar-item w3-button"><i class="fa fa-user"></i></a>
         <a href="#" class="w3-bar-item w3-button"><i class="fa fa-cog"></i></a>
@@ -66,12 +68,12 @@
         Report Litter</a>
       <a href="reportdeath" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-bell fa-fw"></i>
         Report Death</a>
-      <a href="adduser" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add
+      <a href="addadmin" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add
         Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
-      <a href="FamilyTree" class="w3-bar-item w3-button w3-padding"><i class="fa fa-diamond fa-fw"></i> 
-        Generate Family Tree</a>
+        <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
+          User Guide</a>
     </div>
   </nav>
 
@@ -105,7 +107,8 @@
               {{ form.mannerOfDeath }}
               <!-- TODO: FIX: table looks weird after removed weaned date and added dropdown for manner of death -->
             </td>
-            <td style="display: block;"><button type="button" class="w3-button" onclick="areYouSure()">Report</button></td>
+            <td style="display: block;"><button type="button" class="w3-button" onclick="areYouSure()">Report</button>
+            </td>
           </tr>
 
         </table>
@@ -166,18 +169,18 @@
     }
 
     function deathDetails () {
-      if ( form.  dropDown.value != "" && number.value != "" ) {
-      show.style.display = "inline";
+      if ( form.dropDown.value != "" && number.value != "" ) {
+        show.style.display = "inline";
       }
     }
 
     function areYouSure () {
       //if ( dDate.value != "" && coDeath.value != "" ) {
-        modal.style.display = "block";
-        document.getElementById( "modalText" ).innerHTML = "Are you sure?"
-        //TODO: update "are you sure" with the actual values like it used to show previously
-        //"Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() +
-          //" died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() + "?";
+      modal.style.display = "block";
+      document.getElementById( "modalText" ).innerHTML = "Are you sure?"
+      //TODO: update "are you sure" with the actual values like it used to show previously
+      //"Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() +
+      //" died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() + "?";
       //}
     }
 

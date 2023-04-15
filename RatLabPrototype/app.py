@@ -5,10 +5,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, BooleanField, SelectField, DateField
 from wtforms.validators import DataRequired
-from datetime import date
+from datetime import date, datetime, timedelta
 from dateutil import relativedelta
 import re
-from sqlalchemy import cast, Integer
+from sqlalchemy import cast, Integer, Date, extract
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 # Initialize Flask
@@ -173,17 +173,17 @@ def default():
 @login_required
 def dashboard():
     livingRats = len(db.session.execute(db.select(Rat.rat_number).where(
-        (Rat.manner_of_death == "Alive")
-        )
-    ).all())
+        (Rat.manner_of_death == "Alive"))).all())
     
     oldRats = db.session.execute(db.select(Rat.rat_number, Rat.age_months).where(
-        (Rat.manner_of_death == "Alive")
-        )
-    ).all()
+        (Rat.manner_of_death == "Alive")).order_by(cast(Rat.rat_number, Integer).asc())).all()[0:9]
     
+    past30days = date.today() - timedelta(days=30)
+    numLittersInPast30Days = len(db.session.execute(db.session.query(Rat.last_litter_date).filter(Rat.last_litter_date >= past30days)).all())//2
+    users = db.session.execute(db.session.query(User)).all()
+    numUsers = len(users)
     admin = (Admins.query.get(current_user.username) != None)
-    return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats, user=current_user.username, admin=admin)
+    return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats, user=current_user.username, admin=admin, numUsers=numUsers, numLitters=numLittersInPast30Days)
 
 @app.route("/addrat", methods=['POST', 'GET'])
 @login_required

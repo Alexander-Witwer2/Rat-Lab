@@ -317,7 +317,9 @@ def editRecords():
         
         if(form.birthdate.data != None):
             rat.birthdate = form.birthdate.data
-            #TODO: recalculate rat's age when given new birthdate
+            delta = relativedelta.relativedelta(date.today(), form.birthdate.data)
+            age = delta.months + (delta.years * 12)
+            rat.age_months = age
         if(form.last_paired_date != None):
             rat.last_paired_date = form.last_paired_date.data
         if(form.last_litter_date != None):

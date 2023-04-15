@@ -386,7 +386,7 @@ def recordTransfer():
           rat.manner_of_death = "Transferred"
           db.session.commit()
         else :
-			    print(str("Error: Not an existing rat."))
+            print(str("Error: Not an existing rat."))
         
         return render_template("recordtransfer.html", form=form, user=current_user.username)
     else:
@@ -401,20 +401,20 @@ def reportLitter():
     
     if(request.method == "POST") :
         rat_number = str(form.number.data) + form.sex.data[0]
-		    ratCheck = ratIDCheck(form.number.data)
+        ratCheck = ratIDCheck(form.number.data)
 		
-		    if(rat_number in ratCheck):
-			    rat = Rat.query.get(rat_number)
+        if(rat_number in ratCheck):
+            rat = Rat.query.get(rat_number)
 			    #References drop down menu options for if litter has defects or not
-			    if(form.reportLittersWithDefects.data != "No") :
-				    rat.num_litters_with_defects = rat.num_litters_with_defects + 1
-				    rat.num_litters = rat.num_litters + 1
-			    	db.session.commit()
-			  else:
-				    rat.num_litters = rat.num_litters + 1
-				    db.session.commit()
-		else:
-			print(str("Error: Not an existing rat."))
+            if(form.reportLittersWithDefects.data != "No") :
+                rat.num_litters_with_defects = rat.num_litters_with_defects + 1
+                rat.num_litters = rat.num_litters + 1
+                db.session.commit()
+            else:
+                rat.num_litters = rat.num_litters + 1
+                db.session.commit()
+    else:
+        print(str("Error: Not an existing rat."))
 
     return render_template("reportlitter.html", form=form, user=current_user.username)
 

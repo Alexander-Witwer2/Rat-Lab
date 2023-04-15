@@ -450,40 +450,74 @@ def userGuide():
 #         this function does not return anything 
 def fillGenealogyData(new_rat_number, sire_number, dam_number):
     new_rat = Rat.query.get(new_rat_number)
-    sire = Rat.query.get(sire_number)
-    dam = Rat.query.get(dam_number)
-
-    # fill in new rat's paternal side
-    new_rat.pgsire = sire.sire
-    new_rat.pgdam = sire.dam
-    new_rat.pg11sire = sire.pgsire
-    new_rat.pg11dam = sire.pgdam
-    new_rat.pg12sire = sire.mgsire
-    new_rat.pg12dam = sire.mgdam
-    new_rat.pg21sire = sire.pg11sire
-    new_rat.pg21dam = sire.pg11dam
-    new_rat.pg22sire = sire.pg12sire
-    new_rat.pg22dam = sire.pg12dam
-    new_rat.pg23sire = sire.mg11sire
-    new_rat.pg23dam = sire.mg11dam
-    new_rat.pg24sire = sire.mg12sire
-    new_rat.pg24dam = sire.mg12dam
     
-    # # fill in new rat's maternal side
-    new_rat.mgsire = dam.sire
-    new_rat.mgdam = dam.dam
-    new_rat.mg11sire = dam.pgsire
-    new_rat.mg11dam = dam.pgdam
-    new_rat.mg12sire = dam.mgsire
-    new_rat.mg12dam = dam.mgdam
-    new_rat.mg21sire = dam.pg11sire
-    new_rat.mg21dam = dam.pg11dam
-    new_rat.mg22sire = dam.pg12sire
-    new_rat.mg22dam = dam.pg12dam
-    new_rat.mg23sire = dam.mg11sire
-    new_rat.mg23dam = dam.mg11dam
-    new_rat.mg24sire = dam.mg12sire
-    new_rat.mg24dam = dam.mg12dam
+    # if rat is ENEN, fill in ancestry data with all ENs
+    if(sire_number == "EN" and dam_number == "EN"):
+        new_rat.pgsire = "EN"
+        new_rat.pgdam = "EN"
+        new_rat.pg11sire = "EN"
+        new_rat.pg11dam = "EN"
+        new_rat.pg12sire = "EN"
+        new_rat.pg12dam = "EN"
+        new_rat.pg21sire = "EN"
+        new_rat.pg21dam = "EN"
+        new_rat.pg22sire = "EN"
+        new_rat.pg22dam = "EN"
+        new_rat.pg23sire = "EN"
+        new_rat.pg23dam = "EN"
+        new_rat.pg24sire = "EN"
+        new_rat.pg24dam = "EN"
+    
+        new_rat.mgsire = "EN"
+        new_rat.mgdam = "EN"
+        new_rat.mg11sire = "EN"
+        new_rat.mg11dam = "EN"
+        new_rat.mg12sire = "EN"
+        new_rat.mg12dam = "EN"
+        new_rat.mg21sire = "EN"
+        new_rat.mg21dam = "EN"
+        new_rat.mg22sire = "EN"
+        new_rat.mg22dam = "EN"
+        new_rat.mg23sire = "EN"
+        new_rat.mg23dam = "EN"
+        new_rat.mg24sire = "EN"
+        new_rat.mg24dam = "EN"
+
+    else: # rat is from colony, get data from database
+        sire = Rat.query.get(sire_number)
+        dam = Rat.query.get(dam_number)
+
+        # fill in new rat's paternal side
+        new_rat.pgsire = sire.sire
+        new_rat.pgdam = sire.dam
+        new_rat.pg11sire = sire.pgsire
+        new_rat.pg11dam = sire.pgdam
+        new_rat.pg12sire = sire.mgsire
+        new_rat.pg12dam = sire.mgdam
+        new_rat.pg21sire = sire.pg11sire
+        new_rat.pg21dam = sire.pg11dam
+        new_rat.pg22sire = sire.pg12sire
+        new_rat.pg22dam = sire.pg12dam
+        new_rat.pg23sire = sire.mg11sire
+        new_rat.pg23dam = sire.mg11dam
+        new_rat.pg24sire = sire.mg12sire
+        new_rat.pg24dam = sire.mg12dam
+        
+        # # fill in new rat's maternal side
+        new_rat.mgsire = dam.sire
+        new_rat.mgdam = dam.dam
+        new_rat.mg11sire = dam.pgsire
+        new_rat.mg11dam = dam.pgdam
+        new_rat.mg12sire = dam.mgsire
+        new_rat.mg12dam = dam.mgdam
+        new_rat.mg21sire = dam.pg11sire
+        new_rat.mg21dam = dam.pg11dam
+        new_rat.mg22sire = dam.pg12sire
+        new_rat.mg22dam = dam.pg12dam
+        new_rat.mg23sire = dam.mg11sire
+        new_rat.mg23dam = dam.mg11dam
+        new_rat.mg24sire = dam.mg12sire
+        new_rat.mg24dam = dam.mg12dam
     
     db.session.commit()
     return 

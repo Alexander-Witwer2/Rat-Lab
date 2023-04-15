@@ -254,6 +254,7 @@ def breedingPairs():
             return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=possibleMates, user=current_user.username)
              
         else:
+            possibleMates.reverse()
             form.mateDropdown.choices = possibleMates
             query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates)).order_by(cast(Rat.rat_number, Integer).desc())).scalars()   
 
@@ -444,8 +445,9 @@ def reportDeath():
         return render_template("reportdeath.html", form=form, user=current_user.username)
     
 @app.route("/userguide")
+@login_required
 def userGuide():
-    return render_template("userguide.html")
+    return render_template("userguide.html", user=current_user.username)
 
 # this function MUST be called *after* a new rat has been added to the database
 # it fills in the new rat's genealogical fields

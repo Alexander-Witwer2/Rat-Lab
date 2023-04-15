@@ -143,10 +143,11 @@ class GenerateBreedingPairsForm(FlaskForm):
     mateDropdown = SelectField()
     recordButton = SubmitField('Yes')
 
-class ReportLitterForm(FlaskForm) :
-    sex = SelectField(choices=['Male', 'Female'])
-    number = IntegerField()
-    reportLittersWithDefects = SelectField(choices=['Yes', 'No'])
+class ReportLitterForm(FlaskForm):
+    sire = IntegerField('Sire')
+    dam = IntegerField('Dam')
+    reportLittersWithDefects = SelectField(default="No", choices=['Yes', 'No'])
+    litterDate = DateField(default=date.today())
     submit = SubmitField('Yes')
     
 class RecordTransferForm(FlaskForm) :
@@ -402,17 +403,21 @@ def reportLitter():
     form = ReportLitterForm()
     
     if(request.method == "POST") :
-        rat_number = str(form.number.data) + form.sex.data[0]
+        sire_number = str(form.sire.data) + "M"
+        dam_number = str(form.dam.data) + "F"
         
-        rat = Rat.query.get(rat_number)
+        sire = Rat.query.get(sire_number)
+        dam = Rat.query.get(dam_number)
+        sire.num_litters = sire.num_litters + 1
+        dam.num_litters = dam.num_litters + 1
+        sire.last_litter_date = form.litterDate.data
+        dam.last_litter_date = form.litterDate.data
         #References drop down menu options for if litter has defects or not
-        if(form.reportLittersWithDefects.data != "No") :
-            rat.num_litters_with_defects = rat.num_litters_with_defects + 1
-            rat.num_litters = rat.num_litters + 1
-            db.session.commit()
-        else:
-            rat.num_litters = rat.num_litters + 1
-            db.session.commit()
+        if(form.reportLittersWithDefects.data == "Yes") :
+            sire.num_litters_with_defects = sire.num_litters_with_defects + 1
+            dam.num_litters_with_defects = dam.num_litters_with_defects + 1
+
+        db.session.commit()
 
     return render_template("reportlitter.html", form=form, user=current_user.username)
 

@@ -106,7 +106,7 @@ class AddRatForm(FlaskForm):
     sire = StringField('Sire')
     dam = StringField('Dam')
     weanedDate = DateField()
-    dateAddedToColony = DateField()
+    dateAddedToColony = DateField(default=date.today())
     experiment = BooleanField()
     addButton = SubmitField('Add Rat')       
 
@@ -130,7 +130,7 @@ class EditRatForm(FlaskForm):
 class ReportDeathForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
     number = IntegerField()
-    deathDate = DateField()
+    deathDate = DateField(default=date.today())
     mannerOfDeath = SelectField(choices=['Euthanized', 'Unexpected'])
     submit = SubmitField('Yes')
 

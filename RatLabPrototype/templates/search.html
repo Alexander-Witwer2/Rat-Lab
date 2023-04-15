@@ -136,7 +136,11 @@
           <td>{{ rat.num_litters }} </td>
           <td>{{ rat.date_added_to_colony }} </td>
           <td>{{ rat.num_litters_with_defects }} </td>
-          <td>{{ rat.experiment }} </td>
+          {% if rat.experiment == 0 %}
+            <td>No</td>
+          {% else %}
+            <td>Yes</td>
+          {% endif %}
           <td>{{ rat.manner_of_death }} </td>
           <td>{{ rat.death_date }} </td>
           <form action="/familytree/{{rat.rat_number}}" method="POST">

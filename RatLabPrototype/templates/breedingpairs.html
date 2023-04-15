@@ -72,8 +72,8 @@
         Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
-        <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
-          User Guide</a>
+      <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
+        User Guide</a>
     </div>
   </nav>
 
@@ -152,7 +152,11 @@
           <td>{{ rat.num_times_paired }} </td>
           <td>{{ rat.num_litters }} </td>
           <td>{{ rat.date_added_to_colony }} </td>
-          <td>{{ rat.experiment }}</td>
+          {% if rat.experiment == 0 %}
+          <td>No</td>
+          {% else %}
+          <td>Yes</td>
+          {% endif %}
           <td>{{ rat.num_litters_with_defects }} </td>
           <!-- TODO: add current partner? -->
           <form action="/familytree/{{rat.rat_number}}" method="POST">

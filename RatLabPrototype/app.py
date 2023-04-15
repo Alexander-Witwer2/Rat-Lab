@@ -124,6 +124,7 @@ class EditRatForm(FlaskForm):
     experiment = BooleanField()
     sire = StringField('Sire')
     dam = StringField('Dam')
+    status = SelectField(default="Empty", choices=[('Empty', ''), ('Alive', 'Alive'), ('Euthanized', 'Dead: euthanized'), ('Unexpected', 'Dead: unexpected'), ('Transferred', 'Transferred')])
     update = SubmitField('Update')
     
 class ReportDeathForm(FlaskForm):
@@ -320,9 +321,9 @@ def editRecords():
             delta = relativedelta.relativedelta(date.today(), form.birthdate.data)
             age = delta.months + (delta.years * 12)
             rat.age_months = age
-        if(form.last_paired_date != None):
+        if(form.last_paired_date.data != None):
             rat.last_paired_date = form.last_paired_date.data
-        if(form.last_litter_date != None):
+        if(form.last_litter_date.data != None):
             rat.last_litter_date = form.last_litter_date.data
         if(form.weaned_date.data != None):
             rat.weaned_date = form.weaned_date.data
@@ -342,6 +343,8 @@ def editRecords():
         if(form.dam.data != ''):
             rat.dam = form.dam.data
             fillGenealogyData(number, rat.sire, form.dam.data)
+        if(form.status.data != "Empty" and form.status.data != rat.manner_of_death):
+            rat.manner_of_death = form.status.data
          
         db.session.commit()
         

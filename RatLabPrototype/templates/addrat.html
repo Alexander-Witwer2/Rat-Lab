@@ -94,9 +94,12 @@
         <p>Birthdate:</p>
         {{form.birthdate(class="date")}}
         <br>
-        {{ form.sire(class="inputtext", placeholder="Sire")}}
+        <p>Check the box if the rat was from the supplier:</p>
+        {{ form.supplierRat (class="checkbox") }}
+        <p>Fill out the sire and dam fields if the rat was born in the colony:</p>
+        {{ form.sire(placeholder="Sire Number (ex. 100)")}}
         <br>
-        {{ form.dam(class="inputtext", placeholder="Dam")}}
+        {{ form.dam(placeholder="Dam Number (ex. 100)")}}
         <br>
         <p>Date the rat was weaned:</p>
         {{ form.weanedDate(class="date")}}

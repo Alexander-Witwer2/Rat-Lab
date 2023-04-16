@@ -103,10 +103,11 @@ def load_user(username):
 class AddRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
     birthdate = DateField()
-    sire = StringField('Sire')
-    dam = StringField('Dam')
+    supplierRat = BooleanField()
+    sire = IntegerField('Sire')
+    dam = IntegerField()
     weanedDate = DateField()
-    dateAddedToColony = DateField(default=date.today())
+    dateAddedToColony = DateField()
     experiment = BooleanField()
     addButton = SubmitField('Add Rat')       
 
@@ -197,12 +198,8 @@ def addRat():
     if(Admins.query.get(current_user.username) == None):
         return redirect(url_for("accessdenied"))
     form = AddRatForm()
-    
-    date_Check = False
-    sire_Check = False
-    dam_Check = False
-    
-    if(request.method == "POST"):
+
+    if(request.method == "POST"):      
         rat = Rat()
         rat.sex = form.sex.data
         date_Check = dateCheck(form.birthdate.data)
@@ -218,32 +215,46 @@ def addRat():
         date_Check = dateCheck(form.dateAddedToColony.data)
         if(date_Check != False) :
             rat.date_added_to_colony = form.dateAddedToColony.data
+            
         rat.current_partner = "00X"
         rat.num_litters_with_defects = 0
         rat.experiment = int(form.experiment.data)
         rat.manner_of_death = "Alive"
         rat.death_date = date(1900, 1, 1)
-        sire_Check = sireCheck(form.sire.data)
-        if(sire_Check != False) :
-            rat.sire = form.sire.data
-        dam_Check = damCheck(form.dam.data)
-        if(dam_Check != False) :
-            rat.dam = form.dam.data
-
+        
+        ratNumber = ''
         if(rat.sex == "Female"):
             highestNumberFemale = db.session.execute(db.select(Rat.rat_number).
                 where(Rat.sex=="Female").order_by(cast(Rat.rat_number, Integer).
                 desc())).all()[0].rat_number[:-1]          
             number = int(highestNumberFemale) + 1
-            rat.rat_number = str(number) + "F"
+            ratNumber = rat.rat_number = str(number) + "F"
         else:
             highestNumberMale = db.session.execute(db.select(Rat.rat_number).
                 where(Rat.sex=="Male").order_by(cast(Rat.rat_number, Integer).
                 desc())).all()[0].rat_number[:-1]            
             number = int(highestNumberMale) + 1
-            rat.rat_number = str(number) + "M"
-        
-        rat.rat_name = rat.rat_number + rat.sire[:-1] + rat.dam[:-1]
+            ratNumber = rat.rat_number = str(number) + "M"
+
+        if(form.supplierRat.data == True and (form.sire.data != None or form.dam.data != None)):
+            print("Error: a rat cannot be from the supplier and from the colony.")
+            return render_template("addrat.html", form=form, user=current_user.username)
+
+        if(form.supplierRat.data == True):
+            rat.sire = "EN"
+            rat.dam = "EN"
+            rat.rat_name = ratNumber + "ENEN"
+        else:
+            sire = str(form.sire.data) + "M"
+            dam = str(form.dam.data) + "F" 
+            if(verifySireAndDam(sire, dam)):
+                rat.sire = sire
+                rat.dam = dam
+                rat.rat_name = ratNumber + sire[:-1] + dam[:-1]
+            else:
+                print("Error: invalid parents")
+                return render_template("addrat.html", form=form, user=current_user.username)
+
         delta = relativedelta.relativedelta(date.today(), form.birthdate.data)
         age = delta.months + (delta.years * 12)
         rat.age_months = age
@@ -355,6 +366,11 @@ def editRecords():
     
     if(request.method == "POST"):
         number = str(form.number.data) + form.sex.data[0]
+        isValidRat = ratIDCheck(number)
+        if (not isValidRat):
+            print("Error: rat does not exist")
+            return redirect(url_for("search"))
+        
         rat = db.session.query(Rat).filter(Rat.rat_number == number).one()
         
         if(form.birthdate.data != None):
@@ -907,6 +923,10 @@ def ratIDCheck(number):
 
 
 # this combines sireCheck, damCheck, and enCheck
+# does NOT verify that they are alive, only that they 
+# are valid rat numbers and have had litters so could be the parents of a rat
+# unfortunately, due to not having time to implement a pairing table to track pairings,
+# this is the best I can do
 def verifySireAndDam(sire, dam):
     if(sire == "EN" and dam == "EN"): # case ENEN rats
         return True
@@ -925,13 +945,13 @@ def verifySireAndDam(sire, dam):
     return True
 
 #Check to ensure date is not in the future
-def dateCheck(date) :
+def dateCheck(input_date) :
     
     blocked = date.today()
-    print(str(date))
+    print(str(input_date))
     print(str(blocked))
     
-    if date >= blocked:
+    if input_date >= blocked:
         dCheck = False
         print(str("Error: Date cannot be in the future."))
         #return "Error: Date cannot be in the future."

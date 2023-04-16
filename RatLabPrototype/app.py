@@ -197,11 +197,11 @@ def addRat():
     if(Admins.query.get(current_user.username) == None):
         return redirect(url_for("accessdenied"))
     form = AddRatForm()
-	
+    
     date_Check = False
     sire_Check = False
     dam_Check = False
-	
+    
     if(request.method == "POST"):
         rat = Rat()
         rat.sex = form.sex.data
@@ -352,7 +352,7 @@ def editRecords():
     dam_Check = False
     date_Check = False
     en_Check = 0
-	
+    
     if(request.method == "POST"):
         number = str(form.number.data) + form.sex.data[0]
         rat = db.session.query(Rat).filter(Rat.rat_number == number).one()
@@ -398,20 +398,20 @@ def editRecords():
             rat.num_litters_with_defects = form.num_litters_with_defects.data
         if(form.experiment.data != None):
             rat.experiment = form.experiment.data
-		#to-do: comment out prints used for testing inputs
+        #to-do: comment out prints used for testing inputs
         if(form.sire.data != ''):
             print(str("Calling sire check"))
             sire_Check = sireCheck(form.sire.data)
             print(str(sire_Check))
             en_Check = enCheck(form.sire.data, form.dam.data)
             print(str(en_Check))
-			#Case 1: Valid sire & both sire/dam input as EN
+            #Case 1: Valid sire & both sire/dam input as EN
             if (sire_Check != False and en_Check == 1) :
                 rat.sire = form.sire.data
                 #fillGenealogyData(number, form.sire.data, rat.dam)
                 updateName(number, form.sire.data, form.dam.data)
-			#Case 2: Valid sire & both sire/dam input NOT as EN
-			# -if statement to allow change of EN entries
+            #Case 2: Valid sire & both sire/dam input NOT as EN
+            # -if statement to allow change of EN entries
             elif (sire_Check != False and en_Check == 2) :
                 if (rat.sire == 'EN' or rat.dam == 'EN') :
                   rat.sire = form.sire.data
@@ -421,7 +421,7 @@ def editRecords():
                   rat.sire = form.sire.data
                   #fillGenealogyData(number, form.sire.data, rat.dam)
                   updateName(number, form.sire.data, rat.dam)
-			#Case 3: Valid sire & inputs not a set of paired EN
+            #Case 3: Valid sire & inputs not a set of paired EN
             elif (sire_Check != False and en_Check == 3) :
                 print(str("Error: EN must pair with EN"))
         if(form.dam.data != ''):
@@ -487,8 +487,8 @@ def recordTransfer():
     
     if(request.method == "POST") :
         rat_number =  str(form.number.data) + form.sex.data[0]
-        ratCheck = ratIDCheck(form.number.data)
-        if(rat_number in ratCheck) :
+        isValidRat = ratIDCheck(rat_number)
+        if(isValidRat) :
           rat = Rat.query.get(rat_number)
           rat.manner_of_death = "Transferred"
           db.session.commit()
@@ -508,9 +508,9 @@ def reportLitter():
     
     if(request.method == "POST") :
         rat_number = str(form.number.data) + form.sex.data[0]
-        ratCheck = ratIDCheck(form.number.data)
-		
-        if(rat_number in ratCheck):
+        isValidRat = ratIDCheck(rat_number)
+        
+        if(isValidRat):
             rat = Rat.query.get(rat_number)
             #References drop down menu options for if litter has defects or not
             if(form.reportLittersWithDefects.data != "No") :
@@ -548,16 +548,15 @@ def reportDeath():
         return redirect(url_for("accessdenied"))
     form = ReportDeathForm()
     dCheck = False
-	
+    
     if(request.method == "POST"):       
         rat_number = str(form.number.data) + form.sex.data[0]
  
-        ratCheck = ratIDCheck(form.number.data)
+        isValidRat = ratIDCheck(rat_number)
         
-        if(rat_number in ratCheck):
+        if(isValidRat):
            rat = Rat.query.get(rat_number)
            rat.manner_of_death = form.mannerOfDeath.data
-		   
            dCheck = dateCheck(form.deathDate.data)
            if dCheck != False :
               rat.death_date = form.deathDate.data
@@ -877,7 +876,7 @@ def updateName(new_rat_number, sire_number, dam_number) :
     if(sire_number == 'EN' and dam_number == 'EN') :
         new_rat = Rat.query.get(new_rat_number)
         new_rat.rat_name = new_rat.rat_number + sire_number + dam_number
-		
+        
         print(str(new_rat.rat_number))
         print(str(sire_number))
         print(str(dam_number))	
@@ -886,37 +885,39 @@ def updateName(new_rat_number, sire_number, dam_number) :
         new_rat = Rat.query.get(new_rat_number)
         sire = Rat.query.get(sire_number)
         dam = Rat.query.get(dam_number)
-	
+    
         new_rat.rat_name = new_rat.rat_number + sire.rat_number[:-1] + dam.rat_number[:-1]
         print(str(new_rat.rat_number))
         print(str(sire.rat_number))
         print(str(dam.rat_number))	
         print(str(new_rat.rat_name))
     db.session.commit()
+
 #Check if rat ID exists in database	
-def ratIDCheck(number) :
-
-	ratCheck = [number for number, in db.session.query(Rat.rat_number)]
-	
-	return ratCheck
-
+def ratIDCheck(number):
+    ratNumbers = [rat for rat, in db.session.query(Rat.rat_number)]
+    if (number in ratNumbers):
+        return True
+    else:
+        return False
+        
 #Check to ensure date is not in the future
 def dateCheck(date) :
-	
-	blocked = date.today()
-	print(str(date))
-	print(str(blocked))
-	
-	if date >= blocked:
-		dCheck = False
-		print(str("Error: Date cannot be in the future."))
-		#return "Error: Date cannot be in the future."
-	else:
-		#return "Date not blocked"
-		dCheck = True
-		print(str("Date not blocked"))
-	
-	return dCheck
+    
+    blocked = date.today()
+    print(str(date))
+    print(str(blocked))
+    
+    if date >= blocked:
+        dCheck = False
+        print(str("Error: Date cannot be in the future."))
+        #return "Error: Date cannot be in the future."
+    else:
+        #return "Date not blocked"
+        dCheck = True
+        print(str("Date not blocked"))
+    
+    return dCheck
 
 def sireCheck(sire) :
 
@@ -927,9 +928,9 @@ def sireCheck(sire) :
     else :
         rat_Check = False
         print(str("Error: Invalid Sire"))
-	
+    
     return rat_Check
-	
+    
 def damCheck(dam) :
 
     ratCheck = [dam for dam, in db.session.query(Rat.dam)]
@@ -939,9 +940,9 @@ def damCheck(dam) :
     else :
         rat_Check = False
         print(str("Error: Invalid Dam"))
-	
+    
     return rat_Check
-	
+    
 def enCheck(sire, dam) :
 
     if(sire == 'EN' and dam == 'EN') :

@@ -488,16 +488,20 @@ def recordTransfer():
     if(request.method == "POST") :
         rat_number =  str(form.number.data) + form.sex.data[0]
         isValidRat = ratIDCheck(rat_number)
-        if(isValidRat) :
-          rat = Rat.query.get(rat_number)
-          rat.manner_of_death = "Transferred"
-          db.session.commit()
-        else :
-          print(str("Error: Not an existing rat."))
+        if(not isValidRat):
+            print(str("Error: Not an existing rat."))
+        else:
+            rat = Rat.query.get(rat_number)
+            if(rat.manner_of_death != "Alive"):
+                print("Error: can't transfer a deceased or transferred rat.")
+                return render_template("recordtransfer.html", form=form, user=current_user.username)
+            rat.manner_of_death = "Transferred"
+            db.session.commit()
         
         return render_template("recordtransfer.html", form=form, user=current_user.username)
     else:
         return render_template("recordtransfer.html", form=form, user=current_user.username)
+
 
 @app.route("/reportlitter", methods=['POST', 'GET'])
 @login_required
@@ -507,38 +511,33 @@ def reportLitter():
     form = ReportLitterForm()
     
     if(request.method == "POST") :
-        rat_number = str(form.number.data) + form.sex.data[0]
-        isValidRat = ratIDCheck(rat_number)
-        
-        if(isValidRat):
-            rat = Rat.query.get(rat_number)
-            #References drop down menu options for if litter has defects or not
-            if(form.reportLittersWithDefects.data != "No") :
-                rat.num_litters_with_defects = rat.num_litters_with_defects + 1
-                rat.num_litters = rat.num_litters + 1
-                db.session.commit()
-            else:
-                rat.num_litters = rat.num_litters + 1
-                db.session.commit()
-        else:
-            print(str("Error: Not an existing rat."))
         sire_number = str(form.sire.data) + "M"
         dam_number = str(form.dam.data) + "F"
-        #TODO: verify that sire and dam exist
-        sire = Rat.query.get(sire_number)
-        dam = Rat.query.get(dam_number)
-        sire.num_litters = sire.num_litters + 1
-        dam.num_litters = dam.num_litters + 1
-        sire.last_litter_date = form.litterDate.data
-        dam.last_litter_date = form.litterDate.data
-        #References drop down menu options for if litter has defects or not
-        if(form.reportLittersWithDefects.data == "Yes") :
-            sire.num_litters_with_defects = sire.num_litters_with_defects + 1
-            dam.num_litters_with_defects = dam.num_litters_with_defects + 1
+        validPairing = verifySireAndDam(sire_number, dam_number)        
+        if(not validPairing):
+            print("Error: this is not a valid pairing.")
+        if(not dateCheck(form.litterDate.data)):
+            print("Error: can't report a litter born in the future.")
+        else:
+            sire = Rat.query.get(sire_number)
+            dam = Rat.query.get(dam_number)
 
+            if(sire.manner_of_death != "Alive"):
+                print("Error: can't report a litter if the sire is deceased or transferred.")
+                return render_template("reportlitter.html", form=form, user=current_user.username)
+            if(dam.manner_of_death != "Alive"):
+                print("Error: can't report a litter if the dam is deceased or transferred.")
+                return render_template("reportlitter.html", form=form, user=current_user.username)
+
+            sire.num_litters = sire.num_litters + 1
+            dam.num_litters = dam.num_litters + 1
+            sire.last_litter_date = form.litterDate.data
+            dam.last_litter_date = form.litterDate.data
+            #References drop down menu options for if litter has defects or not
+            if(form.reportLittersWithDefects.data == "Yes") :
+                sire.num_litters_with_defects = sire.num_litters_with_defects + 1
+                dam.num_litters_with_defects = dam.num_litters_with_defects + 1
         db.session.commit()
-
-
     return render_template("reportlitter.html", form=form, user=current_user.username)
 
 @app.route("/reportdeath", methods=['POST', 'GET'])
@@ -556,6 +555,8 @@ def reportDeath():
         
         if(isValidRat):
            rat = Rat.query.get(rat_number)
+           if(rat.manner_of_death != "Alive"):
+               print("Error: can't report the death of a deceased or transferred rat.")
            rat.manner_of_death = form.mannerOfDeath.data
            dCheck = dateCheck(form.deathDate.data)
            if dCheck != False :
@@ -896,11 +897,30 @@ def updateName(new_rat_number, sire_number, dam_number) :
 #Check if rat ID exists in database	
 def ratIDCheck(number):
     ratNumbers = [rat for rat, in db.session.query(Rat.rat_number)]
-    if (number in ratNumbers):
+    if (number in ratNumbers or number == "EN"):
         return True
     else:
         return False
-        
+
+
+# this combines sireCheck, damCheck, and enCheck
+def verifySireAndDam(sire, dam):
+    if(sire == "EN" and dam == "EN"): # case ENEN rats
+        return True
+    if(sire == "EN" or dam == "EN"): # if one rat is EN but not the other, error
+        return False
+    if(not ratIDCheck(sire) or not ratIDCheck(dam)): # case one of the rats is invalid
+        return False
+    sire = Rat.query.get(sire)
+    dam = Rat.query.get(dam)
+    
+    # can't verify that sire and dam were paired *together* b/c no pairing table
+    # so doing the best I can with the information I have.
+    if(sire.current_partner == "00X" or dam.current_partner == "00X" or 
+       sire.num_litters == 0 or dam.num_litters == 0):
+        return False
+    return True
+
 #Check to ensure date is not in the future
 def dateCheck(date) :
     

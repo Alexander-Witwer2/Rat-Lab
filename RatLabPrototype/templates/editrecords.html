@@ -106,6 +106,7 @@
     </div>
 
     <div id="boxes" style="display: none;">
+      <p>Enter data to update.  Fields left blank will not be updated.</p>
       <label class="checkbox" for="birth"> Change Birthdate
         <span style="display: block;"> {{ form.birthdate }} </span>
       </label><br>
@@ -133,11 +134,14 @@
       <label class="checkbox" for="exp"> Was the rat used in an experiment?
         <span style="display: block;">{{ form.experiment (class="checkbox", default="unchecked")}}</span>
       </label><br>
+      <label class="checkbox" for="exp"> Is the rat from the supplier?
+        <span style="display: block;">{{ form.supplierRat (class="checkbox", default="unchecked")}}</span>
+      </label><br>
       <label class="checkbox" for="ratSire"> Edit the Rat's Sire
-        <span style="display: block;">{{ form.sire }} </span>
+        <span style="display: block;">{{ form.sire (placeholder="Sire Number (ex. 100)")}} </span>
       </label><br>
       <label class="checkbox" for="ratDam"> Edit the Rat's Dam
-        <span style="display: block;">{{ form.dam }} </span>
+        <span style="display: block;">{{ form.dam (placeholder="Dam Number (ex. 100)")}} </span>
       </label><br>
       <label class="checkbox" for="ratStatus"> Edit the Rat's status
         <span style="display: block;">{{ form.status }} </span>

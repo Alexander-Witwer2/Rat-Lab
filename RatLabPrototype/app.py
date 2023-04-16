@@ -104,10 +104,10 @@ class AddRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
     birthdate = DateField()
     supplierRat = BooleanField()
-    sire = IntegerField('Sire')
+    sire = IntegerField()
     dam = IntegerField()
     weanedDate = DateField()
-    dateAddedToColony = DateField()
+    dateAddedToColony = DateField(default=date.today())
     experiment = BooleanField()
     addButton = SubmitField('Add Rat')       
 
@@ -123,8 +123,9 @@ class EditRatForm(FlaskForm):
     date_added_to_colony = DateField()
     num_litters_with_defects = IntegerField()
     experiment = BooleanField()
-    sire = StringField('Sire')
-    dam = StringField('Dam')
+    supplierRat = BooleanField()
+    sire = IntegerField()
+    dam = IntegerField()
     status = SelectField(default="Empty", choices=[('Empty', ''), ('Alive', 'Alive'), ('Euthanized', 'Dead: euthanized'), ('Unexpected', 'Dead: unexpected'), ('Transferred', 'Transferred')])
     update = SubmitField('Update')
     
@@ -414,53 +415,48 @@ def editRecords():
             rat.num_litters_with_defects = form.num_litters_with_defects.data
         if(form.experiment.data != None):
             rat.experiment = form.experiment.data
-        #to-do: comment out prints used for testing inputs
-        if(form.sire.data != ''):
-            print(str("Calling sire check"))
-            sire_Check = sireCheck(form.sire.data)
-            print(str(sire_Check))
-            en_Check = enCheck(form.sire.data, form.dam.data)
-            print(str(en_Check))
-            #Case 1: Valid sire & both sire/dam input as EN
-            if (sire_Check != False and en_Check == 1) :
-                rat.sire = form.sire.data
-                #fillGenealogyData(number, form.sire.data, rat.dam)
-                updateName(number, form.sire.data, form.dam.data)
-            #Case 2: Valid sire & both sire/dam input NOT as EN
-            # -if statement to allow change of EN entries
-            elif (sire_Check != False and en_Check == 2) :
-                if (rat.sire == 'EN' or rat.dam == 'EN') :
-                  rat.sire = form.sire.data
-                  #fillGenealogyData(number, form.sire.data, rat.dam)
-                  updateName(number, form.sire.data, form.dam.data)
-                else :
-                  rat.sire = form.sire.data
-                  #fillGenealogyData(number, form.sire.data, rat.dam)
-                  updateName(number, form.sire.data, rat.dam)
-            #Case 3: Valid sire & inputs not a set of paired EN
-            elif (sire_Check != False and en_Check == 3) :
-                print(str("Error: EN must pair with EN"))
-        if(form.dam.data != ''):
-            print(str("Calling dam check"))
-            dam_Check = damCheck(form.dam.data)
-            print(str(dam_Check))
-            en_Check = enCheck(form.sire.data, form.dam.data)
-            print(str(en_Check))
-            if (dam_Check != False and en_Check == 1) :
-                rat.dam = form.dam.data
-                #fillGenealogyData(number, rat.sire, form.dam.data)
-                updateName(number, form.sire.data, form.dam.data)
-            elif (dam_Check != False and en_Check == 2) :
-                if (rat.sire == 'EN' or rat.dam == 'EN') :
-                  rat.dam = form.dam.data
-                  #fillGenealogyData(number, form.sire.data, rat.dam)
-                  updateName(number, form.sire.data, form.dam.data)
-                else :
-                  rat.dam = form.dam.data
-                  #fillGenealogyData(number, rat.sire, form.dam.data)
-                  updateName(number, rat.sire, form.dam.data)
-            elif (dam_Check != False and en_Check == 3) :
-                print(str("Error: EN must pair with EN"))
+                
+        if(form.supplierRat.data == True and (form.sire.data != None or form.dam.data != None)):
+            print("Error: a rat cannot be from the supplier and from the colony.")
+            return render_template("editrat.html", form=form, user=current_user.username)
+
+        if(form.supplierRat.data == True):
+            rat.sire = "EN"
+            rat.dam = "EN"
+            rat.rat_name = rat.rat_number + "ENEN"
+            fillGenealogyData(rat.rat_number, "EN", "EN")
+        elif (form.sire.data != None and form.dam.data != None):
+            sire = str(form.sire.data) + "M"
+            dam = str(form.dam.data) + "F" 
+            if(sire == rat.rat_number or dam == rat.rat_number):
+                print("Error: a rat cannot be its own sire or dam.")
+                return render_template("editrat.html", form=form, user=current_user.username)
+            if(verifySireAndDam(sire, dam)):
+                rat.sire = sire
+                rat.dam = dam
+                newName = rat.rat_number + sire[:-1] + dam[:-1]
+                rat.rat_name = newName
+                print("sire = " + sire)
+                fillGenealogyData(rat.rat_number, sire, dam)
+        elif (form.sire.data != None):
+            sire = str(form.sire.data) + "M"
+            if(sire == rat.rat_number):
+                print("Error: a rat cannot be its own sire.")
+                return render_template("editrat.html", form=form, user=current_user.username)
+            if(verifySireAndDam(sire, rat.dam)):
+                rat.sire = sire
+                rat.rat_name = rat.rat_number + sire[:-1] + rat.dam
+                fillGenealogyData(rat.rat_number, sire, rat.dam)
+        elif (form.dam.data != None):
+            dam = str(form.dam.data) + "F"
+            if(dam == rat.rat_number):
+                print("Error: a rat cannot be its own dam.")
+                return render_template("editrat.html", form=form, user=current_user.username)
+            if(verifySireAndDam(rat.sire, dam)):
+                rat.dam = dam
+                rat.rat_name = rat.rat_number + rat.sire + dam[:-1]
+                fillGenealogyData(rat.rat_number, rat.sire, dam)        
+        
         if(form.status.data != "Empty" and form.status.data != rat.manner_of_death):
             rat.manner_of_death = form.status.data
          
@@ -518,7 +514,6 @@ def recordTransfer():
     else:
         return render_template("recordtransfer.html", form=form, user=current_user.username)
 
-
 @app.route("/reportlitter", methods=['POST', 'GET'])
 @login_required
 def reportLitter():
@@ -532,8 +527,14 @@ def reportLitter():
         validPairing = verifySireAndDam(sire_number, dam_number)        
         if(not validPairing):
             print("Error: this is not a valid pairing.")
+            # Not restricting to only rats that are currently paired with each other
+            # in case the rat had a litter, then the stakeholder swapped breeding pairs
+            # before they got the chance to record the litter.  If I had time to make a 
+            # pairing table I would restrict to sire and dam paired together 
+            # within the past month, but unfortunately, I don't.
         if(not dateCheck(form.litterDate.data)):
             print("Error: can't report a litter born in the future.")
+            return render_template("reportlitter.html", form=form, user=current_user.username)
         else:
             sire = Rat.query.get(sire_number)
             dam = Rat.query.get(dam_number)
@@ -575,7 +576,8 @@ def reportDeath():
         if(isValidRat):
            rat = Rat.query.get(rat_number)
            if(rat.manner_of_death != "Alive"):
-               print("Error: can't report the death of a deceased or transferred rat.")
+                print("Error: can't report the death of a deceased or transferred rat.")
+                return render_template("reportdeath.html", form=form, user=current_user.username)
            rat.manner_of_death = form.mannerOfDeath.data
            dCheck = dateCheck(form.deathDate.data)
            if dCheck != False :
@@ -591,6 +593,7 @@ def reportDeath():
               db.session.commit()
         else :
             print(str("Error: Not an existing rat."))
+            return render_template("reportdeath.html", form=form, user=current_user.username)
         #TODO: route to confirmation screen instead(?) definitely not search
         return redirect(url_for("search"))
     else:

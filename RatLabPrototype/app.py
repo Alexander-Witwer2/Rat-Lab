@@ -1,6 +1,6 @@
 import jinja2
 
-from flask import Flask, request, redirect, url_for, render_template
+from flask import Flask, request, redirect, url_for, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, BooleanField, SelectField, DateField
@@ -164,6 +164,12 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
     generateButton = SubmitField("View Ancestry")
     
+class AddAdminForm(FlaskForm):
+    newAdminUsername = StringField()
+    currentAdminUsername = StringField()
+    currentAdminPassword = StringField()
+    submitButton = SubmitField("Confirm")
+    
 @app.route("/")
 def default():
     form = LoginForm()
@@ -234,12 +240,25 @@ def addRat():
     else:
         return render_template("addrat.html", form=form, user=current_user.username)
 
-@app.route("/addadmin")
+@app.route("/addadmin", methods=["GET", "POST"])
 @login_required
 def addAdmin():
+    form = AddAdminForm()
     if(Admins.query.get(current_user.username) == None):
         return redirect(url_for("accessdenied"))
-    return render_template("addadmin.html", user=current_user.username)
+    if(request.method == "POST"):
+        if(form.currentAdminUsername.data == current_user.username and 
+           form.currentAdminPassword.data == current_user.password and 
+           User.query.get(form.newAdminUsername.data) != None):
+            newAdmin = Admins()
+            newAdmin.username = form.newAdminUsername.data
+            newAdmin.admin = True
+            db.session.add(newAdmin)
+            db.session.commit()
+            flash("Success!  " + newAdmin.username + " is now an administrator.")
+        else:
+            flash("Something went wrong.  Please try again.")
+    return render_template("addadmin.html", user=current_user.username, form=form)
 
 @app.route("/breedingpairs", methods=['GET', 'POST'])
 @login_required

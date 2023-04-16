@@ -1,14 +1,14 @@
 import jinja2
 
-from flask import Flask, request, redirect, url_for, render_template
+from flask import Flask, request, redirect, url_for, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, BooleanField, SelectField, DateField
 from wtforms.validators import DataRequired
-from datetime import date
+from datetime import date, datetime, timedelta
 from dateutil import relativedelta
 import re
-from sqlalchemy import cast, Integer
+from sqlalchemy import cast, Integer, Date, extract
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 # Initialize Flask
@@ -106,7 +106,7 @@ class AddRatForm(FlaskForm):
     sire = StringField('Sire')
     dam = StringField('Dam')
     weanedDate = DateField()
-    dateAddedToColony = DateField()
+    dateAddedToColony = DateField(default=date.today())
     experiment = BooleanField()
     addButton = SubmitField('Add Rat')       
 
@@ -124,12 +124,13 @@ class EditRatForm(FlaskForm):
     experiment = BooleanField()
     sire = StringField('Sire')
     dam = StringField('Dam')
+    status = SelectField(default="Empty", choices=[('Empty', ''), ('Alive', 'Alive'), ('Euthanized', 'Dead: euthanized'), ('Unexpected', 'Dead: unexpected'), ('Transferred', 'Transferred')])
     update = SubmitField('Update')
     
 class ReportDeathForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
     number = IntegerField()
-    deathDate = DateField()
+    deathDate = DateField(default=date.today())
     mannerOfDeath = SelectField(choices=['Euthanized', 'Unexpected'])
     submit = SubmitField('Yes')
 
@@ -142,10 +143,11 @@ class GenerateBreedingPairsForm(FlaskForm):
     mateDropdown = SelectField()
     recordButton = SubmitField('Yes')
 
-class ReportLitterForm(FlaskForm) :
-    sex = SelectField(choices=['Male', 'Female'])
-    number = IntegerField()
-    reportLittersWithDefects = SelectField(choices=['Yes', 'No'])
+class ReportLitterForm(FlaskForm):
+    sire = IntegerField('Sire')
+    dam = IntegerField('Dam')
+    reportLittersWithDefects = SelectField(default="No", choices=['Yes', 'No'])
+    litterDate = DateField(default=date.today())
     submit = SubmitField('Yes')
     
 class RecordTransferForm(FlaskForm) :
@@ -162,6 +164,12 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
     generateButton = SubmitField("View Ancestry")
     
+class AddAdminForm(FlaskForm):
+    newAdminUsername = StringField()
+    currentAdminUsername = StringField()
+    currentAdminPassword = StringField()
+    submitButton = SubmitField("Confirm")
+    
 @app.route("/")
 def default():
     form = LoginForm()
@@ -171,17 +179,17 @@ def default():
 @login_required
 def dashboard():
     livingRats = len(db.session.execute(db.select(Rat.rat_number).where(
-        (Rat.manner_of_death == "Alive")
-        )
-    ).all())
+        (Rat.manner_of_death == "Alive"))).all())
     
     oldRats = db.session.execute(db.select(Rat.rat_number, Rat.age_months).where(
-        (Rat.manner_of_death == "Alive")
-        )
-    ).all()
+        (Rat.manner_of_death == "Alive")).order_by(cast(Rat.rat_number, Integer).asc())).all()[0:9]
     
+    past30days = date.today() - timedelta(days=30)
+    numLittersInPast30Days = len(db.session.execute(db.session.query(Rat.last_litter_date).filter(Rat.last_litter_date >= past30days)).all())//2
+    users = db.session.execute(db.session.query(User)).all()
+    numUsers = len(users)
     admin = (Admins.query.get(current_user.username) != None)
-    return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats, user=current_user.username, admin=admin)
+    return render_template("dashboard.html", livingRats = livingRats, oldRats = oldRats, user=current_user.username, admin=admin, numUsers=numUsers, numLitters=numLittersInPast30Days)
 
 @app.route("/addrat", methods=['POST', 'GET'])
 @login_required
@@ -247,12 +255,25 @@ def addRat():
     else:
         return render_template("addrat.html", form=form, user=current_user.username)
 
-@app.route("/addadmin")
+@app.route("/addadmin", methods=["GET", "POST"])
 @login_required
 def addAdmin():
+    form = AddAdminForm()
     if(Admins.query.get(current_user.username) == None):
         return redirect(url_for("accessdenied"))
-    return render_template("addadmin.html", user=current_user.username)
+    if(request.method == "POST"):
+        if(form.currentAdminUsername.data == current_user.username and 
+           form.currentAdminPassword.data == current_user.password and 
+           User.query.get(form.newAdminUsername.data) != None):
+            newAdmin = Admins()
+            newAdmin.username = form.newAdminUsername.data
+            newAdmin.admin = True
+            db.session.add(newAdmin)
+            db.session.commit()
+            flash("Success!  " + newAdmin.username + " is now an administrator.")
+        else:
+            flash("Something went wrong.  Please try again.")
+    return render_template("addadmin.html", user=current_user.username, form=form)
 
 @app.route("/breedingpairs", methods=['GET', 'POST'])
 @login_required
@@ -268,6 +289,7 @@ def breedingPairs():
             return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=possibleMates, user=current_user.username)
              
         else:
+            possibleMates.reverse()
             form.mateDropdown.choices = possibleMates
             query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates)).order_by(cast(Rat.rat_number, Integer).desc())).scalars()   
 
@@ -423,6 +445,8 @@ def editRecords():
                   updateName(number, rat.sire, form.dam.data)
             elif (dam_Check != False and en_Check == 3) :
                 print(str("Error: EN must pair with EN"))
+        if(form.status.data != "Empty" and form.status.data != rat.manner_of_death):
+            rat.manner_of_death = form.status.data
          
         db.session.commit()
         
@@ -498,6 +522,22 @@ def reportLitter():
                 db.session.commit()
         else:
             print(str("Error: Not an existing rat."))
+        sire_number = str(form.sire.data) + "M"
+        dam_number = str(form.dam.data) + "F"
+        #TODO: verify that sire and dam exist
+        sire = Rat.query.get(sire_number)
+        dam = Rat.query.get(dam_number)
+        sire.num_litters = sire.num_litters + 1
+        dam.num_litters = dam.num_litters + 1
+        sire.last_litter_date = form.litterDate.data
+        dam.last_litter_date = form.litterDate.data
+        #References drop down menu options for if litter has defects or not
+        if(form.reportLittersWithDefects.data == "Yes") :
+            sire.num_litters_with_defects = sire.num_litters_with_defects + 1
+            dam.num_litters_with_defects = dam.num_litters_with_defects + 1
+
+        db.session.commit()
+
 
     return render_template("reportlitter.html", form=form, user=current_user.username)
 
@@ -538,8 +578,9 @@ def reportDeath():
         return render_template("reportdeath.html", form=form, user=current_user.username)
     
 @app.route("/userguide")
+@login_required
 def userGuide():
-    return render_template("userguide.html")
+    return render_template("userguide.html", user=current_user.username)
 
 # this function MUST be called *after* a new rat has been added to the database
 # it fills in the new rat's genealogical fields
@@ -550,40 +591,74 @@ def userGuide():
 def fillGenealogyData(new_rat_number, sire_number, dam_number):
     
     new_rat = Rat.query.get(new_rat_number)
-    sire = Rat.query.get(sire_number)
-    dam = Rat.query.get(dam_number)
-
-    # fill in new rat's paternal side
-    new_rat.pgsire = sire.sire
-    new_rat.pgdam = sire.dam
-    new_rat.pg11sire = sire.pgsire
-    new_rat.pg11dam = sire.pgdam
-    new_rat.pg12sire = sire.mgsire
-    new_rat.pg12dam = sire.mgdam
-    new_rat.pg21sire = sire.pg11sire
-    new_rat.pg21dam = sire.pg11dam
-    new_rat.pg22sire = sire.pg12sire
-    new_rat.pg22dam = sire.pg12dam
-    new_rat.pg23sire = sire.mg11sire
-    new_rat.pg23dam = sire.mg11dam
-    new_rat.pg24sire = sire.mg12sire
-    new_rat.pg24dam = sire.mg12dam
     
-    # # fill in new rat's maternal side
-    new_rat.mgsire = dam.sire
-    new_rat.mgdam = dam.dam
-    new_rat.mg11sire = dam.pgsire
-    new_rat.mg11dam = dam.pgdam
-    new_rat.mg12sire = dam.mgsire
-    new_rat.mg12dam = dam.mgdam
-    new_rat.mg21sire = dam.pg11sire
-    new_rat.mg21dam = dam.pg11dam
-    new_rat.mg22sire = dam.pg12sire
-    new_rat.mg22dam = dam.pg12dam
-    new_rat.mg23sire = dam.mg11sire
-    new_rat.mg23dam = dam.mg11dam
-    new_rat.mg24sire = dam.mg12sire
-    new_rat.mg24dam = dam.mg12dam
+    # if rat is ENEN, fill in ancestry data with all ENs
+    if(sire_number == "EN" and dam_number == "EN"):
+        new_rat.pgsire = "EN"
+        new_rat.pgdam = "EN"
+        new_rat.pg11sire = "EN"
+        new_rat.pg11dam = "EN"
+        new_rat.pg12sire = "EN"
+        new_rat.pg12dam = "EN"
+        new_rat.pg21sire = "EN"
+        new_rat.pg21dam = "EN"
+        new_rat.pg22sire = "EN"
+        new_rat.pg22dam = "EN"
+        new_rat.pg23sire = "EN"
+        new_rat.pg23dam = "EN"
+        new_rat.pg24sire = "EN"
+        new_rat.pg24dam = "EN"
+    
+        new_rat.mgsire = "EN"
+        new_rat.mgdam = "EN"
+        new_rat.mg11sire = "EN"
+        new_rat.mg11dam = "EN"
+        new_rat.mg12sire = "EN"
+        new_rat.mg12dam = "EN"
+        new_rat.mg21sire = "EN"
+        new_rat.mg21dam = "EN"
+        new_rat.mg22sire = "EN"
+        new_rat.mg22dam = "EN"
+        new_rat.mg23sire = "EN"
+        new_rat.mg23dam = "EN"
+        new_rat.mg24sire = "EN"
+        new_rat.mg24dam = "EN"
+
+    else: # rat is from colony, get data from database
+        sire = Rat.query.get(sire_number)
+        dam = Rat.query.get(dam_number)
+
+        # fill in new rat's paternal side
+        new_rat.pgsire = sire.sire
+        new_rat.pgdam = sire.dam
+        new_rat.pg11sire = sire.pgsire
+        new_rat.pg11dam = sire.pgdam
+        new_rat.pg12sire = sire.mgsire
+        new_rat.pg12dam = sire.mgdam
+        new_rat.pg21sire = sire.pg11sire
+        new_rat.pg21dam = sire.pg11dam
+        new_rat.pg22sire = sire.pg12sire
+        new_rat.pg22dam = sire.pg12dam
+        new_rat.pg23sire = sire.mg11sire
+        new_rat.pg23dam = sire.mg11dam
+        new_rat.pg24sire = sire.mg12sire
+        new_rat.pg24dam = sire.mg12dam
+        
+        # # fill in new rat's maternal side
+        new_rat.mgsire = dam.sire
+        new_rat.mgdam = dam.dam
+        new_rat.mg11sire = dam.pgsire
+        new_rat.mg11dam = dam.pgdam
+        new_rat.mg12sire = dam.mgsire
+        new_rat.mg12dam = dam.mgdam
+        new_rat.mg21sire = dam.pg11sire
+        new_rat.mg21dam = dam.pg11dam
+        new_rat.mg22sire = dam.pg12sire
+        new_rat.mg22dam = dam.pg12dam
+        new_rat.mg23sire = dam.mg11sire
+        new_rat.mg23dam = dam.mg11dam
+        new_rat.mg24sire = dam.mg12sire
+        new_rat.mg24dam = dam.mg12dam
     
     db.session.commit()
     return 

@@ -74,8 +74,8 @@
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
       {% endif %}
-        <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
-          User Guide</a>
+      <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
+        User Guide</a>
     </div>
   </nav>
 
@@ -128,17 +128,21 @@
           <td>{{ rat.rat_name }} </td>
           <td>{{ rat.sex }} </td>
           <td>{{ rat.current_partner }}</td>
-          <td>{{ rat.birthdate }} </td>
+          <td>{{ rat.birthdate.strftime('%m-%d-%Y') }} </td>
           <td>{{ rat.weaned_date }} </td>
-          <td>{{ rat.last_paired_date }} </td>
-          <td>{{ rat.last_litter_date }} </td>
+          <td>{{ rat.last_paired_date.strftime('%m-%d-%Y') }} </td>
+          <td>{{ rat.last_litter_date.strftime('%m-%d-%Y') }} </td>
           <td>{{ rat.num_times_paired }} </td>
           <td>{{ rat.num_litters }} </td>
-          <td>{{ rat.date_added_to_colony }} </td>
+          <td>{{ rat.date_added_to_colony.strftime('%m-%d-%Y') }} </td>
           <td>{{ rat.num_litters_with_defects }} </td>
-          <td>{{ rat.experiment }} </td>
+          {% if rat.experiment == 0 %}
+          <td>No</td>
+          {% else %}
+          <td>Yes</td>
+          {% endif %}
           <td>{{ rat.manner_of_death }} </td>
-          <td>{{ rat.death_date }} </td>
+          <td>{{ rat.death_date.strftime('%m-%d-%Y') }} </td>
           <form action="/familytree/{{rat.rat_number}}" method="POST">
             <td>{{ form.generateButton (type="submit")}} </td>
           </form>

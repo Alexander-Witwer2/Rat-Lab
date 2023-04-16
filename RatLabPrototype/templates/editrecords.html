@@ -37,7 +37,7 @@
   <nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
     <div class="w3-container w3-row">
       <div class="w3-col s4">
-        <img src="C:\Users\andre\Desktop\Capstone Repo\Rat-Lab\RatLabPrototype\Assets\kentstatelogo.png"
+        <img src="/static/kentstatelogo.png"
           class="w3-circle w3-margin-right" style="width:90px">
       </div>
       <div class="w3-col s8 w3-bar">
@@ -100,7 +100,7 @@
               title="Enter a Rat's Number"> -->
             {{ form.number }}
             <!-- {{ form.update }} -->
-            <button type="button" class="w3-button" onclick="bringChecks()">Continue</button>
+            <button type="button" onclick="bringChecks()">Continue</button>
         </div>
       </div>
     </div>
@@ -143,14 +143,14 @@
         <span style="display: block;">{{ form.status }} </span>
       </label><br>
       <!-- <input type="submit" value="Update" class="w3-button"></input> -->
-      <button type="button" class="w3-button" onclick="areYouSure()">Update</button>
+      <button type="button" onclick="areYouSure()">Update</button>
       <div id="myModal" class="modal">
 
         <div class="modal-content">
           <p id="modalText"></p>
           {{form.update}}
           <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
-          <button class="w3-button" onclick="closeModal()">No</button>
+          <button onclick="closeModal()">No</button>
         </div>
 
       </div>

@@ -387,9 +387,13 @@ def recordTransfer():
     
     if(request.method == "POST") :
         rat_number =  str(form.number.data) + form.sex.data[0]
-        rat = Rat.query.get(rat_number)
-        rat.manner_of_death = "Transferred"
-        db.session.commit()
+        ratCheck = ratIDCheck(form.number.data)
+        if(rat_number in ratCheck) :
+          rat = Rat.query.get(rat_number)
+          rat.manner_of_death = "Transferred"
+          db.session.commit()
+        else :
+            print(str("Error: Not an existing rat."))
         
         return render_template("recordtransfer.html", form=form, user=current_user.username)
     else:
@@ -405,7 +409,7 @@ def reportLitter():
     if(request.method == "POST") :
         sire_number = str(form.sire.data) + "M"
         dam_number = str(form.dam.data) + "F"
-        
+        #TODO: verify that sire and dam exist
         sire = Rat.query.get(sire_number)
         dam = Rat.query.get(dam_number)
         sire.num_litters = sire.num_litters + 1
@@ -419,6 +423,7 @@ def reportLitter():
 
         db.session.commit()
 
+
     return render_template("reportlitter.html", form=form, user=current_user.username)
 
 @app.route("/reportdeath", methods=['POST', 'GET'])
@@ -427,23 +432,31 @@ def reportDeath():
     if(Admins.query.get(current_user.username) == None):
         return redirect(url_for("accessdenied"))
     form = ReportDeathForm()
-    
+    dCheck = False
+	
     if(request.method == "POST"):       
         rat_number = str(form.number.data) + form.sex.data[0]
  
-        rat = Rat.query.get(rat_number)
-        rat.manner_of_death = form.mannerOfDeath.data
-        rat.death_date = form.deathDate.data
-        # don't have to update the inputted rat's partner because that rat is now deceased 
-        # so it doesn't matter who they're paired with.  their current partner is still alive
-        # though, so we have to update that rat's partner to DEC because they will be repaired
-        # and it matters who they're paired with  
-        if(rat.current_partner != '' and rat.current_partner != "UNK" 
-           and rat.current_partner != "DEC" and rat.current_partner != "00X"):
-            current_partner = Rat.query.get(rat.current_partner)
-            current_partner.current_partner = "DEC"
-        db.session.commit()
+        ratCheck = ratIDCheck(form.number.data)
         
+        if(rat_number in ratCheck):
+           rat = Rat.query.get(rat_number)
+           rat.manner_of_death = form.mannerOfDeath.data
+		   
+           dCheck = dateCheck(form.deathDate.data)
+           if dCheck != False :
+              rat.death_date = form.deathDate.data
+              # don't have to update the inputted rat's partner because that rat is now deceased 
+              # so it doesn't matter who they're paired with.  their current partner is still alive
+              # though, so we have to update that rat's partner to DEC because they will be repaired
+              # and it matters who they're paired with  
+              if(rat.current_partner != '' and rat.current_partner != "UNK" 
+                and rat.current_partner != "DEC" and rat.current_partner != "00X"):
+                 current_partner = Rat.query.get(rat.current_partner)
+                 current_partner.current_partner = "DEC"
+              db.session.commit()
+        else :
+            print(str("Error: Not an existing rat."))
         #TODO: route to confirmation screen instead(?) definitely not search
         return redirect(url_for("search"))
     else:
@@ -743,5 +756,29 @@ def updateAges():
         
     db.session.commit()
 
+#Check if rat ID exists in database	
+def ratIDCheck(number) :
+
+	ratCheck = [number for number, in db.session.query(Rat.rat_number)]
+	
+	return ratCheck
+
+#Check to ensure date is not in the future
+def dateCheck(date) :
+	
+	blocked = date.today()
+	print(str(date))
+	print(str(blocked))
+	
+	if date >= blocked:
+		dCheck = False
+		print(str("Error: Date cannot be in the future."))
+		#return "Error: Date cannot be in the future."
+	else:
+		#return "Date not blocked"
+		dCheck = True
+		print(str("Date not blocked"))
+	
+	return dCheck
 if __name__ == '__main__':
     app.run()

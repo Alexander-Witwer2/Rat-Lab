@@ -92,7 +92,7 @@
           <div class="w3-twothird">
             {{ form.sex }}
             {{ form.number (placeholder="Rat's number") }}
-            <button type="button" class="w3-button" onclick="transferQuestion()">Report Transfer</button>
+            <button type="button" onclick="transferQuestion()">Report Transfer</button>
           </div>
         </div>
       </div>
@@ -101,7 +101,6 @@
         <div class="modal-content">
           <p id="modalText"></p>
           {{ form.submit }}
-          <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
           <button onclick="closeModal()">No</button>
         </div>
       </div>

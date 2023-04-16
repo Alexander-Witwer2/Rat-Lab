@@ -72,8 +72,8 @@
         Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
-        <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
-          User Guide</a>
+      <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
+        User Guide</a>
     </div>
   </nav>
 
@@ -102,7 +102,7 @@
           {% if showMateDropdown %}
           <form action="/recordpairing/{{num}}" method="POST">
             <div id="mateDropdown">
-              <label>Select the rat's partner</label>
+              <label>Select the rat's new partner</label>
               {{ form.mateDropdown }}
               <button type="button" onclick="areYouSure()">Record Pairing</button>
             </div>
@@ -130,7 +130,7 @@
           <th>Rat Name</th>
           <th>Sex</th>
           <th>Current Partner</th>
-          <th>Birthdate</th>
+          <th>Age (months)</th>
           <th>Date of Last Pairing</th>
           <th>Date of Last Litter</th>
           <th>Number of Pairings</th>
@@ -146,13 +146,17 @@
           <td>{{ rat.rat_name }} </td>
           <td>{{ rat.sex }} </td>
           <td>{{ rat.current_partner }}</td>
-          <td>{{ rat.birthdate }} </td>
-          <td>{{ rat.last_paired_date }} </td>
-          <td>{{ rat.last_litter_date }} </td>
+          <td>{{ rat.age_months }} </td>
+          <td>{{ rat.last_paired_date.strftime('%m-%d-%Y') }} </td>
+          <td>{{ rat.last_litter_date.strftime('%m-%d-%Y') }} </td>
           <td>{{ rat.num_times_paired }} </td>
           <td>{{ rat.num_litters }} </td>
-          <td>{{ rat.date_added_to_colony }} </td>
-          <td>{{ rat.experiment }}</td>
+          <td>{{ rat.date_added_to_colony.strftime('%m-%d-%Y') }} </td>
+          {% if rat.experiment == 0 %}
+          <td>No</td>
+          {% else %}
+          <td>Yes</td>
+          {% endif %}
           <td>{{ rat.num_litters_with_defects }} </td>
           <!-- TODO: add current partner? -->
           <form action="/familytree/{{rat.rat_number}}" method="POST">

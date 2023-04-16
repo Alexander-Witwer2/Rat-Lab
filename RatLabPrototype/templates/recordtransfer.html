@@ -82,7 +82,7 @@
           class="w3-circle w3-margin-right" style="width:90px">
       </div>
       <div class="w3-col s8 w3-bar">
-        <span>Welcome, <strong>{{user}}!</strong></span><br>
+        <span>Welcome, <strong>User!</strong></span><br>
         <a href="#" class="w3-bar-item w3-button"><i class="fa fa-envelope"></i></a>
         <a href="#" class="w3-bar-item w3-button"><i class="fa fa-user"></i></a>
         <a href="#" class="w3-bar-item w3-button"><i class="fa fa-cog"></i></a>
@@ -109,11 +109,12 @@
         Report Litter</a>
       <a href="reportdeath" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>
         Report Death</a>
-      <a href="addadmin" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add
+      <a href="adduser" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add
         Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
-
+      <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
+        User Guide</a>
     </div>
   </nav>
 
@@ -131,12 +132,12 @@
         <div class="w3-row-padding" style="margin:0 -16px">
           <div class="w3-twothird">
             {{ form.sex }}
-            {{ form.number }}
-            <button type="button" class="w3-button" onclick="transferQuestion()">Report</button>
-            {{ form.submit }}
+            {{ form.number (placeholder="Rat's number") }}
+            <button type="button" class="w3-button" onclick="transferQuestion()">Report Transfer</button>
           </div>
         </div>
       </div>
+
       <div id="myModal" class="modal">
         <div class="modal-content">
           <p id="modalText"></p>
@@ -145,8 +146,11 @@
           <button onclick="closeModal()">No</button>
         </div>
       </div>
+
     </form>
 
+    <hr>
+    <br>
     <!-- Footer -->
     <footer class="w3-container w3-padding-16 w3-light-grey">
     </footer>

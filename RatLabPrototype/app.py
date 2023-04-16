@@ -295,6 +295,15 @@ def breedingPairs():
     form = GenerateBreedingPairsForm()
     if(request.method == "POST"):
         ratNumber = str(form.number.data) + form.sex.data[0]
+        
+        if(not ratIDCheck(ratNumber)):
+            errorText="Error: rat does not exist"
+            return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=errorText, user=current_user.username)
+        rat = db.session.query(Rat).filter(Rat.rat_number == ratNumber).one()  
+        if(rat.age_months < 3):
+            errorText = "Error: the rat is too young to breed."
+            return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=errorText, user=current_user.username)
+
         possibleMates = pairing(ratNumber, form.swapping.data)
 
         if (isinstance(possibleMates, str)):

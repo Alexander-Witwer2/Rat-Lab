@@ -197,23 +197,38 @@ def addRat():
     if(Admins.query.get(current_user.username) == None):
         return redirect(url_for("accessdenied"))
     form = AddRatForm()
+	
+    date_Check = False
+    sire_Check = False
+    dam_Check = False
+	
     if(request.method == "POST"):
         rat = Rat()
         rat.sex = form.sex.data
-        rat.birthdate = form.birthdate.data
-        rat.weaned_date = form.weanedDate.data
+        date_Check = dateCheck(form.birthdate.data)
+        if(date_Check != False) :
+            rat.birthdate = form.birthdate.data
+        date_Check = dateCheck(form.weanedDate.data)
+        if(date_Check != False) :
+            rat.weaned_date = form.weanedDate.data
         rat.last_paired_date = date(1900, 1, 1)
         rat.last_litter_date = date(1900, 1, 1)
         rat.num_times_paired = 0
         rat.num_litters = 0
-        rat.date_added_to_colony = form.dateAddedToColony.data
+        date_Check = dateCheck(form.dateAddedToColony.data)
+        if(date_Check != False) :
+            rat.date_added_to_colony = form.dateAddedToColony.data
         rat.current_partner = "00X"
         rat.num_litters_with_defects = 0
         rat.experiment = int(form.experiment.data)
         rat.manner_of_death = "Alive"
         rat.death_date = date(1900, 1, 1)
-        rat.sire = form.sire.data #TODO: when validating input make sure that sire and dam are in the format expected (NumberSex)
-        rat.dam = form.dam.data
+        sire_Check = sireCheck(form.sire.data)
+        if(sire_Check != False) :
+            rat.sire = form.sire.data
+        dam_Check = damCheck(form.dam.data)
+        if(dam_Check != False) :
+            rat.dam = form.dam.data
 
         if(rat.sex == "Female"):
             highestNumberFemale = db.session.execute(db.select(Rat.rat_number).
@@ -333,37 +348,103 @@ def editRecords():
     if(Admins.query.get(current_user.username) == None):
         return redirect(url_for("accessdenied"))
     form = EditRatForm()
+    sire_Check = False
+    dam_Check = False
+    date_Check = False
+    en_Check = 0
+	
     if(request.method == "POST"):
         number = str(form.number.data) + form.sex.data[0]
         rat = db.session.query(Rat).filter(Rat.rat_number == number).one()
         
         if(form.birthdate.data != None):
-            rat.birthdate = form.birthdate.data
-            delta = relativedelta.relativedelta(date.today(), form.birthdate.data)
-            age = delta.months + (delta.years * 12)
-            rat.age_months = age
+            date_Check = dateCheck(form.birthdate.data)
+            if(date_Check != False) :
+                rat.birthdate = form.birthdate.data
+                #TODO: recalculate rat's age when given new birthdate
         if(form.last_paired_date.data != None):
-            rat.last_paired_date = form.last_paired_date.data
+            date_Check = dateCheck(form.last_paired_date.data)
+            if(rat.current_partner == '00X') :
+                print(str("Error: Rat must be paired to edit pairing or litter info."))
+            elif(date_Check != False) :
+                rat.last_paired_date = form.last_paired_date.data
         if(form.last_litter_date.data != None):
-            rat.last_litter_date = form.last_litter_date.data
+            date_Check = dateCheck(form.last_litter_date.data)
+            if(rat.current_partner == '00X') :
+                print(str("Error: Rat must be paired to edit pairing or litter info."))
+            elif(date_Check != False) :
+                rat.last_litter_date = form.last_litter_date.data
         if(form.weaned_date.data != None):
-            rat.weaned_date = form.weaned_date.data
+            date_Check = dateCheck(form.weaned_date.data)
+            if(date_Check != False) :
+                rat.weaned_date = form.weaned_date.data
         if(form.num_times_paired.data != None):
-            rat.num_times_paired = form.num_times_paired.data  
+            if(rat.current_partner == '00X') :
+                print(str("Error: Rat must be paired to edit pairing or litter info."))
+            else :
+                rat.num_times_paired = form.num_times_paired.data  
         if(form.num_litters.data != None):
-            rat.num_litters = form.num_litters.data
+            if(rat.current_partner == '00X') :
+                print(str("Error: Rat must be paired to edit pairing or litter info."))
+            #to-do: if number of litters is set to 0 then query database to see if rat is listed as sire/dam for another rat
+            #elif(form.num_litters.data == 0) :
+            else :
+                rat.num_litters = form.num_litters.data
         if(form.date_added_to_colony.data != None):
-            rat.date_added_to_colony = form.date_added_to_colony.data
+            date_Check = dateCheck(form.date_added_to_colony.data)
+            if(date_Check != False) :
+                rat.date_added_to_colony = form.date_added_to_colony.data
         if(form.num_litters_with_defects.data != None):
             rat.num_litters_with_defects = form.num_litters_with_defects.data
         if(form.experiment.data != None):
             rat.experiment = form.experiment.data
+		#to-do: comment out prints used for testing inputs
         if(form.sire.data != ''):
-            rat.sire = form.sire.data
-            fillGenealogyData(number, form.sire.data, rat.dam)
+            print(str("Calling sire check"))
+            sire_Check = sireCheck(form.sire.data)
+            print(str(sire_Check))
+            en_Check = enCheck(form.sire.data, form.dam.data)
+            print(str(en_Check))
+			#Case 1: Valid sire & both sire/dam input as EN
+            if (sire_Check != False and en_Check == 1) :
+                rat.sire = form.sire.data
+                #fillGenealogyData(number, form.sire.data, rat.dam)
+                updateName(number, form.sire.data, form.dam.data)
+			#Case 2: Valid sire & both sire/dam input NOT as EN
+			# -if statement to allow change of EN entries
+            elif (sire_Check != False and en_Check == 2) :
+                if (rat.sire == 'EN' or rat.dam == 'EN') :
+                  rat.sire = form.sire.data
+                  #fillGenealogyData(number, form.sire.data, rat.dam)
+                  updateName(number, form.sire.data, form.dam.data)
+                else :
+                  rat.sire = form.sire.data
+                  #fillGenealogyData(number, form.sire.data, rat.dam)
+                  updateName(number, form.sire.data, rat.dam)
+			#Case 3: Valid sire & inputs not a set of paired EN
+            elif (sire_Check != False and en_Check == 3) :
+                print(str("Error: EN must pair with EN"))
         if(form.dam.data != ''):
-            rat.dam = form.dam.data
-            fillGenealogyData(number, rat.sire, form.dam.data)
+            print(str("Calling dam check"))
+            dam_Check = damCheck(form.dam.data)
+            print(str(dam_Check))
+            en_Check = enCheck(form.sire.data, form.dam.data)
+            print(str(en_Check))
+            if (dam_Check != False and en_Check == 1) :
+                rat.dam = form.dam.data
+                #fillGenealogyData(number, rat.sire, form.dam.data)
+                updateName(number, form.sire.data, form.dam.data)
+            elif (dam_Check != False and en_Check == 2) :
+                if (rat.sire == 'EN' or rat.dam == 'EN') :
+                  rat.dam = form.dam.data
+                  #fillGenealogyData(number, form.sire.data, rat.dam)
+                  updateName(number, form.sire.data, form.dam.data)
+                else :
+                  rat.dam = form.dam.data
+                  #fillGenealogyData(number, rat.sire, form.dam.data)
+                  updateName(number, rat.sire, form.dam.data)
+            elif (dam_Check != False and en_Check == 3) :
+                print(str("Error: EN must pair with EN"))
         if(form.status.data != "Empty" and form.status.data != rat.manner_of_death):
             rat.manner_of_death = form.status.data
          
@@ -412,7 +493,7 @@ def recordTransfer():
           rat.manner_of_death = "Transferred"
           db.session.commit()
         else :
-            print(str("Error: Not an existing rat."))
+          print(str("Error: Not an existing rat."))
         
         return render_template("recordtransfer.html", form=form, user=current_user.username)
     else:
@@ -426,6 +507,21 @@ def reportLitter():
     form = ReportLitterForm()
     
     if(request.method == "POST") :
+        rat_number = str(form.number.data) + form.sex.data[0]
+        ratCheck = ratIDCheck(form.number.data)
+		
+        if(rat_number in ratCheck):
+            rat = Rat.query.get(rat_number)
+            #References drop down menu options for if litter has defects or not
+            if(form.reportLittersWithDefects.data != "No") :
+                rat.num_litters_with_defects = rat.num_litters_with_defects + 1
+                rat.num_litters = rat.num_litters + 1
+                db.session.commit()
+            else:
+                rat.num_litters = rat.num_litters + 1
+                db.session.commit()
+        else:
+            print(str("Error: Not an existing rat."))
         sire_number = str(form.sire.data) + "M"
         dam_number = str(form.dam.data) + "F"
         #TODO: verify that sire and dam exist
@@ -493,6 +589,7 @@ def userGuide():
 # output: updates the genealogical fields of the new rat's entry in the database
 #         this function does not return anything 
 def fillGenealogyData(new_rat_number, sire_number, dam_number):
+    
     new_rat = Rat.query.get(new_rat_number)
     
     # if rat is ENEN, fill in ancestry data with all ENs
@@ -775,6 +872,27 @@ def updateAges():
         
     db.session.commit()
 
+def updateName(new_rat_number, sire_number, dam_number) :
+
+    if(sire_number == 'EN' and dam_number == 'EN') :
+        new_rat = Rat.query.get(new_rat_number)
+        new_rat.rat_name = new_rat.rat_number + sire_number + dam_number
+		
+        print(str(new_rat.rat_number))
+        print(str(sire_number))
+        print(str(dam_number))	
+        print(str(new_rat.rat_name))
+    else:
+        new_rat = Rat.query.get(new_rat_number)
+        sire = Rat.query.get(sire_number)
+        dam = Rat.query.get(dam_number)
+	
+        new_rat.rat_name = new_rat.rat_number + sire.rat_number[:-1] + dam.rat_number[:-1]
+        print(str(new_rat.rat_number))
+        print(str(sire.rat_number))
+        print(str(dam.rat_number))	
+        print(str(new_rat.rat_name))
+    db.session.commit()
 #Check if rat ID exists in database	
 def ratIDCheck(number) :
 
@@ -799,5 +917,41 @@ def dateCheck(date) :
 		print(str("Date not blocked"))
 	
 	return dCheck
+
+def sireCheck(sire) :
+
+    ratCheck = [sire for sire, in db.session.query(Rat.sire)]
+    if(sire in ratCheck or sire == 'EN') :
+        rat_Check = True
+        print(str("Valid Sire"))
+    else :
+        rat_Check = False
+        print(str("Error: Invalid Sire"))
+	
+    return rat_Check
+	
+def damCheck(dam) :
+
+    ratCheck = [dam for dam, in db.session.query(Rat.dam)]
+    if(dam in ratCheck or dam == 'EN') :
+        rat_Check = True
+        print(str("Valid Dam"))
+    else :
+        rat_Check = False
+        print(str("Error: Invalid Dam"))
+	
+    return rat_Check
+	
+def enCheck(sire, dam) :
+
+    if(sire == 'EN' and dam == 'EN') :
+        en_Check = 1
+        print(str("Valid EN Pairing"))
+    elif(sire != 'EN' and dam != 'EN') :
+        en_Check = 2
+    elif(sire != 'EN' or dam != 'EN') :
+        en_Check = 3
+
+    return en_Check		
 if __name__ == '__main__':
     app.run()

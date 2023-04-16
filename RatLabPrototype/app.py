@@ -528,6 +528,9 @@ def reportLitter():
             if(dam.manner_of_death != "Alive"):
                 print("Error: can't report a litter if the dam is deceased or transferred.")
                 return render_template("reportlitter.html", form=form, user=current_user.username)
+            if(not dateCheck(form.litterDate.data)):
+                print("Error: can't report a litter born in the future")
+                return render_template("reportlitter.html", form=form, user=current_user.username)
 
             sire.num_litters = sire.num_litters + 1
             dam.num_litters = dam.num_litters + 1

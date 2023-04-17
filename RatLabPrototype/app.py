@@ -288,8 +288,9 @@ def addAdmin():
     if(Admins.query.get(current_user.username) == None):
         return redirect(url_for("accessdenied"))
     if(request.method == "POST"):
+        print(form.data.items())
         if(form.currentAdminUsername.data == current_user.username and 
-           form.confirmField == "CONFIRM" and 
+           form.confirmField.data == "CONFIRM" and 
            User.query.get(form.newAdminUsername.data) != None):
             newAdmin = Admins()
             newAdmin.username = form.newAdminUsername.data

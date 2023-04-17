@@ -142,7 +142,9 @@ class GenerateBreedingPairsForm(FlaskForm):
     number = IntegerField(validators=[InputRequired()])
     swapping = BooleanField(default="checked")
     mateDropdown = SelectField(validators=[InputRequired()])
+    dateOfPairing = DateField(default=date.today(), validators=[InputRequired()])
     generateButton = SubmitField('Generate')
+    viewAncestryButton = SubmitField('View')
     recordButton = SubmitField('Yes')
 
 class ReportLitterForm(FlaskForm):
@@ -310,6 +312,11 @@ def breedingPairs():
         if(not ratIDCheck(ratNumber)):
             errorText="Error: rat does not exist"
             return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=errorText, user=current_user.username)
+        
+        if(not isDateInBounds(form.dateOfPairing.data)):
+            errorText="Error: date of pairing is " + isDateInBounds(form.dateOfPairing.data) + "."
+            return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=errorText, user=current_user.username)  
+       
         rat = db.session.query(Rat).filter(Rat.rat_number == ratNumber).one()  
         if(rat.age_months < 3):
             errorText = "Error: the rat is too young to breed."
@@ -466,8 +473,15 @@ def editSpecificRat(num):
             if(rat.current_partner == '00X') :
                 errorText = "Error: Rat must be paired to edit pairing or litter info."
                 return render_template("editrecords.html", form=EditRatForm(), user=current_user.username, errorText=errorText)
-            #to-do: if number of litters is set to 0 then query database to see if rat is listed as sire/dam for another rat
-            #elif(form.num_litters.data == 0) :
+            elif(request.form.get("num_litters") == 0):
+                if(rat.sex == "Male"):
+                    if (sireCheck(rat.rat_number)):
+                        errorText="Error: rat is the sire of at least 1 other rat in the colony, it cannot have 0 litters."
+                        return render_template("editrecords.html", form=EditRatForm(), user=current_user.username, errorText=errorText)
+                if(rat.sex == "Female"):
+                    if(damCheck(rat.rat_number)):
+                        errorText="Error: rat is the dam of at least 1 other rat in the colony, it cannot have 0 litters."
+                        return render_template("editrecords.html", form=EditRatForm(), user=current_user.username, errorText=errorText)
             else :
                 rat.num_litters = request.form.get("num_litters")
                 db.session.commit()
@@ -547,6 +561,10 @@ def editSpecificRat(num):
         
         if(request.form.get("status") != "Empty" and request.form.get("status") != rat.manner_of_death):
             rat.manner_of_death = request.form.get("status")
+            if(request.form.get("status") == "Euthanized" or request.form.get("status") == "Unexpected"):
+                rat.death_date = date.today()
+            elif(request.form.get("status") == "Transferred" or request.form.get("status") == "Alive"):
+                rat.death_date = date(1900, 1, 1) # to be consistent with displaying N/A on search screen
          
         db.session.commit()
         
@@ -1051,8 +1069,7 @@ def weanedDateCheck(birthdate, weanedDate):
         return "Error: a rat's weaned date must be at least 3 weeks after it is born."
     return "ok"
 
-def addedToColonyDateCheck(birthdate, weanedDate, addedToColonyDate):
-    
+def addedToColonyDateCheck(birthdate, weanedDate, addedToColonyDate): 
     if(isDateInBounds(addedToColonyDate) != "ok"):
         return "Error: a rat cannot be added to the colony " + isDateInBounds(addedToColonyDate) + "."
     
@@ -1061,29 +1078,19 @@ def addedToColonyDateCheck(birthdate, weanedDate, addedToColonyDate):
         return "ok"
     return "Error: a rat must be weaned before it is added to the colony."
 
-def sireCheck(sire) :
-
+def sireCheck(sire):
     ratCheck = [sire for sire, in db.session.query(Rat.sire)]
-    if(sire in ratCheck or sire == 'EN') :
-        rat_Check = True
-        print(str("Valid Sire"))
+    if(sire in ratCheck) :
+        return True
     else :
-        rat_Check = False
-        print(str("Error: Invalid Sire"))
-    
-    return rat_Check
-    
-def damCheck(dam) :
-
+        return False
+        
+def damCheck(dam):
     ratCheck = [dam for dam, in db.session.query(Rat.dam)]
-    if(dam in ratCheck or dam == 'EN') :
-        rat_Check = True
-        print(str("Valid Dam"))
+    if(dam in ratCheck) :
+        return True
     else :
-        rat_Check = False
-        print(str("Error: Invalid Dam"))
-    
-    return rat_Check
+        return False
     
 def enCheck(sire, dam) :
 

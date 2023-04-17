@@ -90,15 +90,7 @@
         <div class="w3-twothird">
           <form action="/editrecords" , method="POST">
             {{ form.sex }}
-            <!-- <select name="Rat-Gender" id="Rat-Gender">
-              <option value="" disabled selected>Rat's Sex</option>
-              <option value="M">Male</option>
-              <option value="F">Female</option>
-            </select> -->
-            <!-- <input type="text" id="Input" name="number" placeholder="Rat Number..." value="" size="50"
-              title="Enter a Rat's Number"> -->
-            {{ form.number }}
-            <!-- {{ form.update }} -->
+            {{ form.number (placeholder="Rat Number (ex. 100)")}}
             <button type="button" onclick="bringChecks()">Continue</button>
         </div>
       </div>

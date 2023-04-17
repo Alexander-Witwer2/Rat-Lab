@@ -4,7 +4,7 @@ from flask import Flask, request, redirect, url_for, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, BooleanField, SelectField, DateField
-from wtforms.validators import InputRequired
+from wtforms.validators import InputRequired, NumberRange
 from datetime import date, datetime, timedelta
 from dateutil import relativedelta
 import re
@@ -104,8 +104,8 @@ class AddRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
     birthdate = DateField(validators=[InputRequired()])
     supplierRat = BooleanField()
-    sire = IntegerField()
-    dam = IntegerField()
+    sire = IntegerField(validators=[NumberRange(min=0)])
+    dam = IntegerField(validators=[NumberRange(min=0)])
     weanedDate = DateField(validators=[InputRequired()])
     dateAddedToColony = DateField(default=date.today(), validators=[InputRequired()])
     experiment = BooleanField()
@@ -113,33 +113,33 @@ class AddRatForm(FlaskForm):
 
 class EditRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
-    number = IntegerField()
+    number = IntegerField(validators=[NumberRange(min=0)])
     birthdate = DateField()
     last_paired_date = DateField()
     last_litter_date = DateField()
     weaned_date = DateField()
-    num_times_paired = IntegerField()
-    num_litters = IntegerField()
+    num_times_paired = IntegerField(validators=[NumberRange(min=0, max=25)])
+    num_litters = IntegerField(validators=[NumberRange(min=0, max=25)])
     date_added_to_colony = DateField()
-    num_litters_with_defects = IntegerField()
+    num_litters_with_defects = IntegerField(validators=[NumberRange(min=0, max=25)])
     experiment = SelectField(default="0", choices=[("0", "No"), ("1", "Yes")])
     supplierRat = SelectField(default="no", choices=[("no", "No"), ("yes", "Yes")])
-    sire = IntegerField()
-    dam = IntegerField()
+    sire = IntegerField(validators=[NumberRange(min=0)])
+    dam = IntegerField(Numvalidators=[NumberRange(min=0)])
     status = SelectField(default="Empty", choices=[('Empty', ''), ('Alive', 'Alive'), ('Euthanized', 'Dead: euthanized'), ('Unexpected', 'Dead: unexpected'), ('Transferred', 'Transferred')])
     update = SubmitField('Update')
     continueButton = SubmitField('Continue')
     
 class ReportDeathForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
-    number = IntegerField(validators=[InputRequired()])
+    number = IntegerField(validators=[InputRequired(), NumberRange(min=0)])
     deathDate = DateField(default=date.today(), validators=[InputRequired()])
     mannerOfDeath = SelectField(choices=['Euthanized', 'Unexpected'])
     submit = SubmitField('Yes')
 
 class GenerateBreedingPairsForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
-    number = IntegerField(validators=[InputRequired()])
+    number = IntegerField(validators=[InputRequired(), NumberRange(min=0)])
     swapping = BooleanField(default="checked")
     mateDropdown = SelectField(validators=[InputRequired()])
     dateOfPairing = DateField(default=date.today(), validators=[InputRequired()])
@@ -148,8 +148,8 @@ class GenerateBreedingPairsForm(FlaskForm):
     recordButton = SubmitField('Yes')
 
 class ReportLitterForm(FlaskForm):
-    sire = IntegerField('Sire', validators=[InputRequired()])
-    dam = IntegerField('Dam', validators=[InputRequired()])
+    sire = IntegerField('Sire', validators=[InputRequired(), NumberRange(min=0)])
+    dam = IntegerField('Dam', validators=[InputRequired(), NumberRange(min=0)])
     reportLittersWithDefects = SelectField(default="No", choices=['Yes', 'No'])
     litterDate = DateField(default=date.today(), validators=[InputRequired()])
     submit = SubmitField('Yes')
@@ -313,12 +313,7 @@ def breedingPairs():
         
         if(not ratIDCheck(ratNumber)):
             errorText="Error: rat does not exist"
-            return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=errorText, user=current_user.username, admin=admin)
-        
-        if(not isDateInBounds(form.dateOfPairing.data)):
-            errorText="Error: date of pairing is " + isDateInBounds(form.dateOfPairing.data) + "."
-            return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=errorText, user=current_user.username, admin=admin)  
-       
+            return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=errorText, user=current_user.username, admin=admin)       
         rat = db.session.query(Rat).filter(Rat.rat_number == ratNumber).one()  
         if(rat.age_months < 3):
             errorText = "Error: the rat is too young to breed."
@@ -344,15 +339,22 @@ def recordPairing(num):
     if(admin == None):
         return redirect(url_for("accessdenied"))
     if( request.method == "POST"):
+        #print("date of pairing is: " + str(form.dateOfPairing.data) )
+        dateOfPairing = datetime.date(datetime.strptime(request.form.get("dateOfPairing"), "%Y-%m-%d"))
+        print(str(dateOfPairing))
+        if(isDateInBounds(dateOfPairing) != "ok"):
+            errorText="Error: date of pairing is " + isDateInBounds(dateOfPairing) + "."
+            return render_template("breedingpairs.html", form=GenerateBreedingPairsForm(), showMateDropdown=False, errorText=errorText, user=current_user.username, admin=admin)  
+
         rat = db.session.query(Rat).filter(Rat.rat_number == num).one()  
         rat.current_partner = request.form.get("mateDropdown")
-        rat.last_paired_date = date.today()
+        rat.last_paired_date = dateOfPairing
         rat.num_times_paired = rat.num_times_paired + 1
 
         #TODO: *shouldn't* need to modify the rat's old partner here.  Test and verify
         newPartner = db.session.query(Rat).filter(Rat.rat_number == request.form.get("mateDropdown")).one()
         newPartner.current_partner = rat.rat_number
-        newPartner.last_paired_date = date.today()
+        newPartner.last_paired_date = dateOfPairing
         newPartner.num_times_paired = newPartner.num_times_paired + 1
         db.session.commit()
         return redirect(url_for("search"))
@@ -566,6 +568,13 @@ def editSpecificRat(num):
             rat.manner_of_death = request.form.get("status")
             if(request.form.get("status") == "Euthanized" or request.form.get("status") == "Unexpected"):
                 rat.death_date = date.today()
+                if(ratIDCheck(rat.current_partner)):
+                    partner = Rat.query.get(rat.current_partner)
+                    partner.current_partner = "DEC"
+            if(request.form.get("status") == "Transferred"):
+                if(ratIDCheck(rat.current_partner)):
+                    partner = Rat.query.get(rat.current_partner)
+                    partner.current_partner = "DEC"
             elif(request.form.get("status") == "Transferred" or request.form.get("status") == "Alive"):
                 rat.death_date = date(1900, 1, 1) # to be consistent with displaying N/A on search screen
          
@@ -619,6 +628,9 @@ def recordTransfer():
                 errorText = "Error: can't transfer a deceased or transferred rat."
                 return render_template("recordtransfer.html", form=form, user=current_user.username, errorText=errorText, admin=admin)
             rat.manner_of_death = "Transferred"
+            if(ratIDCheck(rat.current_partner)):
+                partner = Rat.query.get(rat.current_partner)
+                partner.current_partner = "DEC"
             db.session.commit()
         
         return render_template("recordtransfer.html", form=form, user=current_user.username, admin=admin)

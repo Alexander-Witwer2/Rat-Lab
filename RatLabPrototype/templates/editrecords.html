@@ -110,7 +110,7 @@
 
     {% if editSpecificRat %}
     <h1>Editing Rat {{num}}</h1>
-    <form action="/editrecord/{{num}}" , method="POST">
+    <form action="/editrecord{{num}}" , method="POST">
       <div id="boxes" style="display: block;">
         <p>Enter data to update. Fields left blank will not be updated.</p>
         <label class="checkbox" for="birth"> Change Birthdate

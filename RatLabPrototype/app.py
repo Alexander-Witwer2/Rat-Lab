@@ -201,20 +201,33 @@ def addRat():
     if(request.method == "POST"):      
         rat = Rat()
         rat.sex = form.sex.data
-        date_Check = dateCheck(form.birthdate.data)
-        if(date_Check != False) :
+        isValidBirthdate = isDateInBounds(form.birthdate.data)
+        if(isValidBirthdate == "ok") :
             rat.birthdate = form.birthdate.data
-        date_Check = dateCheck(form.weanedDate.data)
-        if(date_Check != False) :
+        else:
+            errorText = "Error: a rat cannot be born " + isValidBirthdate + "."
+            return render_template("addrat.html", form=form, user=current_user.username, errorText=errorText)
+
+        isValidWeanedDate = weanedDateCheck(form.birthdate.data, form.weanedDate.data)
+        if(isValidWeanedDate == "ok") :
             rat.weaned_date = form.weanedDate.data
+        else:
+            errorText = isValidWeanedDate
+            return render_template("addrat.html", form=form, user=current_user.username, errorText=errorText)
+
+        
         rat.last_paired_date = date(1900, 1, 1)
         rat.last_litter_date = date(1900, 1, 1)
         rat.num_times_paired = 0
         rat.num_litters = 0
-        date_Check = dateCheck(form.dateAddedToColony.data)
-        if(date_Check != False) :
+        
+        isValidColonyAddedDate = addedToColonyDateCheck(form.birthdate.data, form.weanedDate.data, form.dateAddedToColony.data)
+        if(isValidColonyAddedDate == "ok") :
             rat.date_added_to_colony = form.dateAddedToColony.data
-            
+        else:
+            errorText = isValidColonyAddedDate
+            return render_template("addrat.html", form=form, user=current_user.username, errorText=errorText)
+
         rat.current_partner = "00X"
         rat.num_litters_with_defects = 0
         rat.experiment = int(form.experiment.data)
@@ -379,28 +392,28 @@ def editRecords():
         rat = db.session.query(Rat).filter(Rat.rat_number == number).one()
         
         if(form.birthdate.data != None):
-            date_Check = dateCheck(form.birthdate.data)
-            if(date_Check != False) :
+            date_Check = isDateInBounds(form.birthdate.data)
+            if(date_Check != False ) :
                 rat.birthdate = form.birthdate.data
                 delta = relativedelta.relativedelta(date.today(), form.birthdate.data)
                 age = delta.months + (delta.years * 12)
                 rat.age_months = age        
         if(form.last_paired_date.data != None):
-            date_Check = dateCheck(form.last_paired_date.data)
+            date_Check = isDateInBounds(form.last_paired_date.data)
             if(rat.current_partner == '00X') :
                 errorText = "Error: Rat must be paired to edit pairing or litter info."
                 return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
             elif(date_Check != False) :
                 rat.last_paired_date = form.last_paired_date.data
         if(form.last_litter_date.data != None):
-            date_Check = dateCheck(form.last_litter_date.data)
+            date_Check = isDateInBounds(form.last_litter_date.data)
             if(rat.current_partner == '00X') :
                 errorText = "Error: Rat must be paired to edit pairing or litter info."
                 return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
             elif(date_Check != False) :
                 rat.last_litter_date = form.last_litter_date.data
         if(form.weaned_date.data != None):
-            date_Check = dateCheck(form.weaned_date.data)
+            date_Check = isDateInBounds(form.weaned_date.data)
             if(date_Check != False) :
                 rat.weaned_date = form.weaned_date.data
         if(form.num_times_paired.data != None):
@@ -418,7 +431,7 @@ def editRecords():
             else :
                 rat.num_litters = form.num_litters.data
         if(form.date_added_to_colony.data != None):
-            date_Check = dateCheck(form.date_added_to_colony.data)
+            date_Check = isDateInBounds(form.date_added_to_colony.data)
             if(date_Check != False) :
                 rat.date_added_to_colony = form.date_added_to_colony.data
         if(form.num_litters_with_defects.data != None):
@@ -543,7 +556,7 @@ def reportLitter():
             # before they got the chance to record the litter.  If I had time to make a 
             # pairing table I would restrict to sire and dam paired together 
             # within the past month, but unfortunately, I don't.
-        if(not dateCheck(form.litterDate.data)):
+        if(not isDateInBounds(form.litterDate.data)):
             errorText = "Error: can't report a litter born in the future."
             return render_template("reportlitter.html", form=form, user=current_user.username, errorText=errorText)
         else:
@@ -556,7 +569,7 @@ def reportLitter():
             if(dam.manner_of_death != "Alive"):
                 errorText = "Error: can't report a litter if the dam is deceased or transferred."
                 return render_template("reportlitter.html", form=form, user=current_user.username, errorText=errorText)
-            if(not dateCheck(form.litterDate.data)):
+            if(not isDateInBounds(form.litterDate.data)):
                 errorText = "Error: can't report a litter born in the future"
                 return render_template("reportlitter.html", form=form, user=current_user.username, errorText=errorText)
 
@@ -590,7 +603,7 @@ def reportDeath():
                 errorText = "Error: can't report the death of a deceased or transferred rat."
                 return render_template("reportdeath.html", form=form, user=current_user.username, errorText=errorText)
            rat.manner_of_death = form.mannerOfDeath.data
-           dCheck = dateCheck(form.deathDate.data)
+           dCheck = isDateInBounds(form.deathDate.data)
            if dCheck != False :
               rat.death_date = form.deathDate.data
               # don't have to update the inputted rat's partner because that rat is now deceased 
@@ -958,22 +971,35 @@ def verifySireAndDam(sire, dam):
     return True
 
 #Check to ensure date is not in the future
-def dateCheck(input_date) :
+def isDateInBounds(input_date) :
     
-    blocked = date.today()
-    print(str(input_date))
-    print(str(blocked))
+    futureBlock = date.today() + timedelta(days=1)
+    pastBlock = date.today() + relativedelta.relativedelta(years=-10)
+      
+    if (input_date >= futureBlock) :
+        return "in the future"
+    if(input_date <= pastBlock) :
+        return "more than 10 years in the past"
+    return "ok"
     
-    if input_date >= blocked:
-        dCheck = False
-        print(str("Error: Date cannot be in the future."))
-        #return "Error: Date cannot be in the future."
-    else:
-        #return "Date not blocked"
-        dCheck = True
-        print(str("Date not blocked"))
+def weanedDateCheck(birthdate, weanedDate):
+    if(isDateInBounds(birthdate) != "ok"):
+        return "Error: a rat cannot be born " + isDateInBounds(birthdate) + "."
+    if(isDateInBounds(weanedDate) != "ok"):
+        return "Error: a rat cannot be weaned " + isDateInBounds(weanedDate) + "."
+    if( weanedDate < (birthdate + relativedelta.relativedelta(weeks=3)) ):
+        return "Error: a rat's weaned date must be at least 3 weeks after it is born."
+    return "ok"
+
+def addedToColonyDateCheck(birthdate, weanedDate, addedToColonyDate):
     
-    return dCheck
+    if(isDateInBounds(addedToColonyDate) != "ok"):
+        return "Error: a rat cannot be added to the colony " + isDateInBounds(addedToColonyDate) + "."
+    
+    if( weanedDateCheck(birthdate, weanedDate) == "ok" and
+       weanedDate <= addedToColonyDate ):
+        return "ok"
+    return "Error: a rat must be weaned before it is added to the colony."
 
 def sireCheck(sire) :
 

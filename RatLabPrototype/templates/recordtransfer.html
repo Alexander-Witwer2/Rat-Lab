@@ -94,6 +94,11 @@
             {{ form.number (placeholder="Rat's number") }}
             <button type="button" class="w3-button" onclick="transferQuestion()">Report Transfer</button>
           </div>
+          {% if errorText %}
+          <div class="w3-twothird">
+            {{errorText}}
+          </div>
+          {% endif %}
         </div>
       </div>
 

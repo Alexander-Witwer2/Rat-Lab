@@ -37,8 +37,7 @@
   <nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
     <div class="w3-container w3-row">
       <div class="w3-col s4">
-        <img src="/static/kentstatelogo.png"
-          class="w3-circle w3-margin-right" style="width:90px">
+        <img src="/static/kentstatelogo.png" class="w3-circle w3-margin-right" style="width:90px">
       </div>
       <div class="w3-col s8 w3-bar">
         <span>Welcome, <strong>{{user}}!</strong></span><br>
@@ -72,8 +71,8 @@
         Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
-        <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
-          User Guide</a>
+      <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
+        User Guide</a>
     </div>
   </nav>
 
@@ -87,6 +86,11 @@
 
     <!-- Header -->
     <br>
+    {% if errorText %}
+    <div class="w3-twothird">
+      {{errorText}}
+    </div>
+    {% endif %}
     <div id="boxes" style="display: block;" class="w3-row-padding">
       <form action="/addrat" , method="POST">
         {{form.sex}} <br>

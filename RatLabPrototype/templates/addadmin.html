@@ -32,11 +32,15 @@
           {{form.currentAdminUsername (placeholder="Your FlashLine Username")}}
         </div>
         <div class="input-field">
-          {{form.currentAdminPassword (placeholder="Your FlashLine Password")}}
+          <p>Enter CONFIRM to confirm the action.</p>
+          {{form.confirmField}}
         </div>
       </div>
       <div class="action">
-        {{form.submitButton}}
+          {{form.submitButton}}
+      </div>
+      <div style="padding-left: 213px; padding-bottom: 30px;">
+        <a href="dashboard" class="w3-button">Dashboard</a>
       </div>
     </form>
   </div>

@@ -57,6 +57,7 @@
         Dashboard</a>
       <a href="search" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i> 
         Search Rats</a>
+      {% if admin %}
       <a href="addrat" class="w3-bar-item w3-button w3-padding w3"><i class="fa fa-cog fa-fw"></i>  Add
         Rat</a>
       <a href="editrecords" class="w3-bar-item w3-button w3-padding"><i class="fa fa-history fa-fw"></i> 
@@ -71,6 +72,7 @@
         Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
+      {% endif %}
       <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
         User Guide</a>
     </div>
@@ -90,7 +92,7 @@
         <div class="w3-row-padding" style="margin:0 -16px">
           <div class="w3-twothird">
             {{ form.sex }}
-            {{ form.number }}
+            {{ form.number (placeholder="Rat Number (ex. 100)")}}
             <!-- below button was part of the input rat sex/num, move to next screen setup, removed for now-->
             <!-- <button class="w3-button" onclick="deathDetails()">Continue</button> -->
           </div>
@@ -111,23 +113,22 @@
           </tr>
 
         </table>
-        {% if errorText %}
-        <div class="w3-twothird">
-          {{errorText}}
-        </div>
-        {% endif %}
       </div>
       <div id="myModal" class="modal">
 
         <div class="modal-content">
           <p id="modalText"></p>
           {{ form.submit }}
-          <button onclick="closeModal()">No</button>
+          <button type="button" onclick="closeModal()">No</button>
         </div>
 
       </div>
     </form>
-
+    {% if errorText %}
+    <div class="w3-twothird">
+      {{errorText}}
+    </div>
+    {% endif %}
     <hr>
     <br>
 

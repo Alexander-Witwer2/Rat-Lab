@@ -57,6 +57,7 @@
         Dashboard</a>
       <a href="search" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i> 
         Search Rats</a>
+      {% if admin %}
       <a href="addrat" class="w3-bar-item w3-button w3-padding"><i class="fa fa-cog fa-fw"></i>  Add
         Rat</a>
       <a href="editrecords" class="w3-bar-item w3-button w3-padding"><i class="fa fa-history fa-fw"></i> 
@@ -71,6 +72,9 @@
         Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
+      {% endif %}
+      <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
+        User Guide</a>
     </div>
   </nav>
 
@@ -88,9 +92,9 @@
         <div class="w3-row-padding" style="margin:0 -16px">
           <div class="w3-twothird">
             <p>Sire number</p>
-            {{ form.sire (placeholder="Sire number") }}
+            {{ form.sire (placeholder="Sire Number (ex. 100)") }}
             <p>Dam number</p>
-            {{ form.dam (placeholder="Dam number") }}
+            {{ form.dam (placeholder="Dam Number (ex. 100)") }}
             <p>Did the litter have birth defects?</p>
             {{form.reportLittersWithDefects}}
             <p>Litter date</p>
@@ -110,7 +114,7 @@
         <div class="modal-content">
           <p id="modalText"></p>
           {{ form.submit }}
-          <button onclick="closeModal()">No</button>
+          <button type="button" onclick="closeModal()">No</button>
         </div>
 
       </div>

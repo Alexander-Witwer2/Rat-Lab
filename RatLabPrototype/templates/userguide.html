@@ -1,329 +1,434 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>User Guide</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="webpage.css">
-<style>
-html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
-</style>
+  <title>User Guide</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="webpage.css">
+  <style>
+    html,
+    body,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+      font-family: "Raleway", sans-serif
+    }
+  </style>
 </head>
+
 <body class="w3-light-grey">
 
-<!-- Top container -->
-<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
-  <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i
-      class="fa fa-bars"></i>  Menu</button>
-  <span class="w3-bar-item w3-right"><a href="{{ url_for('logout') }}" class="navbar-item">
-      Logout
-    </a></span>
-</div>
+  <!-- Top container -->
+  <div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+    <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i
+        class="fa fa-bars"></i>  Menu</button>
+    <span class="w3-bar-item w3-right"><a href="{{ url_for('logout') }}" class="navbar-item">
+        Logout
+      </a></span>
+  </div>
 
-<!-- Sidebar/menu -->
-<nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
-  <div class="w3-container w3-row">
-    <div class="w3-col s4">
-      <img src="/static/kentstatelogo.png" class="w3-circle w3-margin-right" style="width:90px">
+  <!-- Sidebar/menu -->
+  <nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
+    <div class="w3-container w3-row">
+      <div class="w3-col s4">
+        <img src="/static/kentstatelogo.png" class="w3-circle w3-margin-right" style="width:90px">
+      </div>
+      <div class="w3-col s8 w3-bar">
+        <span>Welcome, <strong>{{user}}!</strong></span><br>
+        <a href="#" class="w3-bar-item w3-button"><i class="fa fa-envelope"></i></a>
+        <a href="#" class="w3-bar-item w3-button"><i class="fa fa-user"></i></a>
+        <a href="#" class="w3-bar-item w3-button"><i class="fa fa-cog"></i></a>
+      </div>
     </div>
-    <div class="w3-col s8 w3-bar">
-      <span>Welcome, <strong>{{user}}!</strong></span><br>
-      <a href="#" class="w3-bar-item w3-button"><i class="fa fa-envelope"></i></a>
-      <a href="#" class="w3-bar-item w3-button"><i class="fa fa-user"></i></a>
-      <a href="#" class="w3-bar-item w3-button"><i class="fa fa-cog"></i></a>
+    <hr>
+    <div class="w3-container">
+      <h5>Damron Mueller Lab</h5>
     </div>
-  </div>
-  <hr>
-  <div class="w3-container">
-    <h5>Damron Mueller Lab</h5>
-  </div>
-  <div class="w3-bar-block">
-    <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black"
-      onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i> Close Menu</a>
-    <a href="dashboard" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i> 
-      Dashboard</a>
-    <a href="search" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i> 
-      Search Rats</a>
-    <a href="addrat" class="w3-bar-item w3-button w3-padding"><i class="fa fa-cog fa-fw"></i>  Add
-      Rat</a>
-    <a href="editrecords" class="w3-bar-item w3-button w3-padding"><i class="fa fa-history fa-fw"></i> 
-      Edit Records</a>
-    <a href="breedingpairs" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i> 
-      Generate Breeding Pairs</a>
-    <a href="reportlitter" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i> 
-      Report Litter</a>
-    <a href="reportdeath" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>
-      Report Death</a>
-    <a href="adduser" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add
-      Admin</a>
-    <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
-      Record Transfer</a>
-    <a href="userguide" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-gear fa-fw"></i> 
-      User Guide</a>
-  </div>
-</nav>
+    <div class="w3-bar-block">
+      <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black"
+        onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i> Close Menu</a>
+      <a href="dashboard" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i> 
+        Dashboard</a>
+      <a href="search" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i> 
+        Search Rats</a>
+      {% if admin %}
+      <a href="addrat" class="w3-bar-item w3-button w3-padding"><i class="fa fa-cog fa-fw"></i>  Add
+        Rat</a>
+      <a href="editrecords" class="w3-bar-item w3-button w3-padding"><i class="fa fa-history fa-fw"></i> 
+        Edit Records</a>
+      <a href="breedingpairs" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i> 
+        Generate Breeding Pairs</a>
+      <a href="reportlitter" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i> 
+        Report Litter</a>
+      <a href="reportdeath" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>
+        Report Death</a>
+      <a href="adduser" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add
+        Admin</a>
+      <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
+        Record Transfer</a>
+      {% endif %}
+      <a href="userguide" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-gear fa-fw"></i> 
+        User Guide</a>
+    </div>
+  </nav>
 
 
-<!-- Overlay effect when opening sidebar on small screens -->
-<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+  <!-- Overlay effect when opening sidebar on small screens -->
+  <div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer"
+    title="close side menu" id="myOverlay"></div>
 
-<!-- !PAGE CONTENT! -->
-<div class="w3-main" style="margin-left:325px;margin-top:43px;">
+  <!-- !PAGE CONTENT! -->
+  <div class="w3-main" style="margin-left:325px;margin-top:55px;">
 
-  <body>
-    <main>
+    <body>
+      <main>
         <section class="faq-container">
-            <div class="faq-one">
-                <!-- faq question -->
-                <h2 class="faq-page"><b>Getting Started</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>After landing on the Login Page, you must enter your FlashLine email address and password to enter the system. Once entered, you can do the following listed below.
-                    </p>
-                </div>
+          <div class="faq-one">
+            <!-- faq question -->
+            <h2 class="faq-page"><b>Getting Started</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>After landing on the Login Page, you must enter your FlashLine email address and password to enter the
+                system. Once entered, you can do the following listed below.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-two">
-                <!-- faq question -->
-                <h2 class="faq-page"><b>  Navigating the Sidebar</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>Once logging into the Damron Mueller Rat Lab Database Website, you are greeted with a sidebar on the left-hand side of the page. Here, you can view and access the different pages within the program. The following pages are displayed: 
-                      TODO - ADD SCREENSHOT
+          </div>
+          <hr class="hr-line">
+          <div class="faq-two">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> Navigating the Sidebar</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>Once logging into the Damron Mueller Rat Lab Database Website, you are greeted with a sidebar on the
+                left-hand side of the page. Here, you can view and access the different pages within the program. The
+                following pages are displayed:
+                TODO - ADD SCREENSHOT
 
-                      Any page that you would like to visit can be accessed by simply left-clicking on whichever page you want. The sidebar will redirect you to the page that was clicked, and the sidebar will highlight the current page you're on.
-                      </p>
-                </div>
+                Any page that you would like to visit can be accessed by simply left-clicking on whichever page you
+                want. The sidebar will redirect you to the page that was clicked, and the sidebar will highlight the
+                current page you're on.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-three">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  How to add a user</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>In order to add a user, you must contact KSU IT Support and ask for a new user to be added into the system. The contact information is below:
-                      Email: TODO
-                      Phone: TODO
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-three">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> How to add a user</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>In order to add a user, you must contact KSU IT Support and ask for a new user to be added into the
+                system. The contact information is below:
+                Email: TODO
+                Phone: TODO
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-four">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  How to internally escalate privileges</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>In order to change an existing user to an admin, an admin must navigate to the ‘Add Admin’ page located on the sidebar. 
-                      Once you land on the page, you must enter the user’s email that you wish to convert into an admin, as well as the admin’s FlashLine email address and password. 
-                      After clicking submit, the user has admin rights within the program!
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-four">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> How to internally escalate privileges</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>In order to change an existing user to an admin, an admin must navigate to the ‘Add Admin’ page located
+                on the sidebar.
+                Once you land on the page, you must enter the user’s email that you wish to convert into an admin, as
+                well as the admin’s FlashLine email address and password.
+                After clicking submit, the user has admin rights within the program!
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-five">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  I entered the wrong data. What do I do now?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>After entering and submitting any wrong data into the table, you can do the following:
+          </div>
+          <hr class="hr-line">
+          <div class="faq-five">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> I entered the wrong data. What do I do now?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>After entering and submitting any wrong data into the table, you can do the following:
 
-                      If you changed a field of an existing rat, just navigate to the ‘Edit Records’ tab located in the sidebar and change whichever fields that are incorrect.
-                      
-                      If you added a rat and wished to remove it, you can either report the death of the created rat by accessing the ‘Report Death’ tab located in the sidebar, or edit the record and leave each field blank.
-                      
-                    </p>
-                </div>
-            </div>
-            <hr class="hr-line">
-            <div class="faq-six">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  Why can’t I edit records?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>The reason you might not be able to edit the records of the database is because you have not been given admin privileges. 
-                      
-                      To acquire these privileges, contact a current administrator within the lab and ask them to follow the instructions listed in our ‘How to internally escalate privileges’ section of this page.
-                    </p>
-                </div>
-            </div>
-            <hr class="hr-line">
-            <div class="faq-seven">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  Difference between Admin vs. Regular user</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>The reason you might not be able to edit the records of the database is because you have not been given admin privileges. 
-                      
-                      To acquire these privileges, contact a current administrator within the lab and ask them to follow the instructions listed in our ‘How to internally escalate privileges’ section of this page.
-                    </p>
-                </div>
-            </div>
-            <hr class="hr-line">
-            <div class="faq-eight">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  Why can’t I edit records?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>The abilities of a regular user are only to view and search the database.
+                If you changed a field of an existing rat, just navigate to the ‘Edit Records’ tab located in the
+                sidebar and change whichever fields that are incorrect.
 
-                      An administrator, on the other hand, can Add, Edit, Remove, and perform every other action to the database. 
-                      A normal user can access each of these pages, but their changes made within each page will not alter the records within the database.                      
-                    </p>
-                </div>
+                If you added a rat and wished to remove it, you can either report the death of the created rat by
+                accessing the ‘Report Death’ tab located in the sidebar, or edit the record and leave each field blank.
+
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-nine">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  A rat died and i need to report it. How do i do that?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>If you need to report a rat’s death then you should navigate the sidebar and click on the report death tab of the sidebar. 
-                      After clicking on the report death tab, enter the rat’s sex and number and after doing that enter the date the rat died and how the rat died into input fields that show up. 
-                      After entering those details click the ‘report’ button. After doing that a Modal will pop up and ask if you are sure the data you entered is correct. 
-                      If you are sure click ‘yes’ otherwise click ‘no’. If ‘no’ is selected then the modal will close and you will be given a chance to reenter the data correctly.
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-six">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> Why can’t I edit records?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>The reason you might not be able to edit the records of the database is because you have not been given
+                admin privileges.
+
+                To acquire these privileges, contact a current administrator within the lab and ask them to follow the
+                instructions listed in our ‘How to internally escalate privileges’ section of this page.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-ten">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  A rat litter has been born and I need to report it! How do I do that?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>If you need to report a litter then look at the sidebar and find the tab that says ‘Report Litter’. Once you find that click that tab. It will take you to a page where you can report a rat’s litter. 
-                      You will see two boxes to enter the Sire and Dam of the litter. There will also be a dropdown menu to report whether or not the litter has one or more rats with a defect present. If so select ‘yes’ otherwise select ‘no’. 
-                      Once you are done click the ‘Submit’ button. After doing that a Modal will pop up and ask if you are sure the data you entered is correct. If you are sure click ‘yes’ otherwise click ‘no’. 
-                      If ‘no’ is selected then the modal will close and you will be given a chance to reenter the data correctly.
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-seven">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> Difference between Admin vs. Regular user</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>The reason you might not be able to edit the records of the database is because you have not been given
+                admin privileges.
+
+                To acquire these privileges, contact a current administrator within the lab and ask them to follow the
+                instructions listed in our ‘How to internally escalate privileges’ section of this page.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-eleven">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  I need to look up the information for a specific rat, what do I do?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>In order to look up a specific rat in the database you should navigate the sidebar of the website and find the tab that says ‘Search’ and click it. This will bring you to a page that displays every rat in the database in a table format. 
-                      In order to find a specific rat in the table there will be a dropdown menu and a text input field. Clicking on the dropdown will prompt you to select the sex of the rat that you want to search. In the text field you should input the rat’s number. 
-                      Once both the text and dropdown have been selected you must click the button that says ‘Search. After clicking ‘Search’ the table will filter out any rats that do not match the details you input. And you will have your rat and its associated data.
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-eight">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> Why can’t I edit records?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>The abilities of a regular user are only to view and search the database.
+
+                An administrator, on the other hand, can Add, Edit, Remove, and perform every other action to the
+                database.
+                A normal user can access each of these pages, but their changes made within each page will not alter the
+                records within the database.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-twelve">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  Why can’t I edit records?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>The reason you might not be able to edit the records of the database is because you have not been given admin privileges. 
-                      
-                      To acquire these privileges, contact a current administrator within the lab and ask them to follow the instructions listed in our ‘How to internally escalate privileges’ section of this page.
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-nine">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> A rat died and i need to report it. How do i do that?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>If you need to report a rat’s death then you should navigate the sidebar and click on the report death
+                tab of the sidebar.
+                After clicking on the report death tab, enter the rat’s sex and number and after doing that enter the
+                date the rat died and how the rat died into input fields that show up.
+                After entering those details click the ‘report’ button. After doing that a Modal will pop up and ask if
+                you are sure the data you entered is correct.
+                If you are sure click ‘yes’ otherwise click ‘no’. If ‘no’ is selected then the modal will close and you
+                will be given a chance to reenter the data correctly.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-thirteen">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  A rat has been transferred! I need to report it, how do I do that?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>In order to report when a rat has been transferred you must navigate the sidebar to the tab that says ‘Report Transfer’. Once found you must click on it. When you are on the page you are presented with a drop down menu and a text box. 
-                      Click on the drop down and select the rat’s rex and input the rat’s number then click the ‘Report’ button. After doing that a Modal will pop up and ask if you are sure the data you entered is correct. 
-                      If you are sure click ‘yes’ otherwise click ‘no’. If ‘no’ is selected then the modal will close and you will be given a chance to reenter the data correctly.
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-ten">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> A rat litter has been born and I need to report it! How do I do that?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>If you need to report a litter then look at the sidebar and find the tab that says ‘Report Litter’.
+                Once you find that click that tab. It will take you to a page where you can report a rat’s litter.
+                You will see two boxes to enter the Sire and Dam of the litter. There will also be a dropdown menu to
+                report whether or not the litter has one or more rats with a defect present. If so select ‘yes’
+                otherwise select ‘no’.
+                Once you are done click the ‘Submit’ button. After doing that a Modal will pop up and ask if you are
+                sure the data you entered is correct. If you are sure click ‘yes’ otherwise click ‘no’.
+                If ‘no’ is selected then the modal will close and you will be given a chance to reenter the data
+                correctly.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-fourteen">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  We need to get a bunch of breeding pairs together. How do I do that?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>In order to generate breeding pairs for a rat you must navigate the sidebar and find the tab that says ‘Generate Breeding Pairs’ and click on it. When you are on the page you are presented with a drop down menu and a text box. 
-                      Click on the drop down and select the rat’s rex and input the rat’s number. There will be a checkbox that specifies if you want to swap the breeding pair the rat is currently in, it is checked by default. 
-                      After all of the information has been submitted you click the submit button in order to generate the potential pairs. The best pairs will be at the top of the table that is generated, but all are viable.
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-eleven">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> I need to look up the information for a specific rat, what do I do?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>In order to look up a specific rat in the database you should navigate the sidebar of the website and
+                find the tab that says ‘Search’ and click it. This will bring you to a page that displays every rat in
+                the database in a table format.
+                In order to find a specific rat in the table there will be a dropdown menu and a text input field.
+                Clicking on the dropdown will prompt you to select the sex of the rat that you want to search. In the
+                text field you should input the rat’s number.
+                Once both the text and dropdown have been selected you must click the button that says ‘Search. After
+                clicking ‘Search’ the table will filter out any rats that do not match the details you input. And you
+                will have your rat and its associated data.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-fifteen">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  Can I trust the breeding pairs that are given to me?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>The algorithm that was developed by our team is 100% guaranteed to not result in rats that would cause incest within three generations.
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-twelve">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> Why can’t I edit records?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>The reason you might not be able to edit the records of the database is because you have not been given
+                admin privileges.
+
+                To acquire these privileges, contact a current administrator within the lab and ask them to follow the
+                instructions listed in our ‘How to internally escalate privileges’ section of this page.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-sixteen">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  A rat has been selected to join the colony and needs to be added to the database. How do I do that?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>In order to add a rat to the database you need to navigate the sidebar and find the tab that says ‘Add Rat‘ and click on it. Once you are on the page you are presented with inputs for the rat’s sex, their birthdate, their sire, their dam, the date they were weaned, the date they were added into the colony, and whether or not they are currently in an experiment.
-                       Input all of the associated data in the appropriate fields. After you have correctly input the data, click the add button to add the rat.
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-thirteen">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> A rat has been transferred! I need to report it, how do I do that?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>In order to report when a rat has been transferred you must navigate the sidebar to the tab that says
+                ‘Report Transfer’. Once found you must click on it. When you are on the page you are presented with a
+                drop down menu and a text box.
+                Click on the drop down and select the rat’s rex and input the rat’s number then click the ‘Report’
+                button. After doing that a Modal will pop up and ask if you are sure the data you entered is correct.
+                If you are sure click ‘yes’ otherwise click ‘no’. If ‘no’ is selected then the modal will close and you
+                will be given a chance to reenter the data correctly.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-seventeen">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  I accidentally input the wrong data when adding a rat. How do I change it?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>In order to add a rat to the database you need to navigate the sidebar and find the tab that says ‘Edit Record ‘and click on it. Once you are on the page you are presented with a drop down menu and a text box. Click on the drop down and select the rat’s rex and input the rat’s number. Then click the ‘Continue’ button.
-                       You will be presented with multiple fields that can be edited. These fields include birthdate, date of last pairing, date of last litter, date weaned, number of litters, number of pairings, date added to colony, number of litters with defects, if the rat is in an experiment, the rat’s sire, and the rat’s dam. Input the fields you wish to edit. 
-                       After doing that a Modal will pop up and ask if you are sure the data you entered is correct. If you are sure click ‘yes’ otherwise click ‘no’. If ‘no’ is selected then the modal will close and you will be given a chance to reenter the data correctly.
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-fourteen">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> We need to get a bunch of breeding pairs together. How do I do that?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>In order to generate breeding pairs for a rat you must navigate the sidebar and find the tab that says
+                ‘Generate Breeding Pairs’ and click on it. When you are on the page you are presented with a drop down
+                menu and a text box.
+                Click on the drop down and select the rat’s rex and input the rat’s number. There will be a checkbox
+                that specifies if you want to swap the breeding pair the rat is currently in, it is checked by default.
+                After all of the information has been submitted you click the submit button in order to generate the
+                potential pairs. The best pairs will be at the top of the table that is generated, but all are viable.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-eighteen">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  I need to get a view of a rat’s family tree. How do I do that?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>In order to get a view of a rat’s family tree, navigate the sidebar and find the tab that says ‘Search’ and click on it. Once on the associated page enter the rat’s sex and number into the associated drop down and text box. 
-                      Once the data has been input click the ‘Make Tree’ button. Then the family tree of the rat going back to its grandparents of both its sire and its dam will be displayed.
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-fifteen">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> Can I trust the breeding pairs that are given to me?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>The algorithm that was developed by our team is 100% guaranteed to not result in rats that would cause
+                incest within three generations.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-nineteen">
-                <!-- faq question -->
-<h2 class="faq-page"><b>  What is the tree that I see on the dashboard? Is it accurate?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>The Family Tree feature has been added to help the user to visually understand the relationship between each rat within the database, and yes, it is accurate. 
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-sixteen">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> A rat has been selected to join the colony and needs to be added to the database.
+                How do I do that?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>In order to add a rat to the database you need to navigate the sidebar and find the tab that says ‘Add
+                Rat‘ and click on it. Once you are on the page you are presented with inputs for the rat’s sex, their
+                birthdate, their sire, their dam, the date they were weaned, the date they were added into the colony,
+                and whether or not they are currently in an experiment.
+                Input all of the associated data in the appropriate fields. After you have correctly input the data,
+                click the add button to add the rat.
+              </p>
             </div>
-            <hr class="hr-line">
-            <div class="faq-twenty">
-                <!-- faq question -->
-<h2 class="faq-page"><b> Why are there gaps in the number of the rats?</b></h2>
-                <!-- faq answer -->
-                <div class="faq-body">
-                    <p>The data we received was originally incomplete, so there are gaps in the numbers assigned to rats. Any added data through the program should not cause a gap in the number of rats.
-                    </p>
-                </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-seventeen">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> I accidentally input the wrong data when adding a rat. How do I change it?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>In order to add a rat to the database you need to navigate the sidebar and find the tab that says ‘Edit
+                Record ‘and click on it. Once you are on the page you are presented with a drop down menu and a text
+                box. Click on the drop down and select the rat’s rex and input the rat’s number. Then click the
+                ‘Continue’ button.
+                You will be presented with multiple fields that can be edited. These fields include birthdate, date of
+                last pairing, date of last litter, date weaned, number of litters, number of pairings, date added to
+                colony, number of litters with defects, if the rat is in an experiment, the rat’s sire, and the rat’s
+                dam. Input the fields you wish to edit.
+                After doing that a Modal will pop up and ask if you are sure the data you entered is correct. If you are
+                sure click ‘yes’ otherwise click ‘no’. If ‘no’ is selected then the modal will close and you will be
+                given a chance to reenter the data correctly.
+              </p>
             </div>
-            
+          </div>
+          <hr class="hr-line">
+          <div class="faq-eighteen">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> I need to get a view of a rat’s family tree. How do I do that?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>In order to get a view of a rat’s family tree, navigate the sidebar and find the tab that says ‘Search’
+                and click on it. Once on the associated page enter the rat’s sex and number into the associated drop
+                down and text box.
+                Once the data has been input click the ‘Make Tree’ button. Then the family tree of the rat going back to
+                its grandparents of both its sire and its dam will be displayed.
+              </p>
+            </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-nineteen">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> What is the tree that I see on the dashboard? Is it accurate?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>The Family Tree feature has been added to help the user to visually understand the relationship between
+                each rat within the database, and yes, it is accurate.
+              </p>
+            </div>
+          </div>
+          <hr class="hr-line">
+          <div class="faq-twenty">
+            <!-- faq question -->
+            <h2 class="faq-page"><b> Why are there gaps in the number of the rats?</b></h2>
+            <!-- faq answer -->
+            <div class="faq-body">
+              <p>The data we received was originally incomplete, so there are gaps in the numbers assigned to rats. Any
+                added data through the program should not cause a gap in the number of rats.
+              </p>
+            </div>
+          </div>
+
 
         </section>
-    </main>
-    <script src="main.js"></script>
+      </main>
+      <script src="main.js">
+        var dropDown = document.getElementById( "Rat-Gender" );
+        var number = document.getElementById( "Input" );
+        var show = document.getElementById( "obscuredDetails" );
+        var modal = document.getElementById( "myModal" );
+        var dDate = document.getElementById( "Input1" );
+        var coDeath = document.getElementById( "Input2" );
+        var weDate = document.getElementById( "Input3" );
+
+        // Get the Sidebar
+        var mySidebar = document.getElementById( "mySidebar" );
+
+        // Get the DIV with overlay effect
+        var overlayBg = document.getElementById( "myOverlay" );
+
+        // Toggle between showing and hiding the sidebar, and add overlay effect
+        function w3_open () {
+          if ( mySidebar.style.display === 'block' ) {
+            mySidebar.style.display = 'none';
+            overlayBg.style.display = "none";
+          } else {
+            mySidebar.style.display = 'block';
+            overlayBg.style.display = "block";
+          }
+        }
+
+        // Close the sidebar with the close button
+        function w3_close () {
+          mySidebar.style.display = "none";
+          overlayBg.style.display = "none";
+        }
+      </script>
+    </body>
+
+    <!-- Footer -->
+    <footer class="w3-container w3-padding-16 w3-light-grey">
+    </footer>
+
+    <!-- End page content -->
+  </div>
 </body>
 
-  <!-- Footer -->
-  <footer class="w3-container w3-padding-16 w3-light-grey">
-  </footer>
-
-  <!-- End page content -->
-</div>
-</body>
 </html>

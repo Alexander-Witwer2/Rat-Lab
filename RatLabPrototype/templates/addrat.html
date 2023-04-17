@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="webpage.css">
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='webpage.css')}}">
   <style>
     html,
     body,
@@ -82,42 +82,50 @@
     title="close side menu" id="myOverlay"></div>
 
   <!-- !PAGE CONTENT! -->
-  <div class="w3-main" style="margin-left:300px;margin-top:43px;">
-
-    <!-- Header -->
-    <br>
-    {% if errorText %}
-    <div class="w3-twothird">
-      {{errorText}}
+  <div class="center w3-panel">
+    <div class="w3-row-padding" style="margin:0 -8px">
+      <div class="w3-twothird">
+        <div class="w3-main" style="margin-left:300px;margin-top:43px;">
+        <!-- Header -->
+        <br>
+        {% if errorText %}
+        <div class="w3-twothird">
+          {{errorText}}
+        </div>
+        {% endif %}
+        <div id="boxes" style="display: block;" class="w3-row-padding">
+          <p>All fields are required.</p>
+          <form action="/addrat" , method="POST">
+            {{form.sex}} <br>
+            <br>
+            <p>Birthdate:</p>
+            {{form.birthdate(class="date")}}
+            <br>
+            <p>Check the box if the rat was from the supplier:</p>
+            {{ form.supplierRat (class="checkbox") }}
+            <p>Fill out the sire and dam fields if the rat was born in the colony:</p>
+            {{ form.sire(placeholder="Sire Number (ex. 100)")}}
+            <br>
+            {{ form.dam(placeholder="Dam Number (ex. 100)")}}
+            <br>
+            <p>Date the rat was weaned:</p>
+            {{ form.weanedDate(class="date")}}
+            <br>
+            <p>Date the rat was added to the colony:</p>
+            {{ form.dateAddedToColony(class="date")}}
+            <br>
+            <p>Was the rat used in an experiment?</p>
+            {{ form.experiment(class="checkbox", default="unchecked")}}
+            <br>
+            {{form.addButton}}
+          </form>
+        </div>
+      
+      </div>
     </div>
-    {% endif %}
-    <div id="boxes" style="display: block;" class="w3-row-padding">
-      <p>All fields are required.</p>
-      <form action="/addrat" , method="POST">
-        {{form.sex}} <br>
-        <br>
-        <p>Birthdate:</p>
-        {{form.birthdate(class="date")}}
-        <br>
-        <p>Check the box if the rat was from the supplier:</p>
-        {{ form.supplierRat (class="checkbox") }}
-        <p>Fill out the sire and dam fields if the rat was born in the colony:</p>
-        {{ form.sire(placeholder="Sire Number (ex. 100)")}}
-        <br>
-        {{ form.dam(placeholder="Dam Number (ex. 100)")}}
-        <br>
-        <p>Date the rat was weaned:</p>
-        {{ form.weanedDate(class="date")}}
-        <br>
-        <p>Date the rat was added to the colony:</p>
-        {{ form.dateAddedToColony(class="date")}}
-        <br>
-        <p>Was the rat used in an experiment?</p>
-        {{ form.experiment(class="checkbox", default="unchecked")}}
-        <br>
-        {{form.addButton}}
-      </form>
-    </div>
+  </div>
+  
+  
 
     <!-- Footer -->
     <footer class="w3-container w3-padding-16 w3-light-grey">

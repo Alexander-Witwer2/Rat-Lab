@@ -215,7 +215,6 @@ def addRat():
             errorText = isValidWeanedDate
             return render_template("addrat.html", form=form, user=current_user.username, errorText=errorText)
 
-        
         rat.last_paired_date = date(1900, 1, 1)
         rat.last_litter_date = date(1900, 1, 1)
         rat.num_times_paired = 0
@@ -392,36 +391,60 @@ def editRecords():
         rat = db.session.query(Rat).filter(Rat.rat_number == number).one()
         
         if(form.birthdate.data != None):
-            date_Check = isDateInBounds(form.birthdate.data)
-            if(date_Check != False ) :
+            isValidBirthdate = isDateInBounds(form.birthdate.data)
+            if(isValidBirthdate == "ok") :
                 rat.birthdate = form.birthdate.data
                 delta = relativedelta.relativedelta(date.today(), form.birthdate.data)
                 age = delta.months + (delta.years * 12)
-                rat.age_months = age        
+                rat.age_months = age
+                db.session.commit()
+            else:
+                errorText = "Error: a rat cannot be born " + isValidBirthdate + "."
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
+        
         if(form.last_paired_date.data != None):
-            date_Check = isDateInBounds(form.last_paired_date.data)
+            isValidPairedDate = isDateInBounds(form.last_paired_date.data)
             if(rat.current_partner == '00X') :
                 errorText = "Error: Rat must be paired to edit pairing or litter info."
                 return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
-            elif(date_Check != False) :
+            if(isValidPairedDate != "ok") :
+                errorText = "Error: a rat cannot be paired " + isValidPairedDate + "."
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=isValidPairedDate)
+            if(form.last_paired_date.data < (rat.birthdate + relativedelta.relativedelta(months=3)) ):
+                errorText = "Error: this paired date is before the rat was 3 months old and eligible to breed."
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
+            else:
                 rat.last_paired_date = form.last_paired_date.data
+
         if(form.last_litter_date.data != None):
-            date_Check = isDateInBounds(form.last_litter_date.data)
+            isValidLitterDate = isDateInBounds(form.last_litter_date.data)
             if(rat.current_partner == '00X') :
                 errorText = "Error: Rat must be paired to edit pairing or litter info."
                 return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
-            elif(date_Check != False) :
+            if(isValidLitterDate != "ok") :
+                errorText = "Error: cannot record a litter " + isValidLitterDate + "."
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
+            if(form.last_litter_date.data < (rat.birthdate + relativedelta.relativedelta(months=3)) ):
+                errorText = "Error: this litter date is before the rat was 3 months old and eligible to breed."
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
+            else:
                 rat.last_litter_date = form.last_litter_date.data
+        
         if(form.weaned_date.data != None):
-            date_Check = isDateInBounds(form.weaned_date.data)
-            if(date_Check != False) :
+            isValidWeanedDate = weanedDateCheck(rat.birthdate, form.weaned_date.data)
+            if(isValidWeanedDate != "ok") :
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=isValidWeanedDate)
+            else:
                 rat.weaned_date = form.weaned_date.data
+                db.session.commit()
+        
         if(form.num_times_paired.data != None):
             if(rat.current_partner == '00X') :
                 errorText = "Error: Rat must be paired to edit pairing or litter info."
                 return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
             else :
                 rat.num_times_paired = form.num_times_paired.data  
+        
         if(form.num_litters.data != None):
             if(rat.current_partner == '00X') :
                 errorText = "Error: Rat must be paired to edit pairing or litter info."
@@ -430,12 +453,25 @@ def editRecords():
             #elif(form.num_litters.data == 0) :
             else :
                 rat.num_litters = form.num_litters.data
+                db.session.commit()
+        
         if(form.date_added_to_colony.data != None):
-            date_Check = isDateInBounds(form.date_added_to_colony.data)
-            if(date_Check != False) :
+            isValidAddedToColonyDate = addedToColonyDateCheck(rat.birthdate, rat.weaned_date, form.date_added_to_colony.data)
+            if(isValidAddedToColonyDate != "ok") :
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=isValidAddedToColonyDate)
+            else:
                 rat.date_added_to_colony = form.date_added_to_colony.data
+        
         if(form.num_litters_with_defects.data != None):
-            rat.num_litters_with_defects = form.num_litters_with_defects.data
+            if(rat.current_partner == '00X') :
+                errorText = "Error: Rat must be paired to edit pairing or litter info."
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
+            if(rat.num_litters == 0):
+                errorText = "Error: rat has not been involved in any litters, it cannot have had any litters with defects."
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
+            else:
+                rat.num_litters_with_defects = form.num_litters_with_defects.data
+        
         if(form.experiment.data != None):
             rat.experiment = form.experiment.data
                 
@@ -460,6 +496,9 @@ def editRecords():
                 newName = rat.rat_number + sire[:-1] + dam[:-1]
                 rat.rat_name = newName
                 fillGenealogyData(rat.rat_number, sire, dam)
+            else:
+                errorText = "Error: the updated sire and dam are an invalid pairing."
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
         elif (form.sire.data != None):
             sire = str(form.sire.data) + "M"
             if(sire == rat.rat_number):
@@ -469,6 +508,9 @@ def editRecords():
                 rat.sire = sire
                 rat.rat_name = rat.rat_number + sire[:-1] + rat.dam
                 fillGenealogyData(rat.rat_number, sire, rat.dam)
+            else:
+                errorText = "Error: the updated sire is an invalid pairing with the rat's dam."
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
         elif (form.dam.data != None):
             dam = str(form.dam.data) + "F"
             if(dam == rat.rat_number):
@@ -477,7 +519,10 @@ def editRecords():
             if(verifySireAndDam(rat.sire, dam)):
                 rat.dam = dam
                 rat.rat_name = rat.rat_number + rat.sire + dam[:-1]
-                fillGenealogyData(rat.rat_number, rat.sire, dam)        
+                fillGenealogyData(rat.rat_number, rat.sire, dam)
+            else:
+                errorText = "Error: the updated dam is an invalid pairing with the rat's sire."
+                return render_template("editrecords.html", form=form, user=current_user.username, errorText=errorText)
         
         if(form.status.data != "Empty" and form.status.data != rat.manner_of_death):
             rat.manner_of_death = form.status.data
@@ -547,8 +592,7 @@ def reportLitter():
     if(request.method == "POST") :
         sire_number = str(form.sire.data) + "M"
         dam_number = str(form.dam.data) + "F"
-        validPairing = verifySireAndDam(sire_number, dam_number)        
-        if(not validPairing):
+        if(not (ratIDCheck(sire_number) and ratIDCheck(dam_number))):
             errorText = "Error: this is not a valid pairing."
             return render_template("reportlitter.html", form=form, user=current_user.username, errorText=errorText)
             # Not restricting to only rats that are currently paired with each other
@@ -556,8 +600,9 @@ def reportLitter():
             # before they got the chance to record the litter.  If I had time to make a 
             # pairing table I would restrict to sire and dam paired together 
             # within the past month, but unfortunately, I don't.
-        if(not isDateInBounds(form.litterDate.data)):
-            errorText = "Error: can't report a litter born in the future."
+        isValidDate = isDateInBounds(form.litterDate.data)
+        if( isValidDate != "ok"):
+            errorText = "Error: can't report a litter born " + isValidDate + "."
             return render_template("reportlitter.html", form=form, user=current_user.username, errorText=errorText)
         else:
             sire = Rat.query.get(sire_number)
@@ -568,9 +613,6 @@ def reportLitter():
                 return render_template("reportlitter.html", form=form, user=current_user.username, errorText=errorText)
             if(dam.manner_of_death != "Alive"):
                 errorText = "Error: can't report a litter if the dam is deceased or transferred."
-                return render_template("reportlitter.html", form=form, user=current_user.username, errorText=errorText)
-            if(not isDateInBounds(form.litterDate.data)):
-                errorText = "Error: can't report a litter born in the future"
                 return render_template("reportlitter.html", form=form, user=current_user.username, errorText=errorText)
 
             sire.num_litters = sire.num_litters + 1
@@ -590,7 +632,6 @@ def reportDeath():
     if(Admins.query.get(current_user.username) == None):
         return redirect(url_for("accessdenied"))
     form = ReportDeathForm()
-    dCheck = False
     
     if(request.method == "POST"):       
         rat_number = str(form.number.data) + form.sex.data[0]
@@ -598,23 +639,21 @@ def reportDeath():
         isValidRat = ratIDCheck(rat_number)
         
         if(isValidRat):
-           rat = Rat.query.get(rat_number)
-           if(rat.manner_of_death != "Alive"):
+            rat = Rat.query.get(rat_number)
+            if(rat.manner_of_death != "Alive"):
                 errorText = "Error: can't report the death of a deceased or transferred rat."
                 return render_template("reportdeath.html", form=form, user=current_user.username, errorText=errorText)
-           rat.manner_of_death = form.mannerOfDeath.data
-           dCheck = isDateInBounds(form.deathDate.data)
-           if dCheck != False :
-              rat.death_date = form.deathDate.data
-              # don't have to update the inputted rat's partner because that rat is now deceased 
-              # so it doesn't matter who they're paired with.  their current partner is still alive
-              # though, so we have to update that rat's partner to DEC because they will be repaired
-              # and it matters who they're paired with  
-              if(rat.current_partner != '' and rat.current_partner != "UNK" 
+            isValidDate = isDateInBounds(form.deathDate.data)
+            if(isValidDate != "ok"):
+                errorText = "Can't report a death that happened " + isValidDate + "."
+                return render_template("reportdeath.html", form=form, user=current_user.username, errorText=errorText)
+            
+            rat.manner_of_death = form.mannerOfDeath.data
+            if(rat.current_partner != '' and rat.current_partner != "UNK" 
                 and rat.current_partner != "DEC" and rat.current_partner != "00X"):
-                 current_partner = Rat.query.get(rat.current_partner)
-                 current_partner.current_partner = "DEC"
-              db.session.commit()
+                current_partner = Rat.query.get(rat.current_partner)
+                current_partner.current_partner = "DEC"
+            db.session.commit()
         else :
             errorText = "Error: Not an existing rat."
             return render_template("reportdeath.html", form=form, user=current_user.username, errorText=errorText)

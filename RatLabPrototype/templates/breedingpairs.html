@@ -153,15 +153,15 @@
           {% if rat.current_partner == "DEC" %}
           <td>Deceased</td>
           {% elif rat.current_partner == "00X" %}
-          <td>N/A</td>
+          <td>None</td>
           {% else %}
           <td>{{ rat.current_partner }}</td>
           {% endif %}
 
           <td>{{ rat.age_months }} </td>
 
-          {% if rat.current_partner == "00X" %}
-          <td>None</td>
+          {% if rat.current_partner == "00X"  or rat.current_partner == '' %}
+          <td>N/A</td>
           <td>N/A</td>
           <td>N/A</td>
           <td>N/A</td>

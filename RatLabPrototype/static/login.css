@@ -76,7 +76,9 @@ body {
   display: flex;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
-          flex-direction: row;
+  flex-direction: row;
+  padding-left: 155px;
+  padding-bottom: 30px;
 }
 .login-form .action button {
   width: 100%;
@@ -105,4 +107,14 @@ body {
 }
 .login-form .action button:nth-child(2):hover {
   background: #3c4d6d;
+}
+
+#submit{
+  height: 20px;
+  width: 200px;
+}
+
+#submitButton{
+  height: 20px;
+  width: 200px;
 }

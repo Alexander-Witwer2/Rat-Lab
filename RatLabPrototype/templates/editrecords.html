@@ -108,62 +108,70 @@
       {{errorText}}
     </div>
     {% endif %}
-    <div id="boxes" style="display: none;">
-      <p>Enter data to update. Fields left blank will not be updated.</p>
-      <label class="checkbox" for="birth"> Change Birthdate
-        <span style="display: block;"> {{ form.birthdate }} </span>
-      </label><br>
-      <label class="checkbox" for="lastPair"> Edit date of Last Pairing
-        <span style="display: block;"> {{ form.last_paired_date }}</span>
-      </label><br>
-      <label class="checkbox" for="lastLitter"> Change date of Last Litter
-        <span style="display: block;"> {{ form.last_litter_date }}</span>
-      </label><br>
-      <label class="checkbox" for="weanedDate"> Change date the date the rat was weaned
-        <span style="display: block;"> {{ form.weaned_date }}</span>
-      </label><br>
-      <label class="checkbox" for="numPair"> Edit Number of Pairings
-        <span style="display: block;"> {{ form.num_times_paired }} </span>
-      </label><br>
-      <label class="checkbox" for="numLitter"> Edit Number of Litters
-        <span style="display: block;"> {{ form.num_litters}} </span>
-      </label><br>
-      <label class="checkbox" for="colonyDate"> Change the Date the Rat was Added to the Colony
-        <span style="display: block;"> {{ form.date_added_to_colony}} </span>
-      </label><br>
-      <label class="checkbox" for="defectLit"> Edit the Number of Litters with Defects
-        <span style="display: block;">{{ form.num_litters_with_defects}} </span>
-      </label><br>
-      <label class="checkbox" for="exp"> Was the rat used in an experiment?
-        <span style="display: block;">{{ form.experiment (class="checkbox", default="unchecked")}}</span>
-      </label><br>
-      <label class="checkbox" for="exp"> Is the rat from the supplier?
-        <span style="display: block;">{{ form.supplierRat (class="checkbox", default="unchecked")}}</span>
-      </label><br>
-      <label class="checkbox" for="ratSire"> Edit the Rat's Sire
-        <span style="display: block;">{{ form.sire (placeholder="Sire Number (ex. 100)")}} </span>
-      </label><br>
-      <label class="checkbox" for="ratDam"> Edit the Rat's Dam
-        <span style="display: block;">{{ form.dam (placeholder="Dam Number (ex. 100)")}} </span>
-      </label><br>
-      <label class="checkbox" for="ratStatus"> Edit the Rat's status
-        <span style="display: block;">{{ form.status }} </span>
-      </label><br>
+    <div class="center w3-panel">
+      <div class="w3-row-padding" style="margin:0 -8px">
+        <div class="w3-twothird">
+          
+          <div id="boxes" style="display: none;">
+            <p>Enter data to update. Fields left blank will not be updated.</p>
+            <label class="checkbox" for="birth"> Change Birthdate
+              <span style="display: block;"> {{ form.birthdate }} </span>
+            </label><br>
+            <label class="checkbox" for="lastPair"> Edit date of Last Pairing
+              <span style="display: block;"> {{ form.last_paired_date }}</span>
+            </label><br>
+            <label class="checkbox" for="lastLitter"> Change date of Last Litter
+              <span style="display: block;"> {{ form.last_litter_date }}</span>
+            </label><br>
+            <label class="checkbox" for="weanedDate"> Change date the date the rat was weaned
+              <span style="display: block;"> {{ form.weaned_date }}</span>
+            </label><br>
+            <label class="checkbox" for="numPair"> Edit Number of Pairings
+              <span style="display: block;"> {{ form.num_times_paired }} </span>
+            </label><br>
+            <label class="checkbox" for="numLitter"> Edit Number of Litters
+              <span style="display: block;"> {{ form.num_litters}} </span>
+            </label><br>
+            <label class="checkbox" for="colonyDate"> Change the Date the Rat was Added to the Colony
+              <span style="display: block;"> {{ form.date_added_to_colony}} </span>
+            </label><br>
+            <label class="checkbox" for="defectLit"> Edit the Number of Litters with Defects
+              <span style="display: block;">{{ form.num_litters_with_defects}} </span>
+            </label><br>
+            <label class="checkbox" for="exp"> Was the rat used in an experiment?
+              <span style="display: block;">{{ form.experiment (class="checkbox", default="unchecked")}}</span>
+            </label><br>
+            <label class="checkbox" for="exp"> Is the rat from the supplier?
+              <span style="display: block;">{{ form.supplierRat (class="checkbox", default="unchecked")}}</span>
+            </label><br>
+            <label class="checkbox" for="ratSire"> Edit the Rat's Sire
+              <span style="display: block;">{{ form.sire (placeholder="Sire Number (ex. 100)")}} </span>
+            </label><br>
+            <label class="checkbox" for="ratDam"> Edit the Rat's Dam
+              <span style="display: block;">{{ form.dam (placeholder="Dam Number (ex. 100)")}} </span>
+            </label><br>
+            <label class="checkbox" for="ratStatus"> Edit the Rat's status
+              <span style="display: block;">{{ form.status }} </span>
+            </label><br>
 
-      <!-- <input type="submit" value="Update" class="w3-button"></input> -->
-      <button type="button" onclick="areYouSure()">Update</button>
-      <div id="myModal" class="modal">
+            <!-- <input type="submit" value="Update" class="w3-button"></input> -->
+            <button type="button" onclick="areYouSure()">Update</button>
+            <div id="myModal" class="modal">
 
-        <div class="modal-content">
-          <p id="modalText"></p>
-          {{form.update}}
-          <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
-          <button onclick="closeModal()">No</button>
+              <div class="modal-content">
+                <p id="modalText"></p>
+                {{form.update}}
+                <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
+                <button onclick="closeModal()">No</button>
+              </div>
+
+            </div>
+            </form>
+          </div>
         </div>
-
       </div>
-      </form>
     </div>
+    
 
     <hr>
     <br>

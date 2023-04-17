@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Record Transfer</title>
+<title>ACCESS DENIED</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -20,60 +20,26 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   <span class="w3-bar-item w3-right">Rat Database</span>
 </div>
 
-<p>ACCESS DENIED</p>
 
-<script>
-    var dropDown = document.getElementById( "Rat-Gender" );
-    var number = document.getElementById( "Input" );
-    var show = document.getElementById( "obscuredDetails" );
-    var modal = document.getElementById( "myModal" );
-    var dDate = document.getElementById( "Input1" );
-    var coDeath = document.getElementById( "Input2" );
-    var weDate = document.getElementById( "Input3" );
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer"
+  title="close side menu" id="myOverlay"></div>
 
-// Get the Sidebar
-var mySidebar = document.getElementById("mySidebar");
+<!-- !PAGE CONTENT! -->
+<div class="w3-main" style="margin-left:300px;margin-top:43px;">
 
-// Get the DIV with overlay effect
-var overlayBg = document.getElementById("myOverlay");
+  <!-- Header -->
+  <br>
+  <div id="boxes" style="display: block;" class="w3-row-padding center">
+    <p>ACCESS DENIED</p>
+  </div>
 
-// Toggle between showing and hiding the sidebar, and add overlay effect
-function w3_open() {
-  if (mySidebar.style.display === 'block') {
-    mySidebar.style.display = 'none';
-    overlayBg.style.display = "none";
-  } else {
-    mySidebar.style.display = 'block';
-    overlayBg.style.display = "block";
-  }
-}
+  <!-- Footer -->
+  <footer class="w3-container w3-padding-16 w3-light-grey">
+  </footer>
 
-// Close the sidebar with the close button
-function w3_close() {
-  mySidebar.style.display = "none";
-  overlayBg.style.display = "none";
-}
-
-function deathDetails () {
-  if ( form.  dropDown.value != "" && number.value != "" ) {
-  show.style.display = "inline";
-  }
-}
-	
-function transferQuestion () {
-  //if(dropDown.value != "" && number.value != ""){
-    modal.style.display = "block";
-    document.getElementById("modalText").innerHTML = "Are you sure?" 
-	//+ dropDown.value.toUpperCase() + number.value.toUpperCase() + 
-    //        " was Transfer?";
-  }
-
-
-function closeModal(){
-  modal.style.display = "none";
-}
-
-</script>
+  <!-- End page content -->
+</div>
 
 </body>
 </html>

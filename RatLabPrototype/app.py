@@ -4,7 +4,7 @@ from flask import Flask, request, redirect, url_for, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, BooleanField, SelectField, DateField
-from wtforms.validators import DataRequired
+from wtforms.validators import InputRequired
 from datetime import date, datetime, timedelta
 from dateutil import relativedelta
 import re
@@ -102,12 +102,12 @@ def load_user(username):
 
 class AddRatForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
-    birthdate = DateField()
+    birthdate = DateField(validators=[InputRequired()])
     supplierRat = BooleanField()
     sire = IntegerField()
     dam = IntegerField()
-    weanedDate = DateField()
-    dateAddedToColony = DateField(default=date.today())
+    weanedDate = DateField(validators=[InputRequired()])
+    dateAddedToColony = DateField(default=date.today(), validators=[InputRequired()])
     experiment = BooleanField()
     addButton = SubmitField('Add Rat')       
 
@@ -131,45 +131,43 @@ class EditRatForm(FlaskForm):
     
 class ReportDeathForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
-    number = IntegerField()
-    deathDate = DateField(default=date.today())
+    number = IntegerField(validators=[InputRequired()])
+    deathDate = DateField(default=date.today(), validators=[InputRequired()])
     mannerOfDeath = SelectField(choices=['Euthanized', 'Unexpected'])
     submit = SubmitField('Yes')
 
 class GenerateBreedingPairsForm(FlaskForm):
     sex = SelectField(choices=['Male', 'Female'])
-    number = IntegerField()
+    number = IntegerField(validators=[InputRequired()])
     swapping = BooleanField(default="checked")
-    mateDropdown = SelectField()
+    mateDropdown = SelectField(validators=[InputRequired()])
     generateButton = SubmitField('Generate')
-    mateDropdown = SelectField()
     recordButton = SubmitField('Yes')
 
 class ReportLitterForm(FlaskForm):
-    sire = IntegerField('Sire')
-    dam = IntegerField('Dam')
+    sire = IntegerField('Sire', validators=[InputRequired()])
+    dam = IntegerField('Dam', validators=[InputRequired()])
     reportLittersWithDefects = SelectField(default="No", choices=['Yes', 'No'])
-    litterDate = DateField(default=date.today())
+    litterDate = DateField(default=date.today(), validators=[InputRequired()])
     submit = SubmitField('Yes')
     
 class RecordTransferForm(FlaskForm) :
     sex = SelectField(choices=['Male', 'Female'])
-    number = IntegerField()
+    number = IntegerField(validators=[InputRequired()])
     submit = SubmitField('Yes')
 
 class FamilyTreeForm(FlaskForm):
     generateButton = SubmitField("View Ancestry")
 
 class LoginForm(FlaskForm):
-    username = StringField()
-    password = StringField()
+    username = StringField(validators=[InputRequired()])
+    password = StringField(validators=[InputRequired()])
     submit = SubmitField("Login")
-    generateButton = SubmitField("View Ancestry")
     
 class AddAdminForm(FlaskForm):
-    newAdminUsername = StringField()
-    currentAdminUsername = StringField()
-    currentAdminPassword = StringField()
+    newAdminUsername = StringField(validators=[InputRequired()])
+    currentAdminUsername = StringField(validators=[InputRequired()])
+    currentAdminPassword = StringField(validators=[InputRequired()])
     submitButton = SubmitField("Confirm")
     
 @app.route("/")
@@ -254,7 +252,7 @@ def addRat():
                 rat.rat_name = ratNumber + sire[:-1] + dam[:-1]
             else:
                 errorText = "Error: invalid parents"
-            return render_template("addrat.html", form=form, user=current_user.username, errorText=errorText)
+                return render_template("addrat.html", form=form, user=current_user.username, errorText=errorText)
 
         delta = relativedelta.relativedelta(date.today(), form.birthdate.data)
         age = delta.months + (delta.years * 12)

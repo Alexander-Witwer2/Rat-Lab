@@ -88,83 +88,94 @@
     <div class="center w3-panel">
       <div class="w3-row-padding" style="margin:0 -16px">
         <div class="w3-twothird">
+          {% if not editSpecificRat %}
           <form action="/editrecords" , method="POST">
             {{ form.sex }}
             {{ form.number (placeholder="Rat Number (ex. 100)")}}
-            <button type="button" onclick="bringChecks()">Continue</button>
+            <!-- <button type="button" onclick="bringChecks()" id="continueButton">Continue</button> -->
+            {{ form.continueButton }}
+          </form>
+          {% endif %}
         </div>
       </div>
     </div>
+    
     {% if errorText %}
     <div class="w3-twothird">
       {{errorText}}
     </div>
     {% endif %}
-    <div id="boxes" style="display: none;">
-      <p>Enter data to update. Fields left blank will not be updated.</p>
-      <label class="checkbox" for="birth"> Change Birthdate
-        <span style="display: block;"> {{ form.birthdate }} </span>
-      </label><br>
-      <label class="checkbox" for="lastPair"> Edit date of Last Pairing
-        <span style="display: block;"> {{ form.last_paired_date }}</span>
-      </label><br>
-      <label class="checkbox" for="lastLitter"> Change date of Last Litter
-        <span style="display: block;"> {{ form.last_litter_date }}</span>
-      </label><br>
-      <label class="checkbox" for="weanedDate"> Change date the date the rat was weaned
-        <span style="display: block;"> {{ form.weaned_date }}</span>
-      </label><br>
-      <label class="checkbox" for="numPair"> Edit Number of Pairings
-        <span style="display: block;"> {{ form.num_times_paired }} </span>
-      </label><br>
-      <label class="checkbox" for="numLitter"> Edit Number of Litters
-        <span style="display: block;"> {{ form.num_litters}} </span>
-      </label><br>
-      <label class="checkbox" for="colonyDate"> Change the Date the Rat was Added to the Colony
-        <span style="display: block;"> {{ form.date_added_to_colony}} </span>
-      </label><br>
-      <label class="checkbox" for="defectLit"> Edit the Number of Litters with Defects
-        <span style="display: block;">{{ form.num_litters_with_defects}} </span>
-      </label><br>
-      <label class="checkbox" for="exp"> Was the rat used in an experiment?
-        <span style="display: block;">{{ form.experiment (class="checkbox", default="unchecked")}}</span>
-      </label><br>
-      <label class="checkbox" for="exp"> Is the rat from the supplier?
-        <span style="display: block;">{{ form.supplierRat (class="checkbox", default="unchecked")}}</span>
-      </label><br>
-      <label class="checkbox" for="ratSire"> Edit the Rat's Sire
-        <span style="display: block;">{{ form.sire (placeholder="Sire Number (ex. 100)")}} </span>
-      </label><br>
-      <label class="checkbox" for="ratDam"> Edit the Rat's Dam
-        <span style="display: block;">{{ form.dam (placeholder="Dam Number (ex. 100)")}} </span>
-      </label><br>
-      <label class="checkbox" for="ratStatus"> Edit the Rat's status
-        <span style="display: block;">{{ form.status }} </span>
-      </label><br>
 
-      <!-- <input type="submit" value="Update" class="w3-button"></input> -->
-      <button type="button" onclick="areYouSure()">Update</button>
-      <div id="myModal" class="modal">
+    {% if editSpecificRat %}
+    <h1>Editing Rat {{num}}</h1>
+    <form action="/editrecord/{{num}}" , method="POST">
+      <div id="boxes" style="display: block;">
+        <p>Enter data to update. Fields left blank will not be updated.</p>
+        <label class="checkbox" for="birth"> Change Birthdate
+          <span style="display: block;"> {{ form.birthdate }} </span>
+        </label><br>
+        <label class="checkbox" for="lastPair"> Edit date of Last Pairing
+          <span style="display: block;"> {{ form.last_paired_date }}</span>
+        </label><br>
+        <label class="checkbox" for="lastLitter"> Change date of Last Litter
+          <span style="display: block;"> {{ form.last_litter_date }}</span>
+        </label><br>
+        <label class="checkbox" for="weanedDate"> Change date the date the rat was weaned
+          <span style="display: block;"> {{ form.weaned_date }}</span>
+        </label><br>
+        <label class="checkbox" for="numPair"> Edit Number of Pairings
+          <span style="display: block;"> {{ form.num_times_paired }} </span>
+        </label><br>
+        <label class="checkbox" for="numLitter"> Edit Number of Litters
+          <span style="display: block;"> {{ form.num_litters}} </span>
+        </label><br>
+        <label class="checkbox" for="colonyDate"> Change the Date the Rat was Added to the Colony
+          <span style="display: block;"> {{ form.date_added_to_colony}} </span>
+        </label><br>
+        <label class="checkbox" for="defectLit"> Edit the Number of Litters with Defects
+          <span style="display: block;">{{ form.num_litters_with_defects}} </span>
+        </label><br>
+        <label class="checkbox" for="exp"> Was the rat used in an experiment?
+          <span style="display: block;">{{ form.experiment }}</span>
+        </label><br>
+        <label class="checkbox" for="supplier"> Is the rat from the supplier?
+          <span style="display: block;">{{ form.supplierRat }}</span>
+        </label><br>
+        <label class="checkbox" for="ratSire"> Edit the Rat's Sire
+          <span style="display: block;">{{ form.sire (placeholder="Sire Number (ex. 100)")}} </span>
+        </label><br>
+        <label class="checkbox" for="ratDam"> Edit the Rat's Dam
+          <span style="display: block;">{{ form.dam (placeholder="Dam Number (ex. 100)")}} </span>
+        </label><br>
+        <label class="checkbox" for="ratStatus"> Edit the Rat's status
+          <span style="display: block;">{{ form.status }} </span>
+        </label><br>
 
-        <div class="modal-content">
-          <p id="modalText"></p>
-          {{form.update}}
-          <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
-          <button type="button" onclick="closeModal()">No</button>
+        <!-- <input type="submit" value="Update" class="w3-button"></input> -->
+        <button type="button" onclick="areYouSure()">Update</button>
+
+        <div id="myModal" class="modal">
+          <div class="modal-content">
+            <p id="modalText"></p>
+            {{form.update (type="submit")}}
+            <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
+            <button type="button" onclick="closeModal()">No</button>
+          </div>
         </div>
 
-      </div>
-      </form>
-    </div>
+    </form>
+    {% endif %}
 
-    <hr>
-    <br>
+  </div>
 
-    <!-- Footer -->
-    <footer class="w3-container w3-padding-16 w3-light-grey">
-    </footer>
+  <hr>
+  <br>
 
-    <!-- End page content -->
+  <!-- Footer -->
+  <footer class="w3-container w3-padding-16 w3-light-grey">
+  </footer>
+
+  <!-- End page content -->
   </div>
 
   <script>
@@ -172,6 +183,7 @@
     var number = document.getElementById( "Input" );
     var modal = document.getElementById( "myModal" );
     var boxes = document.getElementById( "boxes" );
+    var continueButton = document.getElementById( "continueButton" )
 
     // Get the Sidebar
     var mySidebar = document.getElementById( "mySidebar" );
@@ -199,12 +211,13 @@
     function bringChecks () {
       // if ( dropDown.value != "" && number.value != "" )
       boxes.style.display = "block";
+      continueButton.style.display = "none";
     }
 
     function areYouSure () {
       //if ( dDate.value != "" && coDeath.value != "" ) {
       modal.style.display = "block";
-      document.getElementById( "modalText" ).innerHTML = "Are you sure?"
+      document.getElementById( "modalText" ).innerHTML = "Are you sure?";
       //TODO: update "are you sure" with the actual values like it used to show previously
       //"Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() +
       //" died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() + "?";

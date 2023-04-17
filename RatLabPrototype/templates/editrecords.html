@@ -37,8 +37,7 @@
   <nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
     <div class="w3-container w3-row">
       <div class="w3-col s4">
-        <img src="C:\Users\andre\Desktop\Capstone Repo\Rat-Lab\RatLabPrototype\Assets\kentstatelogo.png"
-          class="w3-circle w3-margin-right" style="width:90px">
+        <img src="/static/kentstatelogo.png" class="w3-circle w3-margin-right" style="width:90px">
       </div>
       <div class="w3-col s8 w3-bar">
         <span>Welcome, <strong>{{user}}!</strong></span><br>
@@ -72,8 +71,8 @@
         Admin</a>
       <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
         Record Transfer</a>
-        <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
-          User Guide</a>
+      <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
+        User Guide</a>
     </div>
   </nav>
 
@@ -100,12 +99,17 @@
               title="Enter a Rat's Number"> -->
             {{ form.number }}
             <!-- {{ form.update }} -->
-            <button type="button" class="w3-button" onclick="bringChecks()">Continue</button>
+            <button type="button" onclick="bringChecks()">Continue</button>
         </div>
       </div>
     </div>
-
+    {% if errorText %}
+    <div class="w3-twothird">
+      {{errorText}}
+    </div>
+    {% endif %}
     <div id="boxes" style="display: none;">
+      <p>Enter data to update. Fields left blank will not be updated.</p>
       <label class="checkbox" for="birth"> Change Birthdate
         <span style="display: block;"> {{ form.birthdate }} </span>
       </label><br>
@@ -133,21 +137,28 @@
       <label class="checkbox" for="exp"> Was the rat used in an experiment?
         <span style="display: block;">{{ form.experiment (class="checkbox", default="unchecked")}}</span>
       </label><br>
+      <label class="checkbox" for="exp"> Is the rat from the supplier?
+        <span style="display: block;">{{ form.supplierRat (class="checkbox", default="unchecked")}}</span>
+      </label><br>
       <label class="checkbox" for="ratSire"> Edit the Rat's Sire
-        <span style="display: block;">{{ form.sire }} </span>
+        <span style="display: block;">{{ form.sire (placeholder="Sire Number (ex. 100)")}} </span>
       </label><br>
       <label class="checkbox" for="ratDam"> Edit the Rat's Dam
-        <span style="display: block;">{{ form.dam }} </span>
+        <span style="display: block;">{{ form.dam (placeholder="Dam Number (ex. 100)")}} </span>
       </label><br>
+      <label class="checkbox" for="ratStatus"> Edit the Rat's status
+        <span style="display: block;">{{ form.status }} </span>
+      </label><br>
+
       <!-- <input type="submit" value="Update" class="w3-button"></input> -->
-      <button type="button" class="w3-button" onclick="areYouSure()">Update</button>
+      <button type="button" onclick="areYouSure()">Update</button>
       <div id="myModal" class="modal">
 
         <div class="modal-content">
           <p id="modalText"></p>
           {{form.update}}
           <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
-          <button class="w3-button" onclick="closeModal()">No</button>
+          <button onclick="closeModal()">No</button>
         </div>
 
       </div>

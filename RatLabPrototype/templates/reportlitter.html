@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="webpage.css">
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='webpage.css')}}">
   <style>
     html,
     body,
@@ -37,8 +37,7 @@
   <nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
     <div class="w3-container w3-row">
       <div class="w3-col s4">
-        <img src="C:\Users\andre\Desktop\Capstone Repo\Rat-Lab\RatLabPrototype\Assets\kentstatelogo.png"
-          class="w3-circle w3-margin-right" style="width:90px">
+        <img src="/static/kentstatelogo.png" class="w3-circle w3-margin-right" style="width:90px">
       </div>
       <div class="w3-col s8 w3-bar">
         <span>Welcome, <strong>{{user}}!</strong></span><br>
@@ -88,33 +87,37 @@
       <div class="center w3-panel">
         <div class="w3-row-padding" style="margin:0 -16px">
           <div class="w3-twothird">
-            {{ form.sex }}
-            {{ form.number }}
-            <!-- button type="button" class="w3-button" onclick="deathDetails()">Report</button -->
+            <p>Sire number</p>
+            {{ form.sire (placeholder="Sire number") }}
+            <p>Dam number</p>
+            {{ form.dam (placeholder="Dam number") }}
+            <p>Did the litter have birth defects?</p>
+            {{form.reportLittersWithDefects}}
+            <p>Litter date</p>
+            {{ form.litterDate }}
+            <br>
+            <button type="button" onclick="areYouSure()">Report</button>
           </div>
         </div>
       </div>
-
-      <div class="w3-container w3-padding-32">
-        <table class="w3-table w3-striped w3-bordered w3-border w3-white" id="Table" style="width: 50%;">
-          <tr>
-            <td class="w3-padding"> Defect? {{form.reportLittersWithDefects}}
-            </td>
-            <td style="display: block;"><button type="button" class="w3-button" onclick="areYouSure()">Report</button>
-            </td>
-          </tr>
-        </table>
+      {% if errorText %}
+      <div class="w3-twothird">
+        {{errorText}}
       </div>
+      {% endif %}
+
       <div id="myModal" class="modal">
         <div class="modal-content">
           <p id="modalText"></p>
           {{ form.submit }}
-          <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
-          <button class="w3-button" onclick="closeModal()">No</button>
+          <button onclick="closeModal()">No</button>
         </div>
+
       </div>
     </form>
 
+    <hr>
+    <br>
     <!-- Footer -->
     <footer class="w3-container w3-padding-16 w3-light-grey">
     </footer>
@@ -122,136 +125,47 @@
     <!-- End page content -->
   </div>
 
-  <hr>
-  <div class="w3-container">
-    <h5>Damron Mueller Lab</h5>
-  </div>
-  <div class="w3-bar-block">
-    <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black"
-      onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i> Close Menu</a>
-    <a href="dashboard" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i> 
-      Dashboard</a>
-    <a href="search" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i> 
-      Search Rats</a>
-    <a href="addrat" class="w3-bar-item w3-button w3-padding"><i class="fa fa-cog fa-fw"></i>  Add
-      Rat</a>
-    <a href="editrecords" class="w3-bar-item w3-button w3-padding"><i class="fa fa-history fa-fw"></i> 
-      Edit Records</a>
-    <a href="breedingpairs" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i> 
-      Generate Breeding Pairs</a>
-    <a href="reportlitter" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-bell fa-fw"></i> 
-      Report Litter</a>
-    <a href="reportdeath" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bell fa-fw"></i>
-      Report Death</a>
-    <a href="adduser" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Add
-      Admin</a>
-    <a href="recordtransfer" class="w3-bar-item w3-button w3-padding"><i class="fa fa-bank fa-fw"></i> 
-      Record Transfer</a>
-      <a href="userguide" class="w3-bar-item w3-button w3-padding"><i class="fa fa-gear fa-fw"></i> 
-        User Guide</a>
-  </div>
-</nav>
+  <script>
+    var show = document.getElementById( "obscuredDetails" );
+    var modal = document.getElementById( "myModal" );
 
+    // Get the Sidebar
+    var mySidebar = document.getElementById( "mySidebar" );
 
-<!-- Overlay effect when opening sidebar on small screens -->
-<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+    // Get the DIV with overlay effect
+    var overlayBg = document.getElementById( "myOverlay" );
 
-<!-- !PAGE CONTENT! -->
-<div class="w3-main" style="margin-left:300px;margin-top:43px;">
+    // Toggle between showing and hiding the sidebar, and add overlay effect
+    function w3_open () {
+      if ( mySidebar.style.display === 'block' ) {
+        mySidebar.style.display = 'none';
+        overlayBg.style.display = "none";
+      } else {
+        mySidebar.style.display = 'block';
+        overlayBg.style.display = "block";
+      }
+    }
 
-  <!-- Header -->
-  <form action="/reportlitter" , method="POST">
-	<div class="center w3-panel">
-		<div class="w3-row-padding" style="margin:0 -16px">
-			<div class="w3-twothird">
-				{{ form.sex }}
-				{{ form.number }}
-			<!-- button type="button" class="w3-button" onclick="deathDetails()">Report</button -->
-			</div>
-		</div>
-	</div>
-	
-	<div class="w3-container w3-padding-32">
-		<table class="w3-table w3-striped w3-bordered w3-border w3-white" id="Table" style = "width: 50%;">
-			<tr>
-				<td class = "w3-padding"> Defect? {{form.reportLittersWithDefects}}
-				</td>
-				<td style="display: block;"><button type="button" class="w3-button" onclick="areYouSure()">Report</button>
-				</td>
-			</tr>
-		</table>
-	</div>
-	<div id="myModal" class="modal">
-	<div class="modal-content">
-		<p id="modalText"></p>
-		{{ form.submit }}
-		<!-- TODO: consistent button formatting b/c form button and HTML button look different -->
-		<button class="w3-button" onclick="closeModal()">No</button>
-	</div>
-	</div>
-</form>
+    // Close the sidebar with the close button
+    function w3_close () {
+      mySidebar.style.display = "none";
+      overlayBg.style.display = "none";
+    }
 
-  <!-- Footer -->
-  <footer class="w3-container w3-padding-16 w3-light-grey">
-  </footer>
+    function areYouSure () {
+      //if(dDate.value != "" && coDeath.value != ""){
+      modal.style.display = "block";
+      document.getElementById( "modalText" ).innerHTML = "Are you sure?"
+      //+ dropDown.value.toUpperCase() + number.value.toUpperCase() + 
+      //          " died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() +"?";
+      //}
+    }
 
-  <!-- End page content -->
-</div>
+    function closeModal () {
+      modal.style.display = "none";
+    }
 
-<script>
-var dropDown = document.getElementById("Rat-Gender");
-var number = document.getElementById("Input");
-var show = document.getElementById("obscuredDetails");
-var modal = document.getElementById("myModal");
-var dDate = document.getElementById("Input1");
-var coDeath = document.getElementById("Input2");
-var weDate = document.getElementById("Input3");
-
-
-// Get the Sidebar
-var mySidebar = document.getElementById("mySidebar");
-
-// Get the DIV with overlay effect
-var overlayBg = document.getElementById("myOverlay");
-
-// Toggle between showing and hiding the sidebar, and add overlay effect
-function w3_open() {
-  if (mySidebar.style.display === 'block') {
-    mySidebar.style.display = 'none';
-    overlayBg.style.display = "none";
-  } else {
-    mySidebar.style.display = 'block';
-    overlayBg.style.display = "block";
-  }
-}
-
-// Close the sidebar with the close button
-function w3_close() {
-  mySidebar.style.display = "none";
-  overlayBg.style.display = "none";
-}
-
-function deathDetails(){
-  if(dropDown.value != "" && number.value != ""){
-    show.style.display = "inline";
-  }
-}
-
-function areYouSure(){
-
-  //if(dDate.value != "" && coDeath.value != ""){
-  modal.style.display = "block";
-  document.getElementById("modalText").innerHTML = "Are you sure?" 
-  //+ dropDown.value.toUpperCase() + number.value.toUpperCase() + 
-  //          " died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() +"?";
-  //}
-}
-
-function closeModal(){
-  modal.style.display = "none";
-}
-
-</script>
+  </script>
 
 </body>
 

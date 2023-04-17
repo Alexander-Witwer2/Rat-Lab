@@ -37,7 +37,7 @@
   <nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
     <div class="w3-container w3-row">
       <div class="w3-col s4">
-        <img src="C:\Users\andre\Desktop\Capstone Repo\Rat-Lab\RatLabPrototype\Assets\kentstatelogo.png"
+        <img src="/static/kentstatelogo.png"
           class="w3-circle w3-margin-right" style="width:90px">
       </div>
       <div class="w3-col s8 w3-bar">
@@ -102,7 +102,7 @@
           {% if showMateDropdown %}
           <form action="/recordpairing/{{num}}" method="POST">
             <div id="mateDropdown">
-              <label>Select the rat's partner</label>
+              <label>Select the rat's new partner</label>
               {{ form.mateDropdown }}
               <button type="button" onclick="areYouSure()">Record Pairing</button>
             </div>
@@ -112,7 +112,7 @@
                 <p id="modalText"></p>
                 {{ form.recordButton (type="submit" )}}
                 <!-- TODO: consistent button formatting b/c form button and HTML button look different -->
-                <button class="w3-button" onclick="closeModal()">No</button>
+                <button onclick="closeModal()">No</button>
               </div>
             </div>
           </form>
@@ -130,7 +130,7 @@
           <th>Rat Name</th>
           <th>Sex</th>
           <th>Current Partner</th>
-          <th>Birthdate</th>
+          <th>Age (months)</th>
           <th>Date of Last Pairing</th>
           <th>Date of Last Litter</th>
           <th>Number of Pairings</th>
@@ -146,12 +146,12 @@
           <td>{{ rat.rat_name }} </td>
           <td>{{ rat.sex }} </td>
           <td>{{ rat.current_partner }}</td>
-          <td>{{ rat.birthdate }} </td>
-          <td>{{ rat.last_paired_date }} </td>
-          <td>{{ rat.last_litter_date }} </td>
+          <td>{{ rat.age_months }} </td>
+          <td>{{ rat.last_paired_date.strftime('%m-%d-%Y') }} </td>
+          <td>{{ rat.last_litter_date.strftime('%m-%d-%Y') }} </td>
           <td>{{ rat.num_times_paired }} </td>
           <td>{{ rat.num_litters }} </td>
-          <td>{{ rat.date_added_to_colony }} </td>
+          <td>{{ rat.date_added_to_colony.strftime('%m-%d-%Y') }} </td>
           {% if rat.experiment == 0 %}
           <td>No</td>
           {% else %}

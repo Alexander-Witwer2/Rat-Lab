@@ -1,38 +1,48 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Add User Form</title>
-  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:400,700'><link rel="stylesheet" href="C:\Users\andre\Desktop\Capstone Repo\Rat-Lab\RatLabPrototype\Scripts\login.css">
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:400,700'>
+  <link rel="stylesheet" href="C:\Users\andre\Desktop\Capstone Repo\Rat-Lab\RatLabPrototype\Scripts\login.css">
   <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='login.css')}}">
 
 </head>
+
 <body>
-<!-- partial:index.partial.html -->
-<div class="login-form">
-  <form>
-    <h1><center>Add Admin</center></h1>
-    <div class="content">
-      <div class="input-field">
-        <input type="new-admin-email" placeholder="New Admin Email" autocomplete="new-admin-email">
-      </div>
-      <div class="input-field">
-        <input type="new-admin-password" placeholder="New Admin Password" autocomplete="new-admin-password">
-      </div>
-      <div class="input-field">
-        <input type="current-admin-email" placeholder="Current Admin Email" autocomplete="current-admin-email">
-      </div>
-      <div class="input-field">
-        <input type="current-admin-password" placeholder="Current Admin Password" autocomplete="current-admin-password">
-      </div>
+  <!-- partial:index.partial.html -->
+  <div class="login-form">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="notification is-danger">
+      <p>{{ messages[0] }}</p>
     </div>
-    <div class="action">
-      <button>Register New Admin</button>
-    </div>
-  </form>
-</div>
-<!-- partial -->
-  <script  src="RatLabPrototype/Scripts/loginscript.js"></script>
+    {% endif %}
+    {% endwith %}
+    <form action="/addadmin" , method="POST">
+      <h1>
+        <center>Add Admin</center>
+      </h1>
+      <div class="content">
+        <div class="input-field">
+          {{form.newAdminUsername (placeholder="New Administrator's FlashLine Username")}}
+        </div>
+        <div class="input-field">
+          {{form.currentAdminUsername (placeholder="Your FlashLine Username")}}
+        </div>
+        <div class="input-field">
+          {{form.currentAdminPassword (placeholder="Your FlashLine Password")}}
+        </div>
+      </div>
+      <div class="action">
+        {{form.submitButton}}
+      </div>
+    </form>
+  </div>
+  <!-- partial -->
+  <script src="RatLabPrototype/Scripts/loginscript.js"></script>
 
 </body>
+
 </html>

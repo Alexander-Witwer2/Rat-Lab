@@ -111,23 +111,22 @@
           </tr>
 
         </table>
-        {% if errorText %}
-        <div class="w3-twothird">
-          {{errorText}}
-        </div>
-        {% endif %}
       </div>
       <div id="myModal" class="modal">
 
         <div class="modal-content">
           <p id="modalText"></p>
           {{ form.submit }}
-          <button onclick="closeModal()">No</button>
+          <button type="button" onclick="closeModal()">No</button>
         </div>
 
       </div>
     </form>
-
+    {% if errorText %}
+    <div class="w3-twothird">
+      {{errorText}}
+    </div>
+    {% endif %}
     <hr>
     <br>
 

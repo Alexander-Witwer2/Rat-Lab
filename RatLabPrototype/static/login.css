@@ -83,7 +83,6 @@ body {
 .login-form .action button {
   width: 100%;
   border: none;
-  padding: 18px;
   font-family: 'Rubik', sans-serif;
   cursor: pointer;
   text-transform: uppercase;

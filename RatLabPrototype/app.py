@@ -167,7 +167,7 @@ class LoginForm(FlaskForm):
 class AddAdminForm(FlaskForm):
     newAdminUsername = StringField(validators=[InputRequired()])
     currentAdminUsername = StringField(validators=[InputRequired()])
-    currentAdminPassword = StringField(validators=[InputRequired()])
+    confirmField = StringField(validators=[InputRequired()])
     submitButton = SubmitField("Confirm")
     
 @app.route("/")
@@ -273,7 +273,7 @@ def addAdmin():
         return redirect(url_for("accessdenied"))
     if(request.method == "POST"):
         if(form.currentAdminUsername.data == current_user.username and 
-           form.currentAdminPassword.data == current_user.password and 
+           form.confirmField == "CONFIRM" and 
            User.query.get(form.newAdminUsername.data) != None):
             newAdmin = Admins()
             newAdmin.username = form.newAdminUsername.data
@@ -382,7 +382,9 @@ def editRecords():
             date_Check = dateCheck(form.birthdate.data)
             if(date_Check != False) :
                 rat.birthdate = form.birthdate.data
-                #TODO: recalculate rat's age when given new birthdate
+                delta = relativedelta.relativedelta(date.today(), form.birthdate.data)
+                age = delta.months + (delta.years * 12)
+                rat.age_months = age        
         if(form.last_paired_date.data != None):
             date_Check = dateCheck(form.last_paired_date.data)
             if(rat.current_partner == '00X') :

@@ -93,7 +93,7 @@
           <form action="/breedingpairs" , method="POST">
             {{ form.sex }}
             <br>
-            {{ form.number(type="number", placeholder="Rat number")}}
+            {{ form.number(type="number", placeholder="Rat number (ex. 100)")}}
             <label>Check to swap existing pairs</label>
             {{ form.swapping(class="checkbox", default="checked")}}
             {{ form.generateButton (type="submit") }}

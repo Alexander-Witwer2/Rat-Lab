@@ -125,7 +125,7 @@ class EditRatForm(FlaskForm):
     experiment = SelectField(default="0", choices=[("0", "No"), ("1", "Yes")])
     supplierRat = SelectField(default="no", choices=[("no", "No"), ("yes", "Yes")])
     sire = IntegerField(validators=[NumberRange(min=0)])
-    dam = IntegerField(Numvalidators=[NumberRange(min=0)])
+    dam = IntegerField(validators=[NumberRange(min=0)])
     status = SelectField(default="Empty", choices=[('Empty', ''), ('Alive', 'Alive'), ('Euthanized', 'Dead: euthanized'), ('Unexpected', 'Dead: unexpected'), ('Transferred', 'Transferred')])
     update = SubmitField('Update')
     continueButton = SubmitField('Continue')

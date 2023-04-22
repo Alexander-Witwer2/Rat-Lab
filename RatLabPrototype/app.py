@@ -891,23 +891,6 @@ def pairing(input_data, input_swapping_existing_pairs):
                 (Rat.pgdam != input_rat.rat_number) & 
                 (Rat.mgsire != input_rat.rat_number) & 
                 (Rat.mgdam != input_rat.rat_number)
-                #TODO: if rats aren't allowed to breed with their great-grandchildren, add that in here
-                
-                # (Rat.sire != input_rat.sire) & 
-                # (Rat.sire != input_rat.pgsire) & 
-                # (Rat.sire != input_rat.mgsire) & 
-                # (Rat.sire != input_rat.pg11sire) &
-                # (Rat.sire != input_rat.pg12sire) &
-                # (Rat.sire != input_rat.mg11sire) &
-                # (Rat.sire != input_rat.mg12sire) &
-
-                # (Rat.dam != input_rat.dam) & 
-                # (Rat.dam != input_rat.pgdam) & 
-                # (Rat.dam != input_rat.mgdam) & 
-                # (Rat.dam != input_rat.pg11dam) &
-                # (Rat.dam != input_rat.pg12dam) &
-                # (Rat.dam != input_rat.mg11dam) &
-                # (Rat.dam != input_rat.mg12dam) 
             )
         ).all()
         printDatingPool(datingPool, input_rat.rat_number)
@@ -962,16 +945,28 @@ def compareAncestors(datingPool, input_rat_ancestor_numbers, input_rat):
     
     for rat in datingPool:
         finalDatingPool.append(rat.rat_number)
-        if rat.rat_number in input_rat_ancestor_numbers:
-            print(rat.rat_number + " rejected because it's in the list of input rat's ancestors: " + str(input_rat_ancestor_numbers))
+        
+        # check parents and grandparents real quick before going any farther
+        if rat.rat_number in input_rat_ancestor_numbers[:3]:
+            print(rat.rat_number + " rejected because it's in the list of input rat's parents and grandparents: " + str(input_rat_ancestor_numbers))
             finalDatingPool.remove(rat.rat_number)
             continue
         
-        potential_partner_ancestors = [rat.sire, rat.dam, rat.pgsire, rat.pgdam, rat.mgsire, rat.mgdam]
+        potential_partner_ancestors = [rat.sire, rat.dam, rat.pgsire, rat.pgdam, rat.mgsire, rat.mgdam,
+                                       rat.pg11sire, rat.pg11dam, rat.pg12sire, rat.pg12dam, 
+                                       rat.mg11sire, rat.mg11dam, rat.mg12sire, rat.mg12dam]
         print("looking at potential partner " + rat.rat_number + ", ancestors = " + str(potential_partner_ancestors))
+        potential_partner_great_grandparents = [rat.pg11sire, rat.pg11dam, rat.pg12sire, rat.pg12dam, 
+                                       rat.mg11sire, rat.mg11dam, rat.mg12sire, rat.mg12dam]
         
         for ancestor in potential_partner_ancestors:
-            if ancestor != "EN" and ancestor in input_rat_ancestor_numbers:
+            
+            # technically a rat can breed with their great-grandparent because that's 3 generations apart
+            if ancestor in potential_partner_great_grandparents:
+                continue
+            
+            # use great-grandparent info to rule out related grandparents
+            elif ancestor != "EN" and ancestor in input_rat_ancestor_numbers:
                 print(rat.rat_number + " rejected because its ancestor " + ancestor + " is in the list of input rat's ancestors: " + str(input_rat_ancestor_numbers))
                 finalDatingPool.remove(rat.rat_number)
                 break

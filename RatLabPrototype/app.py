@@ -819,7 +819,9 @@ def pairing(input_data, input_swapping_existing_pairs):
 
     # STEP 1: query for input_rat's information and separate out the parents and grandparents names
     input_rat = Rat.query.get(input_data)
-    input_rat_ancestor_names = [input_rat.sire, input_rat.dam, input_rat.pgsire, input_rat.pgdam, input_rat.mgsire, input_rat.mgdam]  
+    input_rat_ancestor_numbers = [input_rat.sire, input_rat.dam, input_rat.pgsire, input_rat.pgdam, input_rat.mgsire, input_rat.mgdam,
+                                  input_rat.pg11sire, input_rat.pg11dam, input_rat.pg12sire, input_rat.pg12dam,
+                                  input_rat.mg11sire, input_rat.mg11dam, input_rat.mg12sire, input_rat.mg12dam]  
     
     # case 0: immediate error checking
     if( input_rat.manner_of_death != "Alive"):
@@ -836,8 +838,11 @@ def pairing(input_data, input_swapping_existing_pairs):
         # ok to cast len into bool because it'll be True if there are multiple vacancies in the colony
         # so if the user reports multiple colony rat deaths then wants to find partners from the 
         # spare rats, this will still behave properly
-        colony_rats_without_partner = db.session.execute(
-                db.select(Rat.rat_number, Rat.sire, Rat.dam, Rat.pgsire, Rat.pgdam, Rat.mgsire, Rat.mgdam).where(
+        # Also, not excluding children or grandchildren here like I do for colony rats, 
+        # because this rat hasn't been paired before, so those won't exist 
+        colony_rats_without_partner = db.session.execute(db.select(Rat.rat_number, Rat.sire, Rat.dam, Rat.pgsire, Rat.pgdam, Rat.mgsire, Rat.mgdam, 
+                      Rat.pg11sire, Rat.pg11dam, Rat.pg12sire, Rat.pg12dam,
+                      Rat.mg11sire, Rat.mg11dam, Rat.mg12sire, Rat.mg12dam).where(
                     (Rat.sex != input_rat.sex) &
                     (Rat.manner_of_death == "Alive") & 
                     (Rat.current_partner == "DEC") & # narrow search to only paired rats
@@ -851,7 +856,7 @@ def pairing(input_data, input_swapping_existing_pairs):
         else: # case 2b and 2c
             # the user could've reported multiple deaths before looking for new partners
             # so there could be multiple rats in colony_rats_without_partner, need to check all of them
-            finalDatingPool = compareBirthdates(input_rat_ancestor_names=input_rat_ancestor_names, datingPool=colony_rats_without_partner, input_rat=input_rat)
+            finalDatingPool = compareAncestors(input_rat_ancestor_numbers=input_rat_ancestor_numbers, datingPool=colony_rats_without_partner, input_rat=input_rat)
             if (len(finalDatingPool) == 0): # case 2b: no unrelated rats error
                 return "ERROR: " + input_rat.rat_number + "cannot be added to the colony.  " + input_rat.rat_number + " can only be paired with a rat that has a deceased partner, and " + input_rat.rat_number + " is too closely related to the available rats with deceased partners."
             else: # case 2c: succeeded in finding unrelated rat with DEC partner
@@ -865,95 +870,125 @@ def pairing(input_data, input_swapping_existing_pairs):
     if(swapping_existing_pairs == False and input_rat.current_partner != "DEC"):
         return "ERROR: cannot add a new rat to the colony when the inputted rat is paired.  Check the checkbox on the previous page and try again."
        
-    # handle ENEN rats because they're a special case.  They can breed with anyone, 
-    # including other ENEN rats, so birthdate checking to rule out common ancestors is unnecessary
-    # for them.  Don't need to check the l
-    if(input_rat.sire == "EN" and input_rat.dam == "EN"):
-        if(swapping_existing_pairs): # look for colony rat
-            datingPool = db.session.execute(
-                db.select(Rat.rat_number).where(
-                    (Rat.sex != input_rat.sex) &
-                    (Rat.manner_of_death == "Alive") & 
-                    (Rat.current_partner != "00X") & # narrow search to only paired rats
-                    (Rat.rat_number != input_rat.current_partner) & # narrow search to exclude input_rat's current partner                    
-                    (Rat.age_months >= 3) &
-                    (Rat.num_litters_with_defects <= 2 ) & 
-                    (Rat.sire != "XX") & # prevent unknown sire/dam rats from being paired per stakeholder
-                    (Rat.dam != "XX") &
-                    (Rat.sire != "5X") &
-                    (Rat.dam != "5X") &
-                    (Rat.dam != input_rat.rat_number) & # prevent the rat's children from being put into the dating pool
-                    (Rat.sire != input_rat.rat_number)
-                )
-            ).all()
-            finalDatingPool = [ rat[0] for rat in datingPool]
-
-        else: # look for spare rat
-            datingPool = db.session.execute(
-                db.select(Rat.rat_number).where(
-                    (Rat.sex != input_rat.sex) &
-                    (Rat.manner_of_death == "Alive") & 
-                    (Rat.current_partner == "00X") & # search for unpaired rats
-                    (Rat.age_months >= 3) &
-                    (Rat.num_litters_with_defects <= 2 ) &
-                    (Rat.sire != "XX") & # prevent unknown sire/dam rats from being paired per stakeholder
-                    (Rat.dam != "XX") &
-                    (Rat.sire != "5X") &
-                    (Rat.dam != "5X") &
-                    (Rat.dam != input_rat.rat_number) & # prevent the rat's children from being put into the dating pool
-                    (Rat.sire != input_rat.rat_number)
-                )
-            ).all()
-            finalDatingPool = [ rat[0] for rat in datingPool]
-
-    else: # handle non ENEN, so need to do birthdate checking
-        if(swapping_existing_pairs): # query for colony rats
-            datingPool = db.session.execute(
-                db.select(Rat.rat_number, Rat.sire, Rat.dam, Rat.pgsire, Rat.pgdam, Rat.mgsire, Rat.mgdam).where(
-                    (Rat.sex != input_rat.sex) &
-                    (Rat.manner_of_death == "Alive") & 
-                    (Rat.current_partner != "00X") & # narrow search to only paired rats
-                    (Rat.rat_number != input_rat.current_partner) & # narrow search to exclude input_rat's current partner                    
-                    (Rat.age_months >= 3) &
-                    (Rat.num_litters_with_defects <= 2 ) &
-                    (Rat.sire != "XX") & # prevent unknown sire/dam rats from being paired per stakeholder
-                    (Rat.dam != "XX") &
-                    (Rat.sire != "5X") &
-                    (Rat.dam != "5X") &
-                    (Rat.birthdate != input_rat.birthdate) & 
-                    (Rat.dam != input_rat.rat_number) & # prevent the rat's children from being put into the dating pool
-                    (Rat.sire != input_rat.rat_number)
-                )
-            ).all()
-            
-        else: # case: adding new rat to colony
-            datingPool = db.session.execute(
-                db.select(Rat.rat_number, Rat.sire, Rat.dam, Rat.pgsire, Rat.pgdam, Rat.mgsire, Rat.mgdam).where(
-                    (Rat.sex != input_rat.sex) &
-                    (Rat.manner_of_death == "Alive") & 
-                    (Rat.current_partner == "00X") & # search for unpaired rats
-                    (Rat.age_months >= 3) &
-                    (Rat.num_litters_with_defects <= 2 ) & 
-                    (Rat.sire != "XX") & # prevent unknown sire/dam rats from being paired per stakeholder
-                    (Rat.dam != "XX") &
-                    (Rat.sire != "5X") &
-                    (Rat.dam != "5X") &
-                    (Rat.birthdate != input_rat.birthdate) &
-                    (Rat.dam != input_rat.rat_number) & # prevent the rat's children from being put into the dating pool
-                    (Rat.sire != input_rat.rat_number)
-                )
-            ).all()
+    if(swapping_existing_pairs): # case: swapping colony rats (paired rats)
+        datingPool = db.session.execute(
+            db.select(Rat.rat_number, Rat.sire, Rat.dam, Rat.pgsire, Rat.pgdam, Rat.mgsire, Rat.mgdam, 
+                      Rat.pg11sire, Rat.pg11dam, Rat.pg12sire, Rat.pg12dam,
+                      Rat.mg11sire, Rat.mg11dam, Rat.mg12sire, Rat.mg12dam).where(
+                (Rat.sex != input_rat.sex) &
+                (Rat.manner_of_death == "Alive") & 
+                (Rat.current_partner != "00X") & # narrow search to only paired rats
+                (Rat.rat_number != input_rat.current_partner) & # narrow search to exclude input_rat's current partner                    
+                (Rat.age_months >= 3) &
+                (Rat.num_litters_with_defects <= 2 ) &
+                (Rat.sire != "XX") & # prevent unknown sire/dam rats from being paired per stakeholder
+                (Rat.dam != "XX") &
+                (Rat.sire != "5X") &
+                (Rat.dam != "5X") &
+                (Rat.dam != input_rat.rat_number) & # prevent the rat's children from being put into the dating pool
+                (Rat.sire != input_rat.rat_number) & 
+                (Rat.pgsire != input_rat.rat_number) & # prevent the rat's grandchildren from being put into the dating pool
+                (Rat.pgdam != input_rat.rat_number) & 
+                (Rat.mgsire != input_rat.rat_number) & 
+                (Rat.mgdam != input_rat.rat_number)
+                #TODO: if rats aren't allowed to breed with their great-grandchildren, add that in here
                 
-        # compare birthdates to get the final dating pool
-        finalDatingPool = compareBirthdates(datingPool=datingPool, input_rat_ancestor_names=input_rat_ancestor_names, input_rat=input_rat)
+                # (Rat.sire != input_rat.sire) & 
+                # (Rat.sire != input_rat.pgsire) & 
+                # (Rat.sire != input_rat.mgsire) & 
+                # (Rat.sire != input_rat.pg11sire) &
+                # (Rat.sire != input_rat.pg12sire) &
+                # (Rat.sire != input_rat.mg11sire) &
+                # (Rat.sire != input_rat.mg12sire) &
+
+                # (Rat.dam != input_rat.dam) & 
+                # (Rat.dam != input_rat.pgdam) & 
+                # (Rat.dam != input_rat.mgdam) & 
+                # (Rat.dam != input_rat.pg11dam) &
+                # (Rat.dam != input_rat.pg12dam) &
+                # (Rat.dam != input_rat.mg11dam) &
+                # (Rat.dam != input_rat.mg12dam) 
+            )
+        ).all()
+        printDatingPool(datingPool, input_rat.rat_number)
+        
+    else: # case: input is a colony rat and we're adding spare (new, unpaired) rat to colony
+        datingPool = db.session.execute(
+            db.select(Rat.rat_number, Rat.sire, Rat.dam, Rat.pgsire, Rat.pgdam, Rat.mgsire, Rat.mgdam).where(
+                (Rat.sex != input_rat.sex) &
+                (Rat.manner_of_death == "Alive") & 
+                (Rat.current_partner == "00X") & # search for unpaired rats
+                (Rat.age_months >= 3) &
+                (Rat.num_litters_with_defects <= 2 ) & 
+                (Rat.sire != "XX") & # prevent unknown sire/dam rats from being paired per stakeholder
+                (Rat.dam != "XX") &
+                (Rat.sire != "5X") &
+                (Rat.dam != "5X") &
+                (Rat.dam != input_rat.rat_number) & # prevent the rat's children from being put into the dating pool
+                (Rat.sire != input_rat.rat_number) &
+                (Rat.pgsire != input_rat.rat_number) & # prevent the rat's grandchildren from being put into the dating pool
+                (Rat.pgdam != input_rat.rat_number) & 
+                (Rat.mgsire != input_rat.rat_number) & 
+                (Rat.mgdam != input_rat.rat_number)
+            )
+        ).all()
+        
+    # ENEN rats are a special case, they have no up-tree to check because of their ancestry
+    if(input_rat.sire == "EN" and input_rat.dam == "EN"):
+        finalDatingPool = [ rat[0] for rat in datingPool]
+        return finalDatingPool
+    else: 
+        # colony-born rat, so have to check the rat's up-tree (compare ancestors) to get the final dating pool
+        print("datingPool = ")
+        printDatingPool(datingPool, input_rat.rat_number)
+
+        finalDatingPool = compareAncestors(datingPool=datingPool, input_rat_ancestor_numbers=input_rat_ancestor_numbers, input_rat=input_rat)
         if (len(finalDatingPool) == 0): # no unrelated rats error
             return "ERROR: there are no unrelated paired rats that " + input_rat.rat_number + " can be paired with."
-
+        else:
+            return finalDatingPool
     return finalDatingPool
+
+
+
+# helper function to check if a rat shares common ancestors with potential mates
+# checking up-tree from the perspective of the input rat
+def compareAncestors(datingPool, input_rat_ancestor_numbers, input_rat):
+   
+    finalDatingPool = []
+    
+    print("input rat ancestors = " + str(input_rat_ancestor_numbers))
+    printDatingPool(datingPool, input_rat.rat_number)
+    
+    for rat in datingPool:
+        finalDatingPool.append(rat.rat_number)
+        if rat.rat_number in input_rat_ancestor_numbers:
+            print(rat.rat_number + " rejected because it's in the list of input rat's ancestors: " + str(input_rat_ancestor_numbers))
+            finalDatingPool.remove(rat.rat_number)
+            continue
+        
+        potential_partner_ancestors = [rat.sire, rat.dam, rat.pgsire, rat.pgdam, rat.mgsire, rat.mgdam]
+        print("looking at potential partner " + rat.rat_number + ", ancestors = " + str(potential_partner_ancestors))
+        
+        for ancestor in potential_partner_ancestors:
+            if ancestor != "EN" and ancestor in input_rat_ancestor_numbers:
+                print(rat.rat_number + " rejected because its ancestor " + ancestor + " is in the list of input rat's ancestors: " + str(input_rat_ancestor_numbers))
+                finalDatingPool.remove(rat.rat_number)
+                break
+        
+    
+    return finalDatingPool
+
+ 
+                
+                
+
+
+
 
 # helper function to compare birthdates for a given rat vs their potential dating pool
 # this rules out common ancestors
-def compareBirthdates(datingPool, input_rat_ancestor_names, input_rat):
+def compareBirthdates(datingPool, input_rat_ancestor_numbers, input_rat):
    
     finalDatingPool = []
 
@@ -961,17 +996,23 @@ def compareBirthdates(datingPool, input_rat_ancestor_names, input_rat):
     inputRat50sAncestorsFlag = False
     
     # STEP 1: get the ancestor's birthdates. Include EN in 2nd if stmt b/c grandparents could be EN
-    for ancestor in input_rat_ancestor_names:
+    for ancestor in input_rat_ancestor_numbers:
         pattern = re.compile(r'5\d[MF]|5X|4[78][MF]')
         isAncestorIn50sOr5X = pattern.match(ancestor)
 
+        # TODO shouldn't this if stmt be isAncestorIn50sOr5X != None, set true, break?
         if(ancestor == "5X" or isAncestorIn50sOr5X != None):
             inputRat50sAncestorsFlag = True
+        
+        # don't query for unreachable data
         if(ancestor != "XX" and ancestor != "5X" and ancestor != "EN"):
             data = Rat.query.get(ancestor)
-            input_rat_ancestor_birthdays.append(data.birthdate)
+            # don't include ENEN rat birthdates in the ancestor birthdate list, otherwise it'll exclude
+            # unrelated descendants of ENEN rats (b/c ENEN rats have the same birthdate) 
+            if(data.rat_name[-4:] != "ENEN"):  
+                input_rat_ancestor_birthdays.append(data.birthdate)
 
-    print("input rat ancestors = " + str(input_rat_ancestor_names))
+    print("input rat ancestors = " + str(input_rat_ancestor_numbers))
     printDatingPool(datingPool, input_rat.rat_number)
     for rat in datingPool:
         finalDatingPool.append(rat.rat_number)
@@ -979,18 +1020,23 @@ def compareBirthdates(datingPool, input_rat_ancestor_names, input_rat):
         print("looking at " + rat.rat_number)
         print(rat.rat_number + " ancestors: " + str(potential_partner_ancestors))
         
-        if rat.rat_number in input_rat_ancestor_names:
-            print(rat.rat_number + " rejected because it's in the list of input rat's ancestors: " + str(input_rat_ancestor_names))
+        if rat.rat_number != "EN" and rat.rat_number in input_rat_ancestor_numbers:
+            print(rat.rat_number + " rejected because it's in the list of input rat's ancestors: " + str(input_rat_ancestor_numbers))
             finalDatingPool.remove(rat.rat_number)
             continue
 
         for ancestor in potential_partner_ancestors: 
             
-            if rat.rat_number in input_rat_ancestor_names:
-                print(rat.rat_number + " rejected because its ancestor " + ancestor + " is in the list of input rat's ancestors: " + str(input_rat_ancestor_names))
+            # previous/was working: ancestor != "EN" and ancestor in input_rat_ancestor_numbers
+            # step 1: assume complete information and look for common ancestors by number
+            # ignore XX, 5X, EN because that will cause false negatives
+            # If they share an ancestor, reject and break
+            if ( ancestor != "XX" and ancestor != "5X" and ancestor != "EN" and ancestor in input_rat_ancestor_numbers ):
+                print(rat.rat_number + " rejected because its ancestor " + ancestor + " is in the list of input rat's ancestors: " + str(input_rat_ancestor_numbers))
                 finalDatingPool.remove(rat.rat_number)
                 break
         
+            # step 2: incomplete data part 1: the 5X exception rejection station
             if(inputRat50sAncestorsFlag == True):
                 pattern = re.compile(r'5\d[MF]|5X|4[78][MF]')
                 isPartnerAncestorIn50sOr5X = pattern.match(ancestor)
@@ -999,16 +1045,22 @@ def compareBirthdates(datingPool, input_rat_ancestor_names, input_rat):
                     finalDatingPool.remove(rat.rat_number)
                     break
             
+            # step 3: incomplete data part 2
+            # only compare birthdates if there's incomplete data in input_rat_partner_birthdays (which is why the != 6 thing)
+            # otherwise it should've had complete data and been handled in step 1
             # still have check for if ancestor != 5X because the if stmt above only activates
             # if input_rat has 50s or 5X ancestors, not if potential_partner has a 5X ancestor
-            if(ancestor != "XX" and ancestor != "5X" and ancestor != "EN" and ancestor != None):
+            if(len(input_rat_ancestor_birthdays) != 6 and ancestor != "XX" and ancestor != "5X" and ancestor != "EN" and ancestor != None):
                 partner_ancestor_birthdate = Rat.query.get(ancestor).birthdate
-                print(ancestor + " " + str(partner_ancestor_birthdate))
+                #print(ancestor + " " + str(partner_ancestor_birthdate))
                 if(partner_ancestor_birthdate in input_rat_ancestor_birthdays or partner_ancestor_birthdate == input_rat.birthdate):
                     print(rat.rat_number + " rejected because " + ancestor + " birthdate " + str(partner_ancestor_birthdate))
                     finalDatingPool.remove(rat.rat_number)
                     break
+   
     return finalDatingPool
+
+
 
 def printDatingPool(datingPool, rat_number):
     datingPoolString = rat_number + " dating pool: "

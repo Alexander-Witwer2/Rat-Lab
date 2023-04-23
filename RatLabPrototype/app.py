@@ -1010,7 +1010,7 @@ def compareAncestors(datingPool, input_rat_ancestor_numbers, input_rat, inputRat
         # the grandparents are related
         for ancestor in potential_partner_ancestors:
             
-            if inputRatHas5XAncestorsFlag and pattern.match(rat.rat_number):
+            if inputRatHas5XAncestorsFlag and pattern.match(ancestor):
                 print(rat.rat_number + " rejected because its ancestor " + ancestor + " has a number that fits the 5X regex")
                 finalDatingPool.remove(rat.rat_number)
                 break

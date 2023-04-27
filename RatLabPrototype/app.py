@@ -851,33 +851,30 @@ def fillGenealogyData(new_rat_number, sire_number, dam_number):
     return 
 
 # input_data: string, the input rat's rat_number
-# input_swapping_existing_pairs: bool
+# swapping_existing_pairs: bool
 #   true if swapping existing pairs
 #   false if adding new rat to colony
-def pairing(input_data, input_swapping_existing_pairs):
-    
-    swapping_existing_pairs = input_swapping_existing_pairs
+def pairing(input_data, swapping_existing_pairs):
     datingPool = []
-    finalDatingPool = []
-    #inputRatHas5XAncestorsFlag = False
+
     # STEP 1: query for input_rat's information and separate out the parents and grandparents names
     input_rat = Rat.query.get(input_data)
     input_rat_ancestor_numbers = [input_rat.sire, input_rat.dam, input_rat.pgsire, input_rat.pgdam, input_rat.mgsire, input_rat.mgdam,
                                   input_rat.pg11sire, input_rat.pg11dam, input_rat.pg12sire, input_rat.pg12dam,
                                   input_rat.mg11sire, input_rat.mg11dam, input_rat.mg12sire, input_rat.mg12dam]  
-    print(str(input_rat_ancestor_numbers))
+    #print(str(input_rat_ancestor_numbers))
     
-    inputRatHas5XAncestorsPattern = re.compile(r'5\d[MF]|5X|4[78][MF]')
-    inputRatHas5XAncestorsFlag = any(inputRatHas5XAncestorsPattern.match(ancestor) for ancestor in input_rat_ancestor_numbers) or inputRatHas5XAncestorsPattern.match(input_rat.rat_number)
-    print(input_rat.rat_number + " " + str(inputRatHas5XAncestorsFlag))
+    inputRatHas5XRegexAncestorsPattern = re.compile(r'5\d[MF]|5X|4[78][MF]|37M')
+    inputRatHas5XRegexAncestorsFlag = any(inputRatHas5XRegexAncestorsPattern.match(ancestor) for ancestor in input_rat_ancestor_numbers) or inputRatHas5XRegexAncestorsPattern.match(input_rat.rat_number)
+    print(input_rat.rat_number + " " + str(inputRatHas5XRegexAncestorsFlag))
     
     inputRatHasXXAncestorsPattern = re.compile(r'XX')
     inputRatHasXXAncestorsFlag = any(inputRatHasXXAncestorsPattern.match(ancestor) for ancestor in input_rat_ancestor_numbers)
-    # case 0: immediate error checking
+    # error case #1: immediate error checking
     if( input_rat.manner_of_death != "Alive"):
         return "ERROR: cannot pair a deceased or transferred rat."
     
-    # case 1: input_rat is spare rat, swapping = True
+    # error case #2: input_rat is spare rat, swapping = True
     if(swapping_existing_pairs == True and input_rat.current_partner == "00X"):
         return "ERROR: cannot swap existing pairs if the inputted rat is unpaired."
     
@@ -896,29 +893,38 @@ def pairing(input_data, input_swapping_existing_pairs):
                       Rat.mg11sire, Rat.mg11dam, Rat.mg12sire, Rat.mg12dam).where(
                     (Rat.sex != input_rat.sex) &
                     (Rat.manner_of_death == "Alive") & 
-                    (Rat.current_partner == "DEC") & # narrow search to only paired rats
+                    (Rat.current_partner == "DEC") & # narrow search to only paired rats with deceased partners
                     (Rat.age_months >= 3) &
                     (Rat.num_litters_with_defects <= 2 ) 
                 )
             ).all()
         
         does_colony_have_vacancy = bool(len(colony_rats_without_partner))
-        if(does_colony_have_vacancy == False): # case 2a: no vacancy error
-            return "ERROR: there are no rats with deceased partners rats to pair " + input_rat.rat_number + " with."
-        else: # case 2b and 2c
+        if(does_colony_have_vacancy == False): # error case #3: no vacancy error
+            return "ERROR: there are no rats with deceased partners to pair " + input_rat.rat_number + " with."
+        else: 
             # the user could've reported multiple deaths before looking for new partners
             # so there could be multiple rats in colony_rats_without_partner, need to check all of them
-            finalDatingPool = compareAncestors(colony_rats_without_partner, input_rat_ancestor_numbers, input_rat, inputRatHas5XAncestorsFlag, inputRatHasXXAncestorsFlag)
-            if (len(finalDatingPool) == 0): # case 2b: no unrelated rats error
-                return "ERROR: " + input_rat.rat_number + "cannot be added to the colony.  " + input_rat.rat_number + " can only be paired with a rat that has a deceased partner, and " + input_rat.rat_number + " is too closely related to the available rats with deceased partners."
-            else: # case 2c: succeeded in finding unrelated rat with DEC partner
+            
+            if(input_rat.sire == "EN" and input_rat.dam == "EN"):
+                if (len(datingPool) == 0): # error case #4: no unrelated rats error
+                    return "ERROR: there are no unrelated paired rats that " + input_rat.rat_number + " can be paired with."
+                finalDatingPool = [ rat[0] for rat in datingPool]
+                return finalDatingPool
+
+            finalDatingPool = compareAncestors(colony_rats_without_partner, input_rat_ancestor_numbers, input_rat, inputRatHas5XRegexAncestorsFlag, inputRatHasXXAncestorsFlag)
+            if (len(finalDatingPool) == 0): # error case #4: no unrelated rats error
+                return "ERROR: " + input_rat.rat_number + " cannot be added to the colony.  " + input_rat.rat_number + " can only be paired with a rat that has a deceased partner, and " + input_rat.rat_number + " is too closely related to the available rats with deceased partners."
+            else: # succeeded in finding unrelated rat with DEC partner
                 #print(finalDatingPool)
                 return finalDatingPool
     
     # looking at colony rats from here down
     # two checks to rule out deceased partner errors because those only apply to colony rats
+    # error case #5
     if(swapping_existing_pairs == True and input_rat.current_partner == "DEC" ):
         return "ERROR: cannot swap existing pairs.  " + input_rat.rat_number + " is paired with a deceased rat.  Pairs cannot be swapped unless all rats have living partners.  Try again and uncheck the checkbox on the previous page to look for a spare rat to pair " + input_rat.rat_number + " with."
+    # error case #6
     if(swapping_existing_pairs == False and input_rat.current_partner != "DEC"):
         return "ERROR: cannot add a new rat to the colony when the inputted rat is paired.  Check the checkbox on the previous page and try again."
        
@@ -971,84 +977,82 @@ def pairing(input_data, input_swapping_existing_pairs):
         
     # ENEN rats are a special case, they have no up-tree to check because of their ancestry
     if(input_rat.sire == "EN" and input_rat.dam == "EN"):
+        if (len(datingPool) == 0): # no unrelated rats error
+            return "ERROR: there are no unrelated paired rats that " + input_rat.rat_number + " can be paired with."
         finalDatingPool = [ rat[0] for rat in datingPool]
         return finalDatingPool
     else: 
         # colony-born rat, so have to check the rat's up-tree (compare ancestors) to get the final dating pool
         printDatingPool(datingPool, input_rat.rat_number)
 
-        finalDatingPool = compareAncestors(datingPool, input_rat_ancestor_numbers, input_rat, inputRatHas5XAncestorsFlag, inputRatHasXXAncestorsFlag)
+        finalDatingPool = compareAncestors(datingPool, input_rat_ancestor_numbers, input_rat, inputRatHas5XRegexAncestorsFlag, inputRatHasXXAncestorsFlag)
         if (len(finalDatingPool) == 0): # no unrelated rats error
             return "ERROR: there are no unrelated paired rats that " + input_rat.rat_number + " can be paired with."
         else:
             return finalDatingPool
-   # return finalDatingPool
-
-
 
 # helper function to check if a rat shares common ancestors with potential mates
-# checking up-tree from the perspective of the input rat
-def compareAncestors(datingPool, input_rat_ancestor_numbers, input_rat, inputRatHas5XAncestorsFlag, inputRatHasXXAncestorsFlag):
-    #updatedDatingPool = datingPool.copy()
-    pattern = re.compile(r'5\d[MF]|5X|4[78][MF]')
-    inputRatHas5XAncestorOnlyFlag =  "5X" in input_rat_ancestor_numbers
-
+def compareAncestors(datingPool, input_rat_ancestor_numbers, input_rat, inputRatHas5XRegexAncestorsFlag, inputRatHasXXAncestorsFlag):
+    pattern = re.compile(r'5\d[MF]|5X|4[78][MF]|37M')
+    inputRatHas5XAncestorsOnlyFlag =  "5X" in input_rat_ancestor_numbers
     finalDatingPool = []
     # print(input_rat.rat_number + " ancestors = " + str(input_rat_ancestor_numbers))
-    
-    # do this regardless of the value of inputRatHasXXAncestorsFlag because if a potential partner
-    # has XX ancestors then we will need to compare birthdates
 
     for rat in datingPool:
         finalDatingPool.append(rat.rat_number)
-        # check parents and grandparents real quick before going any farther
+        
+        # check parents and grandparents real quick before going any further
+        # input_rat_ancestor_numbers[:6] is the parents and grandparents of input_rat
         # *only* remove parents and grandparents because technically a rat can breed with its great-grandparent
         # although that's not likely to happen due to rat lifespans
-        if rat.rat_number in input_rat_ancestor_numbers[:5]:
-            print(rat.rat_number + " rejected because it's in the list of input rat's parents and grandparents: " + str(input_rat_ancestor_numbers))
+        if rat.rat_number in input_rat_ancestor_numbers[:6]:
+            #print(rat.rat_number + " rejected because it's in the list of input rat's parents and grandparents: " + str(input_rat_ancestor_numbers))
             finalDatingPool.remove(rat.rat_number)
             continue
-        
-        # if inputRatHas5XAncestorsFlag and pattern.match(rat.rat_number):
-        #     print(rat.rat_number + " rejected because it has a number that fits the 5X regex")
-        #     finalDatingPool.remove(rat.rat_number)
-        #     continue
     
-        # ENEN rats are unrelated to anyone in the colony, and we've already excluded the input rat's children and grandchildren in the datingPool query
-        # so if the potential mate is ENEN, then it's ok to breed them with the input rat 
+        # it's ok to automatically accept ENEN rats at this point because:
+        # Known: ENEN rats cannot share parents/grandparents with an ENEN rat or colony rat because it is from the supplier
+        #           (this applies to all cases)
+        # CASE swapping pairs:
+        #       CASE input_rat is an ENEN rat: 
+        #           the only relevant rats that ENEN rats might be related to are their children/grandchildren.
+        #           children/grandchildren have already been excluded in the datingPool query.
+        #           therefore this possible mate cannot be related to input_rat, and can be accepted
+        #       CASE input_rat is a colony rat:
+        #           if their parent/grandparent is input_rat, the parent/grandparent would have been excluded
+        #           in the previous if statement that checks for input_rat_ancestor_numbers[:6]
+        # 
+        # CASE adding a new rat:
+        #       CASE input_rat is an ENEN rat:
+        #           ENEN rats are unrelated to other ENEN rats, so they can breed together.  New rats haven't had
+        #           children so there's no risk of children/grandchildren relations.
+        #       CASE input_rat is a colony rat:
+        #           if their parent/grandparent is input_rat, the parent/grandparent would have been excluded
+        #           in the previous if statement that checks for input_rat_ancestor_numbers[:6]
         if rat.sire == "EN" and rat.dam == "EN":
-            print(rat.rat_number + " is an ENEN rat, automatically accepted")
+            #print(rat.rat_number + " is an ENEN rat, automatically accepted")
             continue
-        print("looking at potential partner " + rat.rat_number)
+
+        # while we only need to rule out having the same parents/grandparents, it's necessary to have the great-grandparents 
+        # in potential_partner_ancestors because that's how you tell if the grandparents are half-siblings
         potential_partner_ancestors = [rat.sire, rat.dam, rat.pgsire, rat.pgdam, rat.mgsire, rat.mgdam, rat.pg11dam, rat.pg12sire, rat.pg12dam, rat.mg11sire, rat.mg11dam, rat.mg12sire, rat.mg12dam]  #, rat.pg11sire
-        print("looking at potential partner " + rat.rat_number + ", ancestors = " + str(potential_partner_ancestors))
+        #print("looking at potential partner " + rat.rat_number + ", ancestors = " + str(potential_partner_ancestors))
 
-        
-        # check for 5X from the input rat's perspective
-        
-        #potentialMateHas5XAncestorsFlag = any(inputRatHas5XAncestorsPattern.match(ancestor) for ancestor in input_rat_ancestor_numbers) #or inputRatHas5XAncestorsPattern.match(input_rat.rat_number)
-
-
-        # if inputRatHas5XAncestorsFlag and any(pattern.match(ancestor) for ancestor in potential_partner_ancestors[0:3]):
-        #     print(rat.rat_number + " rejected because its ancestor " + ancestor + " has a number that fits the 5X regex")
-        #     finalDatingPool.remove(rat.rat_number)
-        #     continue
-        
-        if "5X" in potential_partner_ancestors and inputRatHas5XAncestorsFlag:
-            print(rat.rat_number + " rejected because it has a 5X ancestor and " + input_rat.rat_number + " has an ancestor with a number that fits the 5X regex")
+        if "5X" in potential_partner_ancestors and inputRatHas5XRegexAncestorsFlag:
+            #print(rat.rat_number + " rejected because it has a 5X ancestor and " + input_rat.rat_number + " has an ancestor with a number that fits the 5X regex")
             finalDatingPool.remove(rat.rat_number)
             continue
         
         ratRemoved = False
         if ("XX" in potential_partner_ancestors or inputRatHasXXAncestorsFlag): 
             input_rat_ancestor_birthdays = []
-            # colylect input rat ancestor birthdays 
+            # collect input rat ancestor birthdays 
             for ancestor in input_rat_ancestor_numbers:
                 if(ancestor != "XX" and ancestor != "5X" and ancestor != "EN"):
                     data = Rat.query.get(ancestor)
                     # don't include ENEN rat birthdates in the ancestor birthdate list, otherwise it'll exclude
-                    # unrelated descendants of ENEN rats (b/c ENEN rats have the same birthdate) 
-                    if(data.rat_name[-4:] != "ENEN"):  
+                    # unrelated descendants of ENEN rats (b/c ENEN rats can have the same birthdate) 
+                    if(data.sire == "XX" or data.dam == "XX"):  
                         input_rat_ancestor_birthdays.append(data.birthdate)
 
             for ancestorRat in potential_partner_ancestors: #.reverse():
@@ -1056,8 +1060,8 @@ def compareAncestors(datingPool, input_rat_ancestor_numbers, input_rat, inputRat
                     data = Rat.query.get(ancestorRat)
                     # don't include ENEN rat birthdates in the ancestor birthdate list, otherwise it'll exclude
                     # unrelated descendants of ENEN rats (b/c ENEN rats have the same birthdate) 
-                    if(data.rat_name[-4:] != "ENEN" and (data.birthdate in input_rat_ancestor_birthdays or data.birthdate == input_rat.birthdate)):
-                        print(rat.rat_number + " rejected because " + ancestorRat + " birthdate " + str(data.birthdate))
+                    if( (data.sire == "XX" or data.dam == "XX") and (data.birthdate in input_rat_ancestor_birthdays or data.birthdate == input_rat.birthdate)):
+                        #print(rat.rat_number + " rejected because " + ancestorRat + " has the birthdate " + str(data.birthdate))
                         finalDatingPool.remove(rat.rat_number)
                         ratRemoved = True
                         break
@@ -1066,74 +1070,24 @@ def compareAncestors(datingPool, input_rat_ancestor_numbers, input_rat, inputRat
          
         # only cycle through the parents and grandparents because those are the direct 1st and 2nd generation relatives
         # technically, a rat can breed with its own great-grandparent, because that's 3 generations apart, so we don't 
-        # look at those.  we have the great-grandparents in potential_partner_ancestors because that's how you tell if
-        # the grandparents are related
-        for ancestor in potential_partner_ancestors[:5]:
+        # look at those.  
+        for ancestor in potential_partner_ancestors[:6]:
             
             # check for 5X from the input rat's perspective
-            if pattern.match(ancestor) and inputRatHas5XAncestorOnlyFlag:
-                print(rat.rat_number + " rejected because its ancestor " + ancestor + " abchas a number that fits the 5X regex")
+            if pattern.match(ancestor) and inputRatHas5XAncestorsOnlyFlag:
+                #print(rat.rat_number + " rejected because its ancestor " + ancestor + " has a number that fits the 5X regex")
                 finalDatingPool.remove(rat.rat_number)
                 break
-            
-           # also check for 5X from the ancestor's perspective vs the input rat
-            # if ancestor == "5X" and pattern.match(input_rat.rat_number):
-            #     print(rat.rat_number + " rejected because it has a 5X ancestor and the input rat has a number that fits the 5X regex")
-            #     finalDatingPool.remove(rat.rat_number)
-            #     break
 
             # check for common ancestors: sire/dam, grandparents
             # use great-grandparent info to rule out related grandparents.  you can't breed rats whose grandparents are half-siblings
             # and there's no way to check for that without looking at the great-grandparents
             if ancestor != "EN" and ancestor != "XX" and ancestor in input_rat_ancestor_numbers:
-                print(rat.rat_number + " rejected because its ancestor " + ancestor + " is in the list of input rat's ancestors: " + str(input_rat_ancestor_numbers))
+                #print(rat.rat_number + " rejected because its ancestor " + ancestor + " is in the list of input rat's ancestors: " + str(input_rat_ancestor_numbers))
                 finalDatingPool.remove(rat.rat_number)
                 break
             
-            
-    #finalDatingPool = [ rat[0] for rat in updatedDatingPool]
     return finalDatingPool
-
-
-# helper function to compare birthdates for a given rat vs their potential dating pool
-# this rules out common ancestors
-def compareBirthdates(datingPool, input_rat_ancestor_numbers, input_rat):
-    print("in compareBirthdates")
-    finalDatingPool = []
-    input_rat_ancestor_birthdays = []
-
-    # STEP 1: get the ancestor's birthdates. Include EN in 2nd if stmt b/c grandparents could be EN
-    for ancestor in input_rat_ancestor_numbers:
-        if(ancestor != "XX" and ancestor != "5X" and ancestor != "EN"):
-            data = Rat.query.get(ancestor)
-            # don't include ENEN rat birthdates in the ancestor birthdate list, otherwise it'll exclude
-            # unrelated descendants of ENEN rats (b/c ENEN rats have the same birthdate) 
-            if(data.rat_name[-4:] != "ENEN"):  
-                input_rat_ancestor_birthdays.append(data.birthdate)
-
-    # print("input rat ancestors = " + str(input_rat_ancestor_numbers))
-    # printDatingPool(datingPool, input_rat.rat_number)
-    for rat in datingPool:
-        finalDatingPool.append(rat.rat_number)
-        potential_partner_ancestors = [rat.sire, rat.dam, rat.pgsire, rat.pgdam, rat.mgsire, rat.mgdam]
-        print("looking at " + rat.rat_number)
-        # print(rat.rat_number + " ancestors: " + str(potential_partner_ancestors))
-
-        for ancestor in potential_partner_ancestors: 
-
-            # step 3: incomplete data part 2
-            # still have check for if ancestor != 5X because the if stmt above only activates
-            # if input_rat has 50s or 5X ancestors, not if potential_partner has a 5X ancestor
-            if(ancestor != "XX" and ancestor != "5X" and ancestor != "EN" and ancestor != None):
-                partner_ancestor_birthdate = Rat.query.get(ancestor).birthdate
-                #print(ancestor + " " + str(partner_ancestor_birthdate))
-                if(partner_ancestor_birthdate in input_rat_ancestor_birthdays or partner_ancestor_birthdate == input_rat.birthdate):
-                    print(rat.rat_number + " rejected because " + ancestor + " birthdate " + str(partner_ancestor_birthdate))
-                    finalDatingPool.remove(rat.rat_number)
-                    break
-   
-    return finalDatingPool
-
 
 
 def printDatingPool(datingPool, rat_number):

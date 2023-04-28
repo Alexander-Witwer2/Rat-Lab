@@ -326,13 +326,12 @@ def breedingPairs():
             return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=errorText, user=current_user.username, admin=admin)
 
         possibleMates = pairing(ratNumber, form.swapping.data)
-
         if (isinstance(possibleMates, str)):
             return render_template("breedingpairs.html", form=form, showMateDropdown=False, num=ratNumber, errorText=possibleMates, user=current_user.username, admin=admin)
              
         else:
-            possibleMates.reverse()
-            form.mateDropdown.choices = possibleMates
+            organizedPossibleMates = sorted(possibleMates, reverse=True, key=lambda number: int(number[:-1]))
+            form.mateDropdown.choices = organizedPossibleMates
             query = db.session.execute(db.select(Rat).filter(Rat.rat_number.in_(possibleMates)).order_by(cast(Rat.rat_number, Integer).desc())).scalars()   
 
             return render_template("breedingpairs.html", form=form, query=query, showMateDropdown=True, num=ratNumber, errorText="", user=current_user.username, admin=admin)

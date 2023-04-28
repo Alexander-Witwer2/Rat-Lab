@@ -371,13 +371,13 @@ def search():
     form = FamilyTreeForm()   
     query = db.session.execute(db.select(Rat).order_by(cast(Rat.rat_number, Integer).desc())).scalars()
     
-    updateAges()
-    rats = db.session.execute(db.select(Rat.rat_number, Rat.sire, Rat.dam)).all()
-    for rat in rats:
-        if rat.sire == "EN" and rat.dam == "EN":
-            fillGenealogyData(rat.rat_number, "EN", "EN")
-        else:
-            fillGenealogyData(rat.rat_number, rat.sire, rat.dam)
+    # updateAges()
+    # rats = db.session.execute(db.select(Rat.rat_number, Rat.sire, Rat.dam)).all()
+    # for rat in rats:
+    #     if rat.sire == "EN" and rat.dam == "EN":
+    #         fillGenealogyData(rat.rat_number, "EN", "EN")
+    #     else:
+    #         fillGenealogyData(rat.rat_number, rat.sire, rat.dam)
 
     #print(query.all())
     # Whatever you do, do NOT run print(query.all()) before the return statement

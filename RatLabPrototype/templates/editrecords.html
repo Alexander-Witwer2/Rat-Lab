@@ -101,7 +101,7 @@
         </div>
       </div>
     </div>
-    
+
     {% if errorText %}
     <div class="w3-twothird">
       {{errorText}}
@@ -109,32 +109,32 @@
     {% endif %}
 
     {% if editSpecificRat %}
-    <h1>Editing Rat {{num}}</h1>
-    <form action="/editrecord{{num}}" , method="POST">
-      <div id="boxes" style="display: block;">
+    <div class="page-center" id="boxes" style="display: block;">
+      <h1>Editing Rat {{num}}</h1>
+      <form action="/editrecord{{num}}" , method="POST">
         <p>Enter data to update. Fields left blank will not be updated.</p>
-        <label class="checkbox" for="birth"> Change Birthdate
+        <label class="checkbox" for="birth"> Change birthdate:
           <span style="display: block;"> {{ form.birthdate }} </span>
         </label><br>
-        <label class="checkbox" for="lastPair"> Edit date of Last Pairing
+        <label class="checkbox" for="lastPair"> Edit date of last pairing:
           <span style="display: block;"> {{ form.last_paired_date }}</span>
         </label><br>
-        <label class="checkbox" for="lastLitter"> Change date of Last Litter
+        <label class="checkbox" for="lastLitter"> Change date of last litter:
           <span style="display: block;"> {{ form.last_litter_date }}</span>
         </label><br>
-        <label class="checkbox" for="weanedDate"> Change date the date the rat was weaned
+        <label class="checkbox" for="weanedDate"> Change the date the rat was weaned:
           <span style="display: block;"> {{ form.weaned_date }}</span>
         </label><br>
-        <label class="checkbox" for="numPair"> Edit Number of Pairings
+        <label class="checkbox" for="numPair"> Edit number of pairings:
           <span style="display: block;"> {{ form.num_times_paired }} </span>
         </label><br>
-        <label class="checkbox" for="numLitter"> Edit Number of Litters
+        <label class="checkbox" for="numLitter"> Edit number of litters:
           <span style="display: block;"> {{ form.num_litters}} </span>
         </label><br>
-        <label class="checkbox" for="colonyDate"> Change the Date the Rat was Added to the Colony
+        <label class="checkbox" for="colonyDate"> Change the date the rat was added to the colony:
           <span style="display: block;"> {{ form.date_added_to_colony}} </span>
         </label><br>
-        <label class="checkbox" for="defectLit"> Edit the Number of Litters with Defects
+        <label class="checkbox" for="defectLit"> Edit the number of litters with defects:
           <span style="display: block;">{{ form.num_litters_with_defects}} </span>
         </label><br>
         <label class="checkbox" for="exp"> Was the rat used in an experiment?
@@ -143,13 +143,13 @@
         <label class="checkbox" for="supplier"> Is the rat from the supplier?
           <span style="display: block;">{{ form.supplierRat }}</span>
         </label><br>
-        <label class="checkbox" for="ratSire"> Edit the Rat's Sire
+        <label class="checkbox" for="ratSire"> Edit the rat's sire:
           <span style="display: block;">{{ form.sire (placeholder="Sire Number (ex. 100)")}} </span>
         </label><br>
-        <label class="checkbox" for="ratDam"> Edit the Rat's Dam
+        <label class="checkbox" for="ratDam"> Edit the rat's dam:
           <span style="display: block;">{{ form.dam (placeholder="Dam Number (ex. 100)")}} </span>
         </label><br>
-        <label class="checkbox" for="ratStatus"> Edit the Rat's status
+        <label class="checkbox" for="ratStatus"> Edit the rat's status:
           <span style="display: block;">{{ form.status }} </span>
         </label><br>
 
@@ -165,71 +165,71 @@
           </div>
         </div>
 
-    </form>
-    {% endif %}
+      </form>
+      {% endif %}
 
-  </div>
+    </div>
+</body>
 
-  <hr>
-  <br>
+<hr>
+<br>
 
-  <!-- Footer -->
-  <footer class="w3-container w3-padding-16 w3-light-grey">
-  </footer>
+<!-- Footer -->
+<footer class="w3-container w3-padding-16 w3-light-grey">
+</footer>
 
-  <!-- End page content -->
-  </div>
+<!-- End page content -->
 
-  <script>
-    var dropDown = document.getElementById( "Rat-Gender" );
-    var number = document.getElementById( "Input" );
-    var modal = document.getElementById( "myModal" );
-    var boxes = document.getElementById( "boxes" );
-    var continueButton = document.getElementById( "continueButton" )
+<script>
+  var dropDown = document.getElementById( "Rat-Gender" );
+  var number = document.getElementById( "Input" );
+  var modal = document.getElementById( "myModal" );
+  var boxes = document.getElementById( "boxes" );
+  var continueButton = document.getElementById( "continueButton" )
 
-    // Get the Sidebar
-    var mySidebar = document.getElementById( "mySidebar" );
+  // Get the Sidebar
+  var mySidebar = document.getElementById( "mySidebar" );
 
-    // Get the DIV with overlay effect
-    var overlayBg = document.getElementById( "myOverlay" );
+  // Get the DIV with overlay effect
+  var overlayBg = document.getElementById( "myOverlay" );
 
-    // Toggle between showing and hiding the sidebar, and add overlay effect
-    function w3_open () {
-      if ( mySidebar.style.display === 'block' ) {
-        mySidebar.style.display = 'none';
-        overlayBg.style.display = "none";
-      } else {
-        mySidebar.style.display = 'block';
-        overlayBg.style.display = "block";
-      }
-    }
-
-    // Close the sidebar with the close button
-    function w3_close () {
-      mySidebar.style.display = "none";
+  // Toggle between showing and hiding the sidebar, and add overlay effect
+  function w3_open () {
+    if ( mySidebar.style.display === 'block' ) {
+      mySidebar.style.display = 'none';
       overlayBg.style.display = "none";
+    } else {
+      mySidebar.style.display = 'block';
+      overlayBg.style.display = "block";
     }
+  }
 
-    function bringChecks () {
-      // if ( dropDown.value != "" && number.value != "" )
-      boxes.style.display = "block";
-      continueButton.style.display = "none";
-    }
+  // Close the sidebar with the close button
+  function w3_close () {
+    mySidebar.style.display = "none";
+    overlayBg.style.display = "none";
+  }
 
-    function areYouSure () {
-      //if ( dDate.value != "" && coDeath.value != "" ) {
-      modal.style.display = "block";
-      document.getElementById( "modalText" ).innerHTML = "Are you sure?";
-      //TODO: update "are you sure" with the actual values like it used to show previously
-      //"Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() +
-      //" died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() + "?";
-      //}
-    }
+  function bringChecks () {
+    // if ( dropDown.value != "" && number.value != "" )
+    boxes.style.display = "block";
+    continueButton.style.display = "none";
+  }
 
-    function closeModal () {
-      modal.style.display = "none";
-    }
-  </script>
+  function areYouSure () {
+    //if ( dDate.value != "" && coDeath.value != "" ) {
+    modal.style.display = "block";
+    document.getElementById( "modalText" ).innerHTML = "Are you sure?";
+    //TODO: update "are you sure" with the actual values like it used to show previously
+    //"Are you sure that rat " + dropDown.value.toUpperCase() + number.value.toUpperCase() +
+    //" died on the date " + dDate.value.toUpperCase() + " because of " + coDeath.value.toUpperCase() + "?";
+    //}
+  }
+
+  function closeModal () {
+    modal.style.display = "none";
+  }
+</script>
 
 </body>
 

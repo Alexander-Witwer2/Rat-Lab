@@ -371,7 +371,7 @@ def search():
     form = FamilyTreeForm()   
     query = db.session.execute(db.select(Rat).order_by(cast(Rat.rat_number, Integer).desc())).scalars()
     
-    # updateAges()
+    #updateAges()
     # rats = db.session.execute(db.select(Rat.rat_number, Rat.sire, Rat.dam)).all()
     # for rat in rats:
     #     if rat.sire == "EN" and rat.dam == "EN":
@@ -1097,10 +1097,9 @@ def printDatingPool(datingPool, rat_number):
     print(datingPoolString)
 
 # updates ages, rat's age in months
-# TODO make this skip rats that are dead 
 def updateAges():
     
-    res = db.session.execute(db.select(Rat.rat_number, Rat.age_months).where(Rat.manner_of_death=="Alive")).all()
+    res = db.session.execute(db.select(Rat.rat_number, Rat.age_months, Rat.current_partner).where(Rat.manner_of_death=="Alive")).all()
     for item in res:
         rat = Rat.query.get(item[0])
         age = 0
@@ -1114,9 +1113,11 @@ def updateAges():
             delta = relativedelta.relativedelta(deathDate, birthdate)
             age = delta.months + (delta.years * 12) 
             #print(str(rat.rat_number) + " " + str(age))
-        db.session.execute(db.update(Rat).where(Rat.rat_number == rat.rat_number).values(age_months = age))
         
-    db.session.commit()
+        if rat.age_months == 2 and age == 3:
+            rat.current_partner = "00X"
+        rat.age_months = age        
+        db.session.commit()
 
 def updateName(new_rat_number, sire_number, dam_number) :
 

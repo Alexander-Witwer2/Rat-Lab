@@ -87,8 +87,8 @@
   <div class="w3-main page-center">
 
     <!-- Header -->
-    <div class="center w3-panel">
-      <div class="w3-row-padding" style="margin:0 -16px">
+    <div class="w3-panel input">
+      <div class="w3-row-padding" style="margin:0 -16px;">
         <div class="w3-twothird">
           {% if not editSpecificRat %}
           <form action="/editrecords" , method="POST">
@@ -109,7 +109,7 @@
     {% endif %}
 
     {% if editSpecificRat %}
-    <div class="page-center" id="boxes" style="display: block;">
+    <div id="boxes" style="display: block;" class = "center">
       <h1>Editing Rat {{num}}</h1>
       <form action="/editrecord{{num}}" , method="POST">
         <p>Enter data to update. Fields left blank will not be updated.</p>
@@ -169,6 +169,7 @@
       {% endif %}
 
     </div>
+  </div>
 </body>
 
 <hr>
